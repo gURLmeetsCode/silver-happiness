@@ -12,6 +12,7 @@
 /.env.local
 /.env.development.local
 /.env.test.local
+/.env.sync
 
 # Ignore all logfiles and tempfiles.
 /log/*

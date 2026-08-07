@@ -100,3 +100,17 @@ cd ~/silver-happiness
 ### Alternative: SSH deploy from GitHub cloud
 
 Possible with [Tailscale in CI](https://tailscale.com/kb/1278/tailscale-github-action) so the cloud runner joins your tailnet briefly, then SSHs to the Pi. More moving parts (Tailscale auth key, SSH key secrets). The self-hosted runner is simpler for a single home Pi.
+
+---
+
+## Sync production → local (Mac)
+
+After logging meals and photos on your phone, pull that data to your Mac for development:
+
+```bash
+bin/sync-from-prod
+```
+
+See [README.md](README.md#sync-production--local-mac) for setup (`.env.sync`, Tailscale, SSH).
+
+**One-way:** prod → local only. Deploy code with `git push` / `./bin/deploy` on the Pi — never copy `development.sqlite3` back to production unless you mean to overwrite your live data.

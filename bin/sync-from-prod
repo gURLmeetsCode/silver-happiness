@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Pull production data from the Raspberry Pi into local development.
+# Run on your Mac (Tailscale connected). Does not change anything on the Pi.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+if [[ -f .env.sync ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source .env.sync
+  set +a
+fi
+
+PI_HOST="${PI_HOST:-pi@raspberrypi}"
+PI_PATH="${PI_PATH:-/home/pi/silver-happiness}"
+REMOTE_DB="${PI_PATH}/storage/production.sqlite3"
+REMOTE_BACKUP="${PI_PATH}/storage/production-sync.sqlite3"
+LOCAL_DB="storage/development.sqlite3"
+
+echo "==> Sync from ${PI_HOST}:${PI_PATH}"
+echo "    (override with PI_HOST / PI_PATH in .env.sync — see .env.sync.example)"
+
+mkdir -p storage
+
+if [[ -f "${LOCAL_DB}" ]]; then
+  backup="storage/development.backup-$(date +%Y%m%d-%H%M%S).sqlite3"
+  echo "==> Backing up local DB to ${backup}"
+  cp "${LOCAL_DB}" "${backup}"
+fi
+
+echo "==> Creating consistent DB backup on Pi (safe while app is running)"
+ssh "${PI_HOST}" "cd '${PI_PATH}' && sqlite3 '${REMOTE_DB}' '.backup ${REMOTE_BACKUP}'"
+
+echo "==> Downloading database"
+scp "${PI_HOST}:${REMOTE_BACKUP}" "${LOCAL_DB}.download"
+mv "${LOCAL_DB}.download" "${LOCAL_DB}"
+
+echo "==> Cleaning up remote backup"
+ssh "${PI_HOST}" "rm -f '${REMOTE_BACKUP}'"
+
+echo "==> Downloading uploaded photos/files (excluding SQLite files)"
+rsync -avz --delete \
+  --exclude='*.sqlite3' \
+  --exclude='*.sqlite3-shm' \
+  --exclude='*.sqlite3-wal' \
+  --exclude='production-sync.sqlite3' \
+  "${PI_HOST}:${PI_PATH}/storage/" "storage/"
+
+echo ""
+echo "Sync complete."
+echo "  Local DB: ${LOCAL_DB}"
+echo "  Start app: bin/rails server"
+echo ""
+echo "Note: this replaces local development data with production."

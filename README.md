@@ -52,6 +52,23 @@ bin/rails server -b 0.0.0.0
 
 Open `http://<your-computer-ip>:3000` from your phone.
 
+### Sync production → local (Mac)
+
+Your Pi has the real logs, meals, and photos. To mirror that on your Mac:
+
+```bash
+# One-time: copy .env.sync.example to .env.sync if pi@raspberrypi doesn't work
+cp .env.sync.example .env.sync
+
+# Tailscale must be connected on your Mac
+bin/sync-from-prod
+bin/rails server
+```
+
+This pulls `production.sqlite3` into `storage/development.sqlite3` and rsyncs uploaded files from the Pi. Your previous local DB is backed up automatically.
+
+**Requirements:** SSH to the Pi works (`ssh pi@raspberrypi`), and `sqlite3` CLI is installed on the Pi (`sudo apt install sqlite3`).
+
 ---
 
 ## Raspberry Pi deployment
