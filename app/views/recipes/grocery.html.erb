@@ -4,78 +4,99 @@
   <%= link_to "← All recipes", recipes_path, class: "text-decoration-none small" %>
 </div>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <div>
-    <h1 class="h3 mb-1">Grocery list</h1>
-    <p class="text-muted mb-0">Weekly staples + everything in your regular recipes.</p>
-  </div>
-</div>
+<div data-controller="grocery-list"
+     data-grocery-list-toggle-url-value="<%= toggle_grocery_checks_path %>"
+     data-grocery-list-total-value="<%= @total_items %>"
+     data-grocery-list-checked-value="<%= @checked_count %>">
 
-<div class="row g-4">
-  <div class="col-lg-5">
-    <div class="card stat-card mb-4">
-      <div class="card-body">
-        <h2 class="h5 mb-3">Weekly staples</h2>
-        <p class="small text-muted">Always good to have on hand. Edit in <code>config/grocery_staples.yml</code>.</p>
-        <% @staples.each do |category, items| %>
-          <div class="mb-3">
-            <div class="small fw-semibold text-muted text-uppercase"><%= RecipeIngredient::CATEGORY_LABELS[category] || category.humanize %></div>
-            <ul class="ps-3 mb-0">
-              <% items.each do |item| %>
-                <li><%= item %></li>
-              <% end %>
-            </ul>
-          </div>
-        <% end %>
-      </div>
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-1">Grocery list</h1>
+      <p class="text-muted mb-1">Weekly staples + regular recipe ingredients.</p>
+      <p class="small mb-0">
+        <span class="badge text-bg-secondary"><%= ShoppingPeriod.label(@shopping_period) %> shop</span>
+        Resets <%= ShoppingPeriod.label(@next_reset) %>
+      </p>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <span class="small text-muted" data-grocery-list-target="progress">
+        <%= @checked_count %> / <%= @total_items %> in cart
+      </span>
+      <%= link_to "Scan product", new_product_path(return_to: grocery_recipes_path), class: "btn btn-outline-primary btn-sm" %>
+      <%= button_to "Clear checks", reset_grocery_checks_path, method: :delete,
+            class: "btn btn-outline-secondary btn-sm",
+            data: { turbo_confirm: "Uncheck everything for this shopping trip?" } %>
     </div>
   </div>
 
-  <div class="col-lg-7">
-    <div class="card stat-card">
-      <div class="card-body">
-        <h2 class="h5 mb-3">From your regular recipes</h2>
-        <p class="small text-muted mb-3">Active regular recipes only — tired or archived meals are excluded.</p>
-
-        <% if @grouped.any? %>
-          <% @grouped.each do |category, ingredients| %>
-            <div class="mb-4">
-              <h3 class="h6 text-muted text-uppercase"><%= ingredients.first.category_label %></h3>
-              <ul class="list-group list-group-flush">
-                <% ingredients.each do |ing| %>
-                  <li class="list-group-item px-0 d-flex justify-content-between align-items-start">
-                    <div>
-                      <strong><%= ing.display %></strong>
-                      <div class="small text-muted"><%= ing.recipe.name %></div>
-                    </div>
-                    <%= link_to "Recipe", recipe_path(ing.recipe), class: "small text-nowrap ms-2" %>
-                  </li>
-                <% end %>
-              </ul>
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card stat-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Weekly staples</h2>
+          <% @staples.each do |category, items| %>
+            <div class="mb-3">
+              <div class="small fw-semibold text-muted text-uppercase mb-1">
+                <%= RecipeIngredient::CATEGORY_LABELS[category] || category.humanize %>
+              </div>
+              <% items.each do |item| %>
+                <%= grocery_checkbox staple_item_key(category, item), item, checked_keys: @checked_keys %>
+              <% end %>
             </div>
           <% end %>
-        <% else %>
-          <p class="text-muted mb-0">No recipe ingredients yet — run <code>bin/rails db:seed</code>.</p>
-        <% end %>
+        </div>
       </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card stat-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">From your regular recipes</h2>
+          <p class="small text-muted mb-3">Active regular recipes only.</p>
+
+          <% if @grouped.any? %>
+            <% @grouped.each do |_category, ingredients| %>
+              <div class="mb-3">
+                <h3 class="h6 text-muted text-uppercase"><%= ingredients.first.category_label %></h3>
+                <% ingredients.each do |ing| %>
+                  <%= grocery_checkbox "ingredient:#{ing.id}", ing.display,
+                        checked_keys: @checked_keys,
+                        meta: ing.recipe.name,
+                        recipe: ing.recipe %>
+                <% end %>
+              </div>
+            <% end %>
+          <% else %>
+            <p class="text-muted mb-0">No recipe ingredients yet.</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card stat-card mt-4 border-success border-opacity-25">
+    <div class="card-body">
+      <h2 class="h6 mb-3">Sunday batch prep</h2>
+      <% @batch_prep_items.each do |item| %>
+        <%= grocery_checkbox item[:key], item[:label],
+              checked_keys: @checked_keys,
+              recipe: item[:recipe] %>
+      <% end %>
     </div>
   </div>
 </div>
 
-<div class="card stat-card mt-4 border-success border-opacity-25">
-  <div class="card-body">
-    <h2 class="h6 mb-2">Sunday batch prep (45 min)</h2>
-    <ul class="small mb-0">
-      <% if (tofu = @batch_prep["baked-tofu"]) %>
-        <li>Bake 2 blocks tofu → <%= link_to "Baked tofu recipe", recipe_path(tofu) %></li>
-      <% end %>
-      <% if (quinoa = @batch_prep["quinoa-batch"]) %>
-        <li>Cook pot of quinoa → <%= link_to "Quinoa batch", recipe_path(quinoa) %></li>
-      <% end %>
-      <% if (dressing = @batch_prep["balsamic-dressing"]) %>
-        <li>Mix dressing → <%= link_to "Balsamic dressing", recipe_path(dressing) %></li>
-      <% end %>
-      <li>Wash/chop salad veg into containers</li>
-    </ul>
-  </div>
-</div>
+<style>
+  .grocery-item__checkbox {
+    width: 1.35rem;
+    height: 1.35rem;
+    cursor: pointer;
+  }
+  .grocery-item {
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+  }
+  .grocery-item:last-child {
+    border-bottom: 0;
+  }
+</style>

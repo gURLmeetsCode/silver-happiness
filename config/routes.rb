@@ -25,7 +25,18 @@ Rails.application.routes.draw do
     resources :progress_photos, only: [ :create, :destroy ]
   end
 
-  resources :products, only: [ :new, :create ]
+  resources :products, only: [ :new, :create ] do
+    collection do
+      get :lookup_barcode
+    end
+  end
+
+  resources :grocery_checks, only: [] do
+    collection do
+      post :toggle
+      delete :reset
+    end
+  end
 
   resources :recipes do
     collection do

@@ -174,29 +174,63 @@ seed_recipe "power-salad", {
 STEPS
 
 seed_recipe "chipotle-yogurt-salad", {
-  name: "Chipotle yogurt salad",
+  name: "Chipotle tofu wrap",
   meal_type: :lunch,
   regular_meal: true,
   meal_template_slug: "chipotle-yogurt-salad",
   prep_time: "5 min",
   serves: 1,
   position: 1,
-  description: "Big salad base with creamy Sojasun nature, avocado, and Cholula Chipotle. Greens and veg are extra — macros tracked from yogurt, avocado, and sauce."
+  description: "Salad wrapped in an Old El Paso Extra Fins tortilla (32 g, 96 kcal). 125 g Céréal Bio tofu nature (1 pavé), one 100 g pot Sojasun nature plain, avocado, and Cholula. Use Tofu fumé only on exception days. Greens and veg are extra."
 }, [
+  [ :carbs, "1 wrap", "Old El Paso Wrap Extra Fins (32 g)", "Old El Paso Wrap Extra Fins", 32 ],
   [ :produce, "2 big handfuls", "mixed greens (mâche / mesclun)", nil, nil ],
   [ :produce, "1 handful", "baby spinach", nil, nil ],
   [ :produce, "10", "cherry tomatoes, halved", nil, nil ],
   [ :produce, "¼", "red pepper, sliced", nil, nil ],
   [ :produce, "6–8 slices", "jalapeños (from jar or fresh)", nil, nil ],
+  [ :protein, "125 g", "tofu nature, cubed (1 pavé)", "Tofu", 125 ],
   [ :fats, "½", "avocado", "Avocado", 75 ],
   [ :protein, "1 pot", "Sojasun yaourt nature plain (100 g)", "Sojasun yaourt nature", 100 ],
   [ :pantry, "1 tbsp", "Cholula Chipotle hot sauce", "Cholula Chipotle sauce", 15 ]
 ], <<~STEPS
   1. Fill a large bowl with mixed greens, spinach, cherry tomatoes, and red pepper.
-  2. Add ½ avocado and sliced jalapeños.
-  3. Spoon one full pot of plain Sojasun nature over the salad (creamy dressing).
-  4. Drizzle Cholula Chipotle to taste. Toss and eat from one bowl.
-  5. Log with one tap — tracked: ~163 kcal · ~6 g protein (yogurt + avocado).
+  2. Add 125 g cubed Céréal Bio tofu nature (1 pavé), ½ avocado, and sliced jalapeños.
+  3. Spoon one 100 g pot of plain Sojasun nature over the salad (creamy dressing).
+  4. Drizzle Cholula Chipotle to taste. Toss gently.
+  5. Pile into one Old El Paso Extra Fins wrap and roll, or eat open-faced.
+  6. Log with one tap — tracked: ~440 kcal · ~26 g protein (wrap + tofu + yogurt + avocado).
+STEPS
+
+seed_recipe "tofu-scramble-potatoes", {
+  name: "Tofu scramble with baby potatoes",
+  meal_type: :breakfast,
+  regular_meal: true,
+  meal_template_slug: "tofu-scramble-potatoes",
+  prep_time: "25 min",
+  serves: 1,
+  position: 2,
+  description: "Crumbled tofu with roasted baby potatoes, pepper, and avocado. Spinach optional on the side. Ketchup or hot sauce on top — not counted in macros."
+}, [
+  [ :protein, "200 g", "extra-firm tofu, crumbled", "Tofu", 200 ],
+  [ :carbs, "225 g", "baby potatoes, roasted or boiled", "Baby potatoes", 225 ],
+  [ :produce, "1", "red pepper, diced", "Red pepper", 80 ],
+  [ :produce, "1 handful", "spinach or mixed salad (optional)", nil, nil ],
+  [ :fats, "¼–½", "avocado", "Avocado", 56 ],
+  [ :pantry, "2 tbsp", "nutritional yeast (optional)", "Nutritional yeast", 10 ],
+  [ :pantry, "½ tsp", "garlic powder", nil, nil ],
+  [ :pantry, "½ tsp", "onion powder", nil, nil ],
+  [ :pantry, "pinch", "turmeric (optional, for colour)", nil, nil ],
+  [ :pantry, nil, "salt, pepper", nil, nil ],
+  [ :pantry, "1 tsp", "olive oil for pan (optional)", nil, nil ],
+  [ :pantry, nil, "ketchup or hot sauce to serve", nil, nil ]
+], <<~STEPS
+  1. Roast or boil 200–250 g baby potatoes until tender (225 g logged).
+  2. Crumble 200 g extra-firm tofu. Sauté pepper in a non-stick pan, add tofu.
+  3. Season with garlic powder, onion powder, turmeric, salt, and pepper. Cook 5–7 min.
+  4. Stir in nutritional yeast if using. Serve with potatoes, avocado, and ketchup/hot sauce.
+  5. Add a handful of spinach on the side if you like.
+  6. Log with one tap — tracked: ~620 kcal · ~40 g protein.
 STEPS
 
 # --- Dinners ---

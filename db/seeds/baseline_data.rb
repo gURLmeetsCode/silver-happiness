@@ -70,13 +70,30 @@ Product.find_or_create_by!(name: "Purée de cacahuètes") do |p|
   p.serving_label = "1 tsp"
 end
 
-Product.find_or_create_by!(name: "Tofu") do |p|
-  p.brand = "Céréal Bio"
-  p.calories_per_100g = 145
-  p.protein_per_100g = 14.4
-  p.default_serving_g = 125
-  p.serving_label = "1 pavé"
-end
+tofu = Product.find_or_create_by!(name: "Tofu")
+tofu.update!(
+  brand: "Céréal Bio",
+  calories_per_100g: 145,
+  protein_per_100g: 14,
+  carbs_per_100g: 0.8,
+  fat_per_100g: 9,
+  default_serving_g: 125,
+  serving_label: "1 pavé (125 g)",
+  notes: "Tofu nature à cuisiner — bio, sans sel. 250 g pack = 2 pavés. Label: 145 kcal · 14 g protein / 100 g."
+)
+
+Product.find_or_create_by!(name: "Tofu fumé")
+tofu_fume = Product.find_by!(name: "Tofu fumé")
+tofu_fume.update!(
+  brand: "Céréal Bio",
+  calories_per_100g: 164,
+  protein_per_100g: 16,
+  carbs_per_100g: 1,
+  fat_per_100g: 10,
+  default_serving_g: 100,
+  serving_label: "1 portion (100 g)",
+  notes: "Tofu fumé au bois de hêtre — exception days. 200 g pack = 2× 100 g. Label: 164 kcal · 16 g protein / 100 g."
+)
 
 Product.find_or_create_by!(name: "Quinoa cuit") do |p|
   p.calories_per_100g = 120
@@ -118,11 +135,52 @@ Product.find_or_create_by!(name: "Cholula Chipotle sauce") do |p|
   p.notes = "Chipotle hot sauce — negligible calories per serving"
 end
 
+Product.find_or_create_by!(name: "Old El Paso Wrap Extra Fins") do |p|
+  p.brand = "Old El Paso"
+  p.calories_per_100g = 299
+  p.protein_per_100g = 8.6
+  p.carbs_per_100g = 53.2
+  p.fat_per_100g = 5.4
+  p.default_serving_g = 32
+  p.serving_label = "1 wrap"
+  p.notes = "Extra thin wheat tortilla — 96 kcal per 32 g wrap (pack of 6)"
+end
+
+Product.find_or_create_by!(name: "Baby potatoes") do |p|
+  p.calories_per_100g = 77
+  p.protein_per_100g = 1.8
+  p.carbs_per_100g = 15
+  p.fat_per_100g = 0.1
+  p.default_serving_g = 225
+  p.serving_label = "200–250 g"
+  p.notes = "Raw weight before roasting/boiling"
+end
+
+Product.find_or_create_by!(name: "Red pepper") do |p|
+  p.calories_per_100g = 31
+  p.protein_per_100g = 1
+  p.carbs_per_100g = 6
+  p.fat_per_100g = 0.3
+  p.default_serving_g = 80
+  p.serving_label = "1 pepper"
+end
+
+Product.find_or_create_by!(name: "Nutritional yeast") do |p|
+  p.calories_per_100g = 400
+  p.protein_per_100g = 50
+  p.carbs_per_100g = 33
+  p.fat_per_100g = 7
+  p.default_serving_g = 10
+  p.serving_label = "2 tbsp"
+  p.notes = "Optional — for scramble"
+end
+
 def seed_template(slug, name, meal_type, items)
   template = MealTemplate.find_or_create_by!(slug: slug) do |t|
     t.name = name
     t.meal_type = meal_type
   end
+  template.update!(name: name, meal_type: meal_type)
   template.meal_template_items.destroy_all
   items.each do |product, quantity_g, label|
     template.meal_template_items.create!(product: product, quantity_g: quantity_g, label: label)
@@ -153,7 +211,7 @@ seed_template("rest-breakfast", "Yogurt + ½ protein", :breakfast, [
 ])
 
 seed_template("power-salad", "Power salad lunch", :lunch, [
-  [ tofu, 125, "125g tofu" ],
+  [ tofu, 125, "125 g tofu nature (1 pavé)" ],
   [ quinoa, 120, "120 g cooked (~¼ cup dry)" ]
 ])
 
@@ -167,11 +225,25 @@ seed_template("banana-pb-skyr-snack", "Banana + PB + Skyr", :snack, [
 sojasun_nature = Product.find_by!(name: "Sojasun yaourt nature")
 avocado = Product.find_by!(name: "Avocado")
 cholula = Product.find_by!(name: "Cholula Chipotle sauce")
+wrap = Product.find_by!(name: "Old El Paso Wrap Extra Fins")
+baby_potatoes = Product.find_by!(name: "Baby potatoes")
+red_pepper = Product.find_by!(name: "Red pepper")
+nutritional_yeast = Product.find_by!(name: "Nutritional yeast")
 
-seed_template("chipotle-yogurt-salad", "Chipotle yogurt salad", :lunch, [
+seed_template("chipotle-yogurt-salad", "Chipotle tofu wrap", :lunch, [
+  [ wrap, 32, "1 Old El Paso Extra Fins wrap" ],
+  [ tofu, 125, "125 g tofu nature (1 pavé)" ],
   [ avocado, 75, "½ avocado" ],
-  [ sojasun_nature, 100, "1 pot Sojasun nature plain" ],
+  [ sojasun_nature, 100, "1 pot Sojasun nature plain (100 g)" ],
   [ cholula, 15, "Cholula Chipotle drizzle" ]
+])
+
+seed_template("tofu-scramble-potatoes", "Tofu scramble + baby potatoes", :breakfast, [
+  [ tofu, 200, "200 g extra-firm tofu" ],
+  [ baby_potatoes, 225, "225 g baby potatoes" ],
+  [ red_pepper, 80, "1 red pepper" ],
+  [ avocado, 56, "¼–½ avocado (~56 g)" ],
+  [ nutritional_yeast, 10, "2 tbsp nutritional yeast (optional)" ]
 ])
 
 # --- Aug 6, 2026 (real day — Nantes outing) ---

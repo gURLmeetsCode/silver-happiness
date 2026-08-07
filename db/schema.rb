@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_07_170000) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_07_170002) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -73,6 +73,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_07_170000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "water_goal_ml", default: 2000, null: false
+  end
+
+  create_table "grocery_checks", force: :cascade do |t|
+    t.date "shopping_period", null: false
+    t.string "item_key", null: false
+    t.boolean "checked", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shopping_period", "item_key"], name: "index_grocery_checks_on_shopping_period_and_item_key", unique: true
   end
 
   create_table "meal_entries", force: :cascade do |t|
@@ -138,6 +147,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_07_170000) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "barcode"
+    t.index ["barcode"], name: "index_products_on_barcode"
   end
 
   create_table "progress_photos", force: :cascade do |t|
