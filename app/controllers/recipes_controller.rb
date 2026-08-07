@@ -1,4 +1,6 @@
 class RecipesController < ApplicationController
+  include GroceryHelper
+
   before_action :set_recipe, only: [ :show, :edit, :update, :archive, :tired_of, :restore, :react ]
   before_action :load_products, only: [ :new, :create, :edit, :update ]
 
