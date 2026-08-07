@@ -40,4 +40,32 @@ module ApplicationHelper
       "#{delta.abs} kg below target"
     end
   end
+
+  def nav_active?(key)
+    case key.to_sym
+    when :today
+      controller_name == "dashboard" ||
+        (controller_name == "daily_logs" && action_name != "index")
+    when :log
+      controller_name == "daily_logs" && action_name == "index"
+    when :recipes
+      controller_name == "recipes"
+    when :strength
+      controller_name == "workout_plans" || controller_name == "strength_sessions"
+    when :outfits
+      controller_name == "outfit_photos" || controller_name == "progress_photos"
+    when :goals
+      controller_name == "goals"
+    else
+      false
+    end
+  end
+
+  def nav_item_class(key)
+    [ "nav-link", ("active" if nav_active?(key)) ].compact.join(" ")
+  end
+
+  def mobile_tab_class(key)
+    [ "mobile-tab", ("active" if nav_active?(key)) ].compact.join(" ")
+  end
 end

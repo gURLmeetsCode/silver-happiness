@@ -1,122 +1,215 @@
 # Silver Happiness
 
-A personal fitness and wellness tracker built for one person — you. It helps you log training, food, body progress, and how you feel day to day, without the noise of a generic calorie app.
+A self-hosted fitness and wellness tracker built with Rails. Log meals, workouts, weight, sleep, and progress photos in one place — designed for a single user running on your own hardware.
 
-Runs on your Mac for development, or on a **Raspberry Pi at home** so you can open it from your iPhone (see [DEPLOY.md](DEPLOY.md)).
+## Features
 
----
+- **Today dashboard** — weight, macros, water, sleep, and weekly charts
+- **Daily log** — meals (templates or custom), workouts, strength sessions, wellness check-ins, notes
+- **Recipes & grocery list** — meal ideas with ingredients grouped by shop section
+- **Strength plans** — structured workout templates with optional supplemental sessions
+- **Goals** — target weight, protein, calories, and water
+- **Photo uploads** — progress and outfit galleries (mobile camera friendly)
 
-## What it does
-
-### Dashboard
-Your at-a-glance home screen for **today**: weight, protein, calories eaten vs burned, water, sleep, period, and how you’re feeling. Weekly charts show weight vs target, calories, and protein trends.
-
-### Daily log
-One page per day where you track everything:
-
-- **Weight** (including pre-run weigh-ins)
-- **Meals** — one-tap from saved templates, custom entries, or products with auto-calculated macros
-- **Copy yesterday** — repeat boring, predictable meals fast
-- **Workouts** — runs, walks, and other activities with distance and calories
-- **Strength sessions** — log home, gym, or Runna app workouts with exercises, weights, and difficulty
-- **Wellness check-in** — period, water intake, bed/wake time, sleep quality, mood tags (bloated, light, tired, etc.), and daily notes
-- **Progress photos** — front/side body shots
-- **Outfit snaps** — workout fits, everyday clothes, *Feeling cute*, and *Not as bad as you think*
-
-### Recipes & grocery
-A **Recipes** tab with your regular meals (run-day oats, yogurt breakfast, power salad lunch, dinner templates) plus suggested swaps. Each recipe lists ingredients by shop section and step-by-step instructions.
-
-The **Grocery list** combines weekly staples with ingredients pulled from your regular recipes — useful before a shop run. Includes a Sunday batch-prep checklist (tofu, quinoa, dressing).
-
-Recipes linked to meal templates can be logged in one tap on your daily page.
-
-### Strength plans
-**Runna handles Wed/Sat strength** — the app treats those as log-only templates after you finish in the app.
-
-**Supplemental suggestions** are extra toning on top of Runna:
-
-| Day type | What’s suggested |
-|---|---|
-| Mon & Thu | Full home toning session (~30–35 min) |
-| Run days (Tue, Fri, Sun) | Optional quick add-on after your run (core, glute+core) |
-| Wed & Sat (Runna strength) | Optional quick add-on only |
-
-You can log any plan on any day — suggestions are a nudge, not a rule.
-
-### Goals
-Editable targets that drive charts and status badges:
-
-- Target weight, starting weight, target date
-- Daily protein min/max
-- Calories for training vs rest days
-- Daily water goal
-
-### Outfit gallery
-A separate gallery for outfit photos by category — workout, everyday, feeling cute, reality check — with optional notes and dates.
-
----
+No user accounts — intended for private, single-user use on a trusted network.
 
 ## Tech stack
 
-- **Rails 8** + SQLite
-- **Bootstrap 5** (CDN)
-- **Chartkick** + Chart.js for charts
-- **Active Storage** for photo uploads
-- **Stimulus** for small UI interactions (meal calculator, feeling tags)
-
-No account system — this is a private, single-user app.
+Rails 8 · SQLite · Bootstrap 5 (CDN) · Chartkick · Active Storage · Stimulus
 
 ---
 
-## Setup (local)
+## Local development
+
+**Requirements:** Ruby 3.3.6, Bundler, ImageMagick (for photo variants)
 
 ```bash
+git clone https://github.com/gURLmeetsCode/silver-happiness.git
 cd silver-happiness
 bundle install
-yarn install --ignore-engines
-bin/rails db:reset    # first run: drop + create + migrate + seed
-bin/dev
+bin/rails db:prepare
+bin/rails db:seed
+bin/rails server
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
 
-### Database trouble?
+### Database reset
 
-If you see `FOREIGN KEY constraint failed` during `db:setup`, the SQLite file already existed from a partial setup:
+If migrations fail with foreign-key errors from a partial setup:
 
 ```bash
-bin/rails db:reset
+bin/rails db:reset   # drop, create, migrate, seed
 ```
 
-**Do not use `db:setup`** after the database already exists — use `db:reset` or `db:migrate` instead.
+Use `db:reset` or `db:migrate` — not `db:setup` — once a database file already exists.
 
-Re-running `db:seed` updates baseline records; it does not wipe data you add later.
+### Phone on the same Wi‑Fi
 
----
+```bash
+bin/rails server -b 0.0.0.0
+```
 
-## Phone use
-
-- **Same Wi‑Fi:** `bin/rails server -b 0.0.0.0` and open your Mac’s IP from iPhone
-- **Anywhere (recommended):** deploy on a Raspberry Pi with **Tailscale** — see [DEPLOY.md](DEPLOY.md)
-
-Photo upload forms use the phone camera for progress and outfit snaps.
+Open `http://<your-computer-ip>:3000` from your phone.
 
 ---
 
-## Project layout (high level)
+## Raspberry Pi deployment
 
-| Area | Purpose |
-|---|---|
-| `app/models/daily_log.rb` | One row per day — weight, wellness, training summary |
-| `app/models/meal_template.rb` | Saved meals for one-tap logging |
-| `app/models/recipe.rb` | Recipes + ingredients for shopping |
-| `app/models/workout_plan.rb` | Runna reference + supplemental strength plans |
-| `config/grocery_staples.yml` | Weekly shop list (editable) |
-| `db/seeds/` | Structure, baseline data, recipes |
+Run the app on a Raspberry Pi at home and open it from your phone anywhere using [Tailscale](https://tailscale.com) (free personal plan). No public domain or port forwarding required.
+
+### 1. Install system packages
+
+```bash
+sudo apt update
+sudo apt install -y git build-essential libsqlite3-dev imagemagick curl
+```
+
+### 2. Install Ruby 3.3.6 (rbenv)
+
+```bash
+curl -fsSL https://github.com/rbenv/rbenv-installer/raw/main/bin/rbenv-installer | bash
+# add rbenv to your shell (~/.bashrc), then:
+rbenv install 3.3.6
+rbenv global 3.3.6
+gem install bundler
+```
+
+On older 32-bit Raspberry Pi OS with a 64-bit kernel, Ruby may need:
+
+```bash
+RUBY_CONFIGURE_OPTS="--with-coroutine=arm32" rbenv install 3.3.6
+```
+
+If the `sqlite3` gem fails to load, rebuild gems for the Pi platform:
+
+```bash
+bundle config set force_ruby_platform true
+bundle install
+```
+
+### 3. Clone and configure the app
+
+```bash
+git clone https://github.com/gURLmeetsCode/silver-happiness.git
+cd silver-happiness
+bundle install
+
+export RAILS_ENV=production
+export SECRET_KEY_BASE=$(bin/rails secret)
+
+bin/rails db:prepare
+bin/rails db:seed
+bin/rails assets:precompile
+```
+
+Production uses SQLite at `storage/production.sqlite3` and ImageMagick (via MiniMagick) for photo resizing — no Node.js or yarn required.
+
+### 4. Run on boot with systemd
+
+Find your bundle path:
+
+```bash
+which bundle   # e.g. /home/pi/.rbenv/shims/bundle
+```
+
+Create `/etc/systemd/system/silver-happiness.service`:
+
+```ini
+[Unit]
+Description=Silver Happiness
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/silver-happiness
+Environment=RAILS_ENV=production
+Environment=SECRET_KEY_BASE=your_secret_here
+ExecStart=/home/pi/.rbenv/shims/bundle exec puma -C config/puma.rb
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now silver-happiness
+sudo systemctl status silver-happiness
+curl -I http://127.0.0.1:3000/up   # expect HTTP 200
+```
+
+### 5. Install Tailscale
+
+On the Pi, choose **Linux** when adding a device:
+
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up
+```
+
+Install Tailscale on your phone (iPhone & iPad) and sign in with the **same account**.
+
+### 6. Expose the app (HTTPS, tailnet only)
+
+Enable [Tailscale Serve](https://tailscale.com/kb/1312/serve) on your tailnet if prompted, then:
+
+```bash
+sudo tailscale serve --bg http://127.0.0.1:3000
+tailscale serve status
+```
+
+Open the URL shown (e.g. `https://raspberrypi.your-tailnet.ts.net`) on your phone with Tailscale connected.
+
+In Safari: **Share → Add to Home Screen** for quick access.
+
+To stop the proxy later:
+
+```bash
+tailscale serve --https=443 off
+```
+
+### 7. Deploy updates
+
+**Automated (recommended):** set up a [GitHub Actions self-hosted runner](DEPLOY.md#automated-deploy-github-actions) on the Pi once. After that, every push to `main` runs CI and deploys automatically.
+
+**Manual fallback:**
+
+```bash
+cd ~/silver-happiness
+./bin/deploy
+```
 
 ---
 
+## Security & backups
 
-## Hosting
+- **No authentication** — only expose the app on a private network (e.g. Tailscale). Do not publish it to the open internet without adding auth.
+- **Back up regularly:** `storage/production.sqlite3` and uploaded files under `storage/`.
 
-See **[DEPLOY.md](DEPLOY.md)** for Raspberry Pi + Tailscale setup (free private access from your phone, no domain required).
+```bash
+# from your Mac
+scp pi@raspberrypi:~/silver-happiness/storage/production.sqlite3 ~/Backups/
+```
+
+---
+
+## Project layout
+
+| Path | Purpose |
+|------|---------|
+| `app/models/daily_log.rb` | One row per day — weight, wellness, summary |
+| `app/models/meal_template.rb` | Saved meals for quick logging |
+| `app/models/recipe.rb` | Recipes and ingredients |
+| `app/models/workout_plan.rb` | Workout plan templates |
+| `config/grocery_staples.yml` | Default grocery staples |
+| `db/seeds/` | Seed data (products, templates, recipes) |
+
+---
+
+## License
+
+See repository license. Use and modify for your own self-hosted setup.

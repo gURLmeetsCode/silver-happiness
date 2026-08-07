@@ -2,7 +2,7 @@
 <html>
   <head>
     <title><%= content_for(:title) || "Silver Happiness" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
@@ -16,22 +16,79 @@
     <script src="https://cdn.jsdelivr.net/npm/chartkick@5.0.1/dist/chartkick.min.js"></script>
   </head>
 
-  <body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-      <div class="container">
-        <%= link_to "Silver Happiness", root_path, class: "navbar-brand fw-semibold" %>
-        <div class="navbar-nav ms-auto flex-row gap-2">
-          <%= link_to "Today", today_path, class: "nav-link px-2" %>
-          <%= link_to "Recipes", recipes_path, class: "nav-link px-2" %>
-          <%= link_to "Strength", workout_plans_path, class: "nav-link px-2" %>
-          <%= link_to "Outfits", outfit_photos_path, class: "nav-link px-2" %>
-          <%= link_to "Log", daily_logs_path, class: "nav-link px-2" %>
-          <%= link_to "Goals", edit_goal_path, class: "nav-link px-2" %>
+  <body class="bg-light has-mobile-nav">
+    <nav class="navbar navbar-dark bg-dark sticky-top site-nav">
+      <div class="container-fluid site-nav-inner">
+        <%= link_to root_path, class: "navbar-brand fw-semibold site-nav-brand mb-0" do %>
+          <span class="site-nav-brand-full">Silver Happiness</span>
+          <span class="site-nav-brand-short">Silver</span>
+        <% end %>
+
+        <div class="site-nav-desktop">
+          <ul class="navbar-nav site-nav-links">
+            <li class="nav-item">
+              <%= link_to today_path, class: nav_item_class(:today) do %>
+                <i class="bi bi-sun me-1"></i> Today
+              <% end %>
+            </li>
+            <li class="nav-item">
+              <%= link_to recipes_path, class: nav_item_class(:recipes) do %>
+                <i class="bi bi-journal-text me-1"></i> Recipes
+              <% end %>
+            </li>
+            <li class="nav-item">
+              <%= link_to workout_plans_path, class: nav_item_class(:strength) do %>
+                <i class="bi bi-lightning me-1"></i> Strength
+              <% end %>
+            </li>
+            <li class="nav-item">
+              <%= link_to outfit_photos_path, class: nav_item_class(:outfits) do %>
+                <i class="bi bi-camera me-1"></i> Outfits
+              <% end %>
+            </li>
+            <li class="nav-item">
+              <%= link_to daily_logs_path, class: nav_item_class(:log) do %>
+                <i class="bi bi-calendar3 me-1"></i> Log
+              <% end %>
+            </li>
+            <li class="nav-item">
+              <%= link_to edit_goal_path, class: nav_item_class(:goals) do %>
+                <i class="bi bi-bullseye me-1"></i> Goals
+              <% end %>
+            </li>
+          </ul>
         </div>
       </div>
     </nav>
 
-    <main class="container py-3 py-md-4">
+    <nav class="mobile-tab-bar d-lg-none" aria-label="Quick navigation">
+      <%= link_to today_path, class: mobile_tab_class(:today) do %>
+        <i class="bi bi-sun"></i>
+        <span>Today</span>
+      <% end %>
+      <%= link_to recipes_path, class: mobile_tab_class(:recipes) do %>
+        <i class="bi bi-journal-text"></i>
+        <span>Recipes</span>
+      <% end %>
+      <%= link_to daily_logs_path, class: mobile_tab_class(:log) do %>
+        <i class="bi bi-plus-circle"></i>
+        <span>Log</span>
+      <% end %>
+      <%= link_to workout_plans_path, class: mobile_tab_class(:strength) do %>
+        <i class="bi bi-lightning"></i>
+        <span>Strength</span>
+      <% end %>
+      <%= link_to outfit_photos_path, class: mobile_tab_class(:outfits) do %>
+        <i class="bi bi-camera"></i>
+        <span>Outfits</span>
+      <% end %>
+      <%= link_to edit_goal_path, class: mobile_tab_class(:goals) do %>
+        <i class="bi bi-bullseye"></i>
+        <span>Goals</span>
+      <% end %>
+    </nav>
+
+    <main class="container py-3 py-md-4 site-main">
       <% if notice.present? %>
         <div class="alert alert-success"><%= notice %></div>
       <% end %>

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Production deploy — run on the Raspberry Pi (manually or via GitHub Actions self-hosted runner).
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+export RAILS_ENV=production
+
+echo "==> Pull latest code"
+git fetch origin main
+git reset --hard origin/main
+
+echo "==> Install gems"
+bundle config set --local deployment 'true' 2>/dev/null || true
+bundle config set --local without 'development test' 2>/dev/null || true
+bundle install
+
+echo "==> Migrate database"
+bin/rails db:migrate
+
+echo "==> Precompile assets"
+bin/rails assets:precompile
+
+echo "==> Restart app"
+sudo systemctl restart silver-happiness
+
+echo "==> Health check"
+sleep 2
+curl -sf http://127.0.0.1:3000/up > /dev/null
+
+echo "Deploy complete."

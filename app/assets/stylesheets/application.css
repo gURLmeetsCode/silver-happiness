@@ -1,5 +1,158 @@
 /* Silver Happiness — mobile-first tweaks */
 
+:root {
+  --mobile-tab-height: 3.5rem;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* --- Top navigation --- */
+
+.site-nav {
+  padding-top: var(--safe-top);
+  z-index: 1030;
+}
+
+.site-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+  min-height: 3rem;
+}
+
+.site-nav-brand {
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+
+.site-nav-brand-short {
+  display: inline;
+}
+
+.site-nav-brand-full {
+  display: none;
+}
+
+/* Desktop: horizontal links in header */
+.site-nav-desktop {
+  display: none;
+}
+
+.site-nav-links {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 0.15rem;
+  margin: 0;
+}
+
+.site-nav-links .nav-link {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.site-nav-links .nav-link.active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@media (min-width: 992px) {
+  .site-nav-inner {
+    justify-content: space-between;
+    max-width: 1320px;
+    margin: 0 auto;
+    min-height: 3.5rem;
+  }
+
+  .site-nav-brand-full {
+    display: inline;
+  }
+
+  .site-nav-brand-short {
+    display: none;
+  }
+
+  .site-nav-desktop {
+    display: flex;
+    align-items: center;
+  }
+
+  .site-nav-links .nav-link {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* --- Bottom tab bar (phones & tablets) --- */
+
+.mobile-tab-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1030;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  align-items: stretch;
+  background: #fff;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+  padding-bottom: var(--safe-bottom);
+  min-height: calc(var(--mobile-tab-height) + var(--safe-bottom));
+}
+
+.mobile-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  padding: 0.35rem 0.1rem;
+  color: #6c757d;
+  text-decoration: none;
+  font-size: 0.58rem;
+  font-weight: 500;
+  line-height: 1.1;
+  min-height: var(--mobile-tab-height);
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+}
+
+.mobile-tab i {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.mobile-tab.active {
+  color: #212529;
+  font-weight: 600;
+}
+
+.mobile-tab.active i {
+  color: #0d6efd;
+}
+
+.has-mobile-nav .site-main {
+  padding-bottom: calc(var(--mobile-tab-height) + var(--safe-bottom) + 1rem) !important;
+}
+
+@media (min-width: 992px) {
+  .has-mobile-nav .site-main {
+    padding-bottom: inherit !important;
+  }
+}
+
+/* Prevent horizontal scroll from wide content on small screens */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 .photo-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

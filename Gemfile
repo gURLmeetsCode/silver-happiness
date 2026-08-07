@@ -14,8 +14,6 @@ gem "importmap-rails"
 gem "turbo-rails"
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem "stimulus-rails"
-# Bundle and process CSS [https://github.com/rails/cssbundling-rails]
-gem "cssbundling-rails"
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
 
@@ -28,8 +26,8 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
-# Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-gem "image_processing", "~> 1.2"
+# Photo variants (progress/outfit uploads) — MiniMagick works on Pi; libvips 8.13+ is often too new on Raspbian
+gem "mini_magick", "~> 4.12"
 
 gem "chartkick"
 gem "groupdate"

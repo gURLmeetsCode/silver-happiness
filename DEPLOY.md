@@ -1,170 +1,100 @@
-## What gets seeded in production?
+# Deployment notes
 
-Your **real baseline** — not fake demo data:
+The main setup guide is in **[README.md](README.md)** — local development, Raspberry Pi install, systemd, and Tailscale Serve.
 
-- Strength workout plans (Wednesday home, Saturday gym, core, Runna)
-- Default goals (edit in app anytime)
-- Your products (Koro, Sojasun, oats, protein powder, etc.)
-- Meal templates (run breakfast, yogurt breakfast, power salad)
-- **Aug 6–7 logs** as they actually happened
+## Quick reference
 
-Anything you add after deploy stays. Re-running `db:seed` only updates these baseline records.
+| Step | Command |
+|------|---------|
+| Health check | `curl -I http://127.0.0.1:3000/up` |
+| Start service | `sudo systemctl start silver-happiness` |
+| View logs | `journalctl -u silver-happiness -f` |
+| Tailscale URL | `tailscale serve status` |
+| Regenerate secret | `bin/rails secret` |
 
-```bash
-RAILS_ENV=production bin/rails db:prepare
-RAILS_ENV=production bin/rails db:seed
-```
+## Home Wi‑Fi only (no Tailscale)
 
----
-
-## Tailscale setup — Raspberry Pi = **Linux**
-
-On the Tailscale “add your first device” screen, choose **Linux** (not macOS, not iPhone).
-
-Your Pi runs Raspberry Pi OS = Linux.
-
-### On the Raspberry Pi (SSH or keyboard)
-
-```bash
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up
-```
-
-Sign in with the same account as your Mac (**gURLmeetsCode@github**). The Pi appears in your Tailscale admin.
-
-### On your iPhone
-
-Choose **iPhone & iPad** in Tailscale, install the app, sign in with the **same account**.
-
-### Expose Silver Happiness (after app is running on Pi)
-
-```bash
-sudo tailscale serve https / http://127.0.0.1:3000
-```
-
-Tailscale shows a URL like `https://raspberrypi.your-tailnet.ts.net` — open that on your iPhone.
-
-**Add to Home Screen** in Safari for quick access like an app.
-
-### On your Mac (for admin)
-
-You can use **macOS** in Tailscale too — useful for checking the Pi, but the Pi itself is always **Linux**.
-
----
-
-## Option A — Tailscale (free, recommended)
-
-Private VPN between your Pi and iPhone. Only your devices can reach the app.
-
-### 1. Install Tailscale
-
-On Pi and iPhone: install from [tailscale.com](https://tailscale.com) (free personal plan).
-
-### 2. Deploy the app on Pi
-
-```bash
-# On Raspberry Pi (64-bit OS recommended)
-sudo apt update
-sudo apt install -y git ruby ruby-dev build-essential libsqlite3-dev nodejs npm
-
-git clone https://github.com/gURLmeetsCode/silver-happiness.git
-cd silver-happiness
-bundle install
-yarn install --ignore-engines
-yarn build:css   # if CSS build fails, see README — Bootstrap CDN works in browser
-
-export RAILS_ENV=production
-export SECRET_KEY_BASE=$(bin/rails secret)
-
-bin/rails db:prepare
-bin/rails db:seed          # workout plans only
-bin/rails assets:precompile
-```
-
-### 3. Run with systemd (starts on boot)
-
-Create `/etc/systemd/system/silver-happiness.service`:
-
-```ini
-[Unit]
-Description=Silver Happiness
-After=network.target
-
-[Service]
-Type=simple
-User=pi
-WorkingDirectory=/home/pi/silver-happiness
-Environment=RAILS_ENV=production
-Environment=SECRET_KEY_BASE=your_secret_here
-ExecStart=/usr/bin/bundle exec puma -C config/puma.rb
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-sudo systemctl enable --now silver-happiness
-```
-
-### 4. Expose via Tailscale Serve (HTTPS, free)
-
-```bash
-sudo tailscale serve https / http://127.0.0.1:3000
-```
-
-Tailscale gives you a private URL like:
-
-`https://raspberrypi.your-tailnet-name.ts.net`
-
-Open that on your iPhone (with Tailscale connected). **Add to Home Screen** in Safari for an app-like icon.
-
----
-
-## Option B — Home Wi‑Fi only (free, simplest test)
+For a quick LAN test without Tailscale:
 
 ```bash
 RAILS_ENV=production bin/rails server -b 0.0.0.0 -p 3000
 ```
 
-On iPhone (same Wi‑Fi): `http://192.168.x.x:3000` (Pi’s local IP).
+Open `http://<pi-local-ip>:3000` from a device on the same network. This does not work away from home.
 
-Works at home only — not when you’re out.
+## Custom domain (optional)
 
----
+If you want a public hostname instead of Tailscale:
 
-## Option C — Custom domain (optional, paid)
+1. Use **Cloudflare Tunnel** or similar — no router port forwarding
+2. **Add authentication** before exposing health data to the internet
 
-Only if you want `silverhappiness.yourdomain.com`:
+## What `db:seed` loads
 
-1. Buy domain (Porkbun, Cloudflare, Gandi, etc.)
-2. Use **Cloudflare Tunnel** (free) to reach Pi without opening router ports
-3. Point DNS to Cloudflare
-
-More setup than Tailscale. Worth it if you want a public URL — but **add password protection** since health data shouldn’t be public.
-
----
-
-## Security notes
-
-- This app has **no login** yet — fine on a private Tailscale network, risky if exposed to the internet
-- **Back up** `storage/production.sqlite3` and `storage/` (photos) regularly
-- Pi SD cards fail — copy backups to your Mac weekly:
+Example products, meal templates, workout plans, and recipes to get started. Re-running seed updates baseline records; data you add in the app is preserved.
 
 ```bash
-scp pi@raspberrypi.local:~/silver-happiness/storage/production.sqlite3 ~/Backups/
+RAILS_ENV=production bin/rails db:seed
 ```
 
 ---
 
-## Updates after git pull
+## Automated deploy (GitHub Actions)
+
+Push to `main` → CI runs tests → Pi deploys itself. No manual `git pull` after the one-time setup below.
+
+### Why a self-hosted runner?
+
+The Pi is only reachable on your Tailscale network. GitHub’s cloud runners cannot SSH to it directly. A **self-hosted runner** on the Pi polls GitHub outbound and runs `./bin/deploy` when CI passes.
+
+### One-time setup on the Pi
+
+**1. Allow deploy script to restart the service without a password**
 
 ```bash
-cd silver-happiness
-git pull
-bundle install
-yarn install --ignore-engines
-RAILS_ENV=production bin/rails db:migrate
-RAILS_ENV=production bin/rails assets:precompile
-sudo systemctl restart silver-happiness
+sudo visudo -f /etc/sudoers.d/silver-happiness
 ```
+
+Add:
+
+```
+pi ALL=(ALL) NOPASSWD: /bin/systemctl restart silver-happiness
+```
+
+**2. Install the GitHub Actions runner**
+
+On GitHub: **Settings → Actions → Runners → New self-hosted runner → Linux → ARM64**
+
+Then on the Pi:
+
+```bash
+mkdir -p ~/actions-runner && cd ~/actions-runner
+
+# Paste the curl + tar commands from GitHub (version changes — use the URL shown in the UI)
+# Example shape:
+# curl -o actions-runner-linux-arm64-2.xxx.tar.gz -L https://github.com/actions/runner/releases/download/v2.xxx/actions-runner-linux-arm64-2.xxx.tar.gz
+# tar xzf ./actions-runner-linux-arm64-2.xxx.tar.gz
+
+./config.sh --url https://github.com/gURLmeetsCode/silver-happiness --token YOUR_TOKEN_FROM_GITHUB
+
+sudo ./svc.sh install
+sudo ./svc.sh start
+sudo ./svc.sh status
+```
+
+The runner must stay online (systemd service handles this after `svc.sh install`).
+
+**3. First deploy**
+
+Push to `main`. Watch **Actions** in GitHub — CI, then **Deploy to Raspberry Pi**.
+
+### Manual deploy (fallback)
+
+```bash
+cd ~/silver-happiness
+./bin/deploy
+```
+
+### Alternative: SSH deploy from GitHub cloud
+
+Possible with [Tailscale in CI](https://tailscale.com/kb/1278/tailscale-github-action) so the cloud runner joins your tailnet briefly, then SSHs to the Pi. More moving parts (Tailscale auth key, SSH key secrets). The self-hosted runner is simpler for a single home Pi.
