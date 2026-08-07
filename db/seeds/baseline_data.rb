@@ -175,6 +175,31 @@ Product.find_or_create_by!(name: "Nutritional yeast") do |p|
   p.notes = "Optional — for scramble"
 end
 
+Product.find_or_create_by!(name: "Barilla Fusilli Protein+")
+barilla_pasta = Product.find_by!(name: "Barilla Fusilli Protein+")
+barilla_pasta.update!(
+  brand: "Barilla",
+  calories_per_100g: 354,
+  protein_per_100g: 20,
+  carbs_per_100g: 63,
+  fat_per_100g: 1.7,
+  default_serving_g: 100,
+  serving_label: "100 g dry",
+  notes: "Pâtes fusilli Protein+ — log dry weight. Label: 354 kcal · 20 g protein / 100 g (semoule + protéines de pois)."
+)
+
+Product.find_or_create_by!(name: "Homemade salad dressing")
+homemade_dressing = Product.find_by!(name: "Homemade salad dressing")
+homemade_dressing.update!(
+  calories_per_100g: 533,
+  protein_per_100g: 0,
+  carbs_per_100g: 0,
+  fat_per_100g: 56,
+  default_serving_g: 30,
+  serving_label: "2 tbsp",
+  notes: "Your eyeball batch — ~80 kcal per tbsp measured onto salad (2 tbsp = ~160 kcal)."
+)
+
 def seed_template(slug, name, meal_type, items)
   template = MealTemplate.find_or_create_by!(slug: slug) do |t|
     t.name = name
@@ -244,6 +269,15 @@ seed_template("tofu-scramble-potatoes", "Tofu scramble + baby potatoes", :breakf
   [ red_pepper, 80, "1 red pepper" ],
   [ avocado, 56, "¼–½ avocado (~56 g)" ],
   [ nutritional_yeast, 10, "2 tbsp nutritional yeast (optional)" ]
+])
+
+barilla_pasta = Product.find_by!(name: "Barilla Fusilli Protein+")
+homemade_dressing = Product.find_by!(name: "Homemade salad dressing")
+
+seed_template("pasta-salad-tofu-dinner", "Pasta salad + tofu", :dinner, [
+  [ barilla_pasta, 100, "100 g Barilla Fusilli Protein+ (dry)" ],
+  [ tofu, 125, "125 g tofu nature (1 pavé)" ],
+  [ homemade_dressing, 30, "2 tbsp homemade dressing" ]
 ])
 
 # --- Aug 6, 2026 (real day — Nantes outing) ---

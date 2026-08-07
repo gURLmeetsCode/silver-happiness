@@ -235,6 +235,33 @@ STEPS
 
 # --- Dinners ---
 
+seed_recipe "pasta-salad-tofu-dinner", {
+  name: "Pasta salad + tofu",
+  meal_type: :dinner,
+  regular_meal: true,
+  meal_template_slug: "pasta-salad-tofu-dinner",
+  prep_time: "20 min",
+  serves: 1,
+  position: 4,
+  description: "Friday run-day dinner. Salad base (greens, tomatoes, cucumber, red pepper, fresh basil) + measured dressing + Barilla Protein+ fusilli + tofu. No cabbage or carrots. Macros from pasta, tofu, and 2 tbsp dressing; salad veg and basil extra."
+}, [
+  [ :produce, "2 big handfuls", "mâche or mesclun mix", nil, nil ],
+  [ :produce, "10", "cherry tomatoes, halved", nil, nil ],
+  [ :produce, "½", "cucumber, sliced", nil, nil ],
+  [ :produce, "¼", "red pepper, sliced", nil, nil ],
+  [ :produce, "1 handful", "fresh basil leaves", nil, nil ],
+  [ :pantry, "2 tbsp", "homemade dressing (measured)", "Homemade salad dressing", 30 ],
+  [ :carbs, "100 g", "Barilla Fusilli Protein+ (dry weight)", "Barilla Fusilli Protein+", 100 ],
+  [ :protein, "125 g", "tofu nature, cubed (1 pavé)", "Tofu", 125 ]
+], <<~STEPS
+  1. Cook 100 g dry Barilla Protein+ fusilli. Drain — weigh dry before cooking.
+  2. Fill a bowl with greens, cherry tomatoes, cucumber, red pepper, and fresh basil.
+  3. Measure exactly 2 tbsp of your homemade dressing onto the salad.
+  4. Add warm fusilli and 125 g cubed Céréal Bio tofu nature. Toss or serve combined.
+  5. One plate only — put leftovers away before eating.
+  6. Log with one tap — tracked: ~695 kcal · ~38 g protein (pasta + tofu + dressing).
+STEPS
+
 seed_recipe "mexican-zucchini-bowl", {
   name: "Mexican zucchini bowl",
   meal_type: :dinner,
