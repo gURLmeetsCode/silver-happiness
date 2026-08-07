@@ -10,12 +10,16 @@
       <% if plan.duration_hint.present? %> · <%= plan.duration_hint %><% end %>
     </p>
     <% if plan.description.present? %>
-      <p class="small mb-3"><%= plan.description %></p>
+      <p class="small mb-2"><%= plan.description %></p>
     <% end %>
+    <%= render "workout_plans/body_targets", plan: plan, class: "mb-3" %>
     <ol class="small mb-3 ps-3">
       <% plan.workout_plan_exercises.each do |ex| %>
         <li class="mb-1">
           <strong><%= ex.name %></strong>
+          <% if ex.body_target.present? %>
+            <span class="text-muted"> · <%= ex.body_target %></span>
+          <% end %>
           <% if ex.sets_prescription.present? || ex.reps_prescription.present? %>
             — <%= [ex.sets_prescription, ex.reps_prescription].compact.join(" · ") %>
           <% end %>

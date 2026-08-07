@@ -1,0 +1,7 @@
+<% labels = plan.body_target_labels %>
+<% if labels.any? %>
+  <div class="body-targets<%= " #{local_assigns[:class]}" if local_assigns[:class].present? %>">
+    <span class="text-muted small">Targets:</span>
+    <%= body_target_badges(labels) %>
+  </div>
+<% end %>

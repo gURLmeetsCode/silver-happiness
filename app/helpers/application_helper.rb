@@ -68,4 +68,13 @@ module ApplicationHelper
   def mobile_tab_class(key)
     [ "mobile-tab", ("active" if nav_active?(key)) ].compact.join(" ")
   end
+
+  def body_target_badges(labels, extra_class: "")
+    labels = Array(labels).map(&:to_s).reject(&:blank?)
+    return "" if labels.empty?
+
+    safe_join(labels.map { |label|
+      content_tag(:span, label, class: [ "badge", "text-bg-light", "text-dark", "border", "me-1", "mb-1", extra_class ].compact)
+    })
+  end
 end

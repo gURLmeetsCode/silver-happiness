@@ -39,6 +39,22 @@ class WorkoutPlan < ApplicationRecord
     PLAN_KIND_LABELS[plan_kind] || plan_kind.humanize
   end
 
+  def body_target_labels
+    if body_targets.present?
+      body_targets.split(/[,·\/]/).map(&:strip).reject(&:blank?)
+    else
+      workout_plan_exercises.filter_map { |exercise| exercise.body_target.presence }
+        .flat_map { |target| target.split(/[,·\/]/) }
+        .map(&:strip)
+        .reject(&:blank?)
+        .uniq
+    end
+  end
+
+  def body_targets_summary
+    body_target_labels.join(" · ")
+  end
+
   def scheduled_day_name
     if kind_runna_reference? && scheduled_wday.present?
       "Runna · #{Date::DAYNAMES[scheduled_wday]}"

@@ -179,6 +179,7 @@
             · <%= @suggested_strength.plan_kind_label %>
             · <%= @suggested_strength.location_label %>
           </p>
+          <%= render "workout_plans/body_targets", plan: @suggested_strength, class: "mb-2" %>
           <p class="small text-muted mb-3"><%= @suggested_strength.workout_plan_exercises.size %> exercises<% if @suggested_strength.duration_hint.present? %> · <%= @suggested_strength.duration_hint %><% end %></p>
           <%= link_to "Log this session", new_daily_log_strength_session_path(@today, workout_plan_id: @suggested_strength.id), class: "btn btn-dark w-100 mb-2" %>
           <%= link_to "See all plans", workout_plans_path, class: "btn btn-outline-secondary w-100 btn-sm" %>

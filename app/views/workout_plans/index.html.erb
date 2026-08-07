@@ -12,6 +12,7 @@
   <div class="alert alert-primary">
     <strong>Today’s supplemental suggestion (<%= Date.current.strftime("%A") %>):</strong>
     <%= @suggested.name %> — <%= @suggested.plan_kind_label %> · <%= @suggested.location_label %>
+    <%= render "workout_plans/body_targets", plan: @suggested, class: "mt-2" %>
     <div class="small mt-1"><%= @suggestion_context %></div>
     <%= link_to "Log it", new_daily_log_strength_session_path(@today, workout_plan_id: @suggested.id), class: "alert-link ms-1" %>
   </div>

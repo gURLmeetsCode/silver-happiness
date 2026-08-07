@@ -73,7 +73,8 @@
           <div class="alert alert-light border mb-3">
             <strong>Supplemental suggestion:</strong> <%= @suggested_strength.name %>
             (<%= @suggested_strength.plan_kind_label %> · <%= @suggested_strength.location_label %>)
-            <div class="small text-muted mt-1"><%= @suggestion_context %></div>
+            <%= render "workout_plans/body_targets", plan: @suggested_strength, class: "mt-2 mb-1" %>
+            <div class="small text-muted"><%= @suggestion_context %></div>
             <%= link_to "Log this add-on", new_daily_log_strength_session_path(@daily_log, workout_plan_id: @suggested_strength.id), class: "alert-link" %>
           </div>
         <% end %>
@@ -83,9 +84,13 @@
           <p class="small fw-semibold text-muted mb-2">Supplemental</p>
           <div class="d-grid gap-2 mb-3">
             <% @supplemental_plans.each do |plan| %>
-              <%= link_to "Log: #{plan.name} (#{plan.plan_kind_label})",
-                    new_daily_log_strength_session_path(@daily_log, workout_plan_id: plan.id),
-                    class: "btn btn-outline-primary text-start#{" active" if plan == @suggested_strength}" %>
+              <%= link_to new_daily_log_strength_session_path(@daily_log, workout_plan_id: plan.id),
+                    class: "btn btn-outline-primary text-start#{" active" if plan == @suggested_strength}" do %>
+                <span class="d-block">Log: <%= plan.name %> (<%= plan.plan_kind_label %>)</span>
+                <% if plan.body_targets_summary.present? %>
+                  <span class="small text-muted">Targets: <%= plan.body_targets_summary %></span>
+                <% end %>
+              <% end %>
             <% end %>
           </div>
         <% end %>

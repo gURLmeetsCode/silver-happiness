@@ -6,6 +6,7 @@
     · <%= @workout_plan.scheduled_day_name %>
     <% if @workout_plan.duration_hint.present? %> · <%= @workout_plan.duration_hint %><% end %>
   </p>
+  <%= render "body_targets", plan: @workout_plan, class: "mt-2" %>
 </div>
 
 <% if @workout_plan.description.present? %>
@@ -19,6 +20,9 @@
       <% @workout_plan.workout_plan_exercises.each do |ex| %>
         <li class="mb-3">
           <strong><%= ex.name %></strong>
+          <% if ex.body_target.present? %>
+            <span class="badge text-bg-light text-dark border ms-1"><%= ex.body_target %></span>
+          <% end %>
           <% if ex.equipment_hint.present? %><div class="small text-muted">Equipment: <%= ex.equipment_hint %></div><% end %>
           <% if ex.sets_prescription.present? || ex.reps_prescription.present? %>
             <div class="small"><%= [ex.sets_prescription, ex.reps_prescription].compact.join(" · ") %></div>
