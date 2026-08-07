@@ -6,6 +6,19 @@ cd "$(dirname "$0")/.."
 
 export RAILS_ENV=production
 
+if [[ -f .env.production ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source .env.production
+  set +a
+fi
+
+if [[ -z "${SECRET_KEY_BASE:-}" ]]; then
+  echo "ERROR: SECRET_KEY_BASE is not set."
+  echo "Create .env.production from .env.production.example and run: bin/rails secret"
+  exit 1
+fi
+
 echo "==> Pull latest code"
 git fetch origin main
 git reset --hard origin/main

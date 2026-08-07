@@ -98,6 +98,13 @@ bundle install
 export RAILS_ENV=production
 export SECRET_KEY_BASE=$(bin/rails secret)
 
+# Save for future deploys (gitignored)
+cat > .env.production <<EOF
+RAILS_ENV=production
+SECRET_KEY_BASE=${SECRET_KEY_BASE}
+EOF
+chmod 600 .env.production
+
 bin/rails db:prepare
 bin/rails db:seed
 bin/rails assets:precompile
@@ -125,7 +132,7 @@ Type=simple
 User=pi
 WorkingDirectory=/home/pi/silver-happiness
 Environment=RAILS_ENV=production
-Environment=SECRET_KEY_BASE=your_secret_here
+EnvironmentFile=/home/pi/silver-happiness/.env.production
 ExecStart=/home/pi/.rbenv/shims/bundle exec puma -C config/puma.rb
 Restart=always
 

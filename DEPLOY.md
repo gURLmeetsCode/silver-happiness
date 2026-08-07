@@ -90,6 +90,8 @@ Push to `main`. Watch **Actions** in GitHub — CI, then **Deploy to Raspberry P
 
 ### Manual deploy (fallback)
 
+Requires `.env.production` with `SECRET_KEY_BASE` (see README). Then:
+
 ```bash
 cd ~/silver-happiness
 ./bin/deploy
