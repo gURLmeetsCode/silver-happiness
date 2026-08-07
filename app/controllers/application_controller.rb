@@ -1,4 +1,4 @@
 class ApplicationController < ActionController::Base
-  # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
-  allow_browser versions: :modern
+  # Self-hosted app: allow mobile Safari 15+ (default :modern requires Safari 17.2+)
+  allow_browser versions: { safari: 15, chrome: 90, firefox: 90, ie: false }
 end
