@@ -3,27 +3,6 @@
     <h2 class="h5 mb-1">Wellness check-in</h2>
     <p class="text-muted small mb-3">Period, how you’re feeling, and daily notes.</p>
 
-    <div class="mb-3">
-      <label class="form-label">Water today</label>
-      <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-        <span class="fw-semibold"><%= daily_log.water_ml %> ml</span>
-        <span class="text-muted small">(~<%= daily_log.water_glasses %> glasses · goal <%= goal.water_goal_ml %> ml)</span>
-        <% if daily_log.meal_water_progress_label.present? %>
-          <span class="badge text-bg-light text-dark border"><%= daily_log.meal_water_progress_label %></span>
-        <% end %>
-      </div>
-      <p class="small text-muted mb-2">Log water with each meal using <strong>+ 1 cup</strong> on the meals list.</p>
-      <div class="progress mb-2" style="height: 8px;">
-        <% water_pct = goal.water_goal_ml.positive? ? [ (daily_log.water_ml.to_f / goal.water_goal_ml * 100).round, 100 ].min : 0 %>
-        <div class="progress-bar bg-info" role="progressbar" style="width: <%= water_pct %>%"></div>
-      </div>
-      <div class="d-flex flex-wrap gap-2">
-        <%= button_to "+250 ml", add_water_daily_log_path(daily_log, amount_ml: 250), method: :post, class: "btn btn-sm btn-outline-info" %>
-        <%= button_to "+500 ml", add_water_daily_log_path(daily_log, amount_ml: 500), method: :post, class: "btn btn-sm btn-outline-info" %>
-        <%= button_to "+750 ml", add_water_daily_log_path(daily_log, amount_ml: 750), method: :post, class: "btn btn-sm btn-outline-info" %>
-      </div>
-    </div>
-
     <%= form_with model: daily_log, class: "row g-3" do |f| %>
       <div class="col-12">
         <div class="form-check">
@@ -50,22 +29,6 @@
         <%= f.label :notes, "Daily notes", class: "form-label" %>
         <%= f.text_area :notes, rows: 3, class: "form-control",
               placeholder: "Anything else — mood, digestion, wins, frustrations…" %>
-      </div>
-
-      <div class="col-md-4">
-        <%= f.label :bed_time, "Bed time (optional)", class: "form-label" %>
-        <%= f.time_field :bed_time, class: "form-control" %>
-      </div>
-      <div class="col-md-4">
-        <%= f.label :wake_time, "Wake time (optional)", class: "form-label" %>
-        <%= f.time_field :wake_time, class: "form-control" %>
-      </div>
-      <div class="col-md-4">
-        <%= f.label :sleep_quality, "Sleep quality 1–10 (optional)", class: "form-label" %>
-        <%= f.number_field :sleep_quality, class: "form-control", min: 1, max: 10 %>
-        <% if daily_log.sleep_duration_hours %>
-          <div class="form-text"><%= daily_log.sleep_duration_hours %> hours sleep</div>
-        <% end %>
       </div>
 
       <div class="col-12">

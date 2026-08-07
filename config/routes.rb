@@ -13,6 +13,7 @@ Rails.application.routes.draw do
     member do
       post :copy_meals
       post :add_water
+      post :set_water
     end
     resources :meal_entries, only: [ :create, :destroy ] do
       member do

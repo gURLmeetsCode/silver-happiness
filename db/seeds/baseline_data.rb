@@ -48,6 +48,17 @@ Product.find_or_create_by!(name: "Skyr vegan") do |p|
   p.calories_per_100g = 60
   p.protein_per_100g = 7
   p.default_serving_g = 150
+  p.serving_label = "1 pot"
+  p.notes = "Skyr nature — plain, unsweetened"
+end
+
+Product.find_or_create_by!(name: "Banana") do |p|
+  p.calories_per_100g = 89
+  p.protein_per_100g = 1.1
+  p.carbs_per_100g = 23
+  p.fat_per_100g = 0.3
+  p.default_serving_g = 118
+  p.serving_label = "1 medium"
 end
 
 Product.find_or_create_by!(name: "Purée de cacahuètes") do |p|
@@ -111,6 +122,13 @@ seed_template("rest-breakfast", "Yogurt + ½ protein", :breakfast, [
 seed_template("power-salad", "Power salad lunch", :lunch, [
   [ tofu, 125, "125g tofu" ],
   [ quinoa, 120, "120g quinoa" ]
+])
+
+banana = Product.find_by!(name: "Banana")
+seed_template("banana-pb-skyr-snack", "Banana + PB + Skyr", :snack, [
+  [ banana, 118, "1 whole banana, sliced" ],
+  [ koro, 8, "1 large tsp Koro PB" ],
+  [ skyr, 15, "1 tbsp plain Skyr" ]
 ])
 
 # --- Aug 6, 2026 (real day — Nantes outing) ---

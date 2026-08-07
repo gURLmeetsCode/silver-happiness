@@ -1,5 +1,5 @@
 class DailyLogsController < ApplicationController
-  before_action :set_daily_log, only: [ :show, :edit, :update, :copy_meals, :add_water ]
+  before_action :set_daily_log, only: [ :show, :edit, :update, :copy_meals, :add_water, :set_water ]
   before_action :load_show_page, only: [ :show, :update ]
 
   def index
@@ -36,6 +36,12 @@ class DailyLogsController < ApplicationController
     amount = 250 if amount <= 0
     @daily_log.add_water!(amount)
     redirect_to @daily_log, notice: "Added #{amount} ml water (#{@daily_log.water_ml} ml total)."
+  end
+
+  def set_water
+    amount = [ params[:amount_ml].to_i, 0 ].max
+    @daily_log.update!(water_ml: amount)
+    redirect_to @daily_log, notice: "Water set to #{amount} ml (#{@daily_log.water_glasses} glasses)."
   end
 
   private

@@ -1,0 +1,26 @@
+<div class="card stat-card mb-4 border-info border-opacity-25" id="water">
+  <div class="card-body">
+    <h2 class="h5 mb-1">Water today</h2>
+    <p class="mb-2">
+      <span class="fs-4 fw-semibold"><%= daily_log.water_ml %> ml</span>
+      <span class="text-muted small">(~<%= daily_log.water_glasses %> glasses · goal <%= goal.water_goal_ml %> ml)</span>
+    </p>
+    <div class="progress mb-3" style="height: 8px;">
+      <% water_pct = goal.water_goal_ml.positive? ? [ (daily_log.water_ml.to_f / goal.water_goal_ml * 100).round, 100 ].min : 0 %>
+      <div class="progress-bar bg-info" role="progressbar" style="width: <%= water_pct %>%"></div>
+    </div>
+
+    <p class="small fw-semibold text-muted mb-2">Volvic 1.5 L bottle — tap how much you've drunk:</p>
+    <div class="d-flex flex-wrap gap-2 mb-2">
+      <% [ 250, 500, 750, 1000, 1250, 1500 ].each do |ml| %>
+        <%= button_to "#{ml} ml",
+              set_water_daily_log_path(daily_log, amount_ml: ml),
+              method: :post,
+              class: "btn btn-sm #{daily_log.water_ml == ml ? 'btn-info' : 'btn-outline-info'}" %>
+      <% end %>
+    </div>
+    <p class="small text-muted mb-0">
+      Meal “+ 1 cup” buttons add water too. Bottle buttons set your total for the day.
+    </p>
+  </div>
+</div>

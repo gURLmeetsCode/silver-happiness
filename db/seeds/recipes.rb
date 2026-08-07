@@ -276,6 +276,25 @@ seed_recipe "pb-apple-snack", {
   1. Slice apple. Weigh 15 g peanut butter. Done.
 STEPS
 
+seed_recipe "banana-pb-skyr-snack", {
+  name: "Banana + PB + Skyr",
+  meal_type: :snack,
+  regular_meal: true,
+  meal_template_slug: "banana-pb-skyr-snack",
+  prep_time: "2 min",
+  serves: 1,
+  position: 1,
+  description: "Quick snack — slice one banana, dip in PB and Skyr. Macros from your saved products."
+}, [
+  [ :produce, "1 whole", "banana, sliced", "Banana", 118 ],
+  [ :fats, "1 large tsp", "Koro peanut butter", "Purée de cacahuètes", 8 ],
+  [ :protein, "1 tbsp", "Sojasun Skyr nature (plain)", "Skyr vegan", 15 ]
+], <<~STEPS
+  1. Slice one whole banana onto a plate.
+  2. Add 1 large teaspoon Koro peanut butter and 1 tablespoon plain Sojasun Skyr.
+  3. Dip slices or spread — log with one tap on your daily log.
+STEPS
+
 # --- Suggested (not daily default) ---
 
 seed_recipe "tempeh-salad-option", {
