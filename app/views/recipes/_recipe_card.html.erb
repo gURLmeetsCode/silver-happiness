@@ -1,0 +1,48 @@
+<div class="card stat-card h-100<%= " opacity-75" if recipe.status_tired_of? || recipe.status_archived? %>">
+  <div class="card-body d-flex flex-column">
+    <div class="d-flex justify-content-between align-items-start mb-2">
+      <h3 class="h5 mb-0"><%= recipe.name %></h3>
+      <span class="badge text-bg-secondary"><%= recipe.meal_type_label %></span>
+    </div>
+    <div class="d-flex flex-wrap gap-1 mb-2">
+      <% if recipe.user_created? %>
+        <span class="badge text-bg-primary">Yours</span>
+      <% elsif recipe.regular_meal? %>
+        <span class="badge text-bg-success">Regular meal</span>
+      <% else %>
+        <span class="badge text-bg-light text-dark border">Suggested</span>
+      <% end %>
+      <% if recipe.status_tired_of? %>
+        <span class="badge text-bg-warning text-dark">Tired of this</span>
+      <% elsif recipe.status_archived? %>
+        <span class="badge text-bg-secondary">Archived</span>
+      <% end %>
+      <% if recipe.reaction_up? %>
+        <span class="badge text-bg-success"><i class="bi bi-hand-thumbs-up"></i></span>
+      <% elsif recipe.reaction_down? %>
+        <span class="badge text-bg-danger"><i class="bi bi-hand-thumbs-down"></i></span>
+      <% end %>
+    </div>
+    <p class="small text-muted mb-2">
+      <% if recipe.prep_time.present? %><%= recipe.prep_time %><% end %>
+      <% if recipe.serves.present? %> · Serves <%= recipe.serves %><% end %>
+      <% if recipe.macros_label.present? %> · <%= recipe.macros_label %><% end %>
+    </p>
+    <% if recipe.personal_notes.present? %>
+      <p class="small text-muted mb-2"><i class="bi bi-pencil"></i> <%= recipe.personal_notes.truncate(80) %></p>
+    <% elsif recipe.description.present? %>
+      <p class="small mb-3"><%= recipe.description.truncate(100) %></p>
+    <% end %>
+    <ul class="small mb-3 ps-3">
+      <% recipe.recipe_ingredients.first(4).each do |ing| %>
+        <li><%= ing.display %></li>
+      <% end %>
+      <% if recipe.recipe_ingredients.size > 4 %>
+        <li class="text-muted">+ <%= recipe.recipe_ingredients.size - 4 %> more…</li>
+      <% end %>
+    </ul>
+    <div class="mt-auto">
+      <%= link_to "View recipe", recipe_path(recipe), class: "btn btn-primary w-100" %>
+    </div>
+  </div>
+</div>

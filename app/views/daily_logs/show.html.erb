@@ -1,0 +1,359 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <div>
+    <h1 class="h3 mb-1"><%= @daily_log.logged_on.strftime("%A, %B %-d") %></h1>
+    <p class="text-muted mb-0">Daily log</p>
+  </div>
+  <%= link_to "Edit day", edit_daily_log_path(@daily_log), class: "btn btn-outline-primary" %>
+</div>
+
+<% goal = @goal %>
+<div class="card stat-card mb-4 border-primary border-opacity-25">
+  <div class="card-body">
+    <div class="row g-3 text-center text-md-start">
+      <div class="col-6 col-md-2">
+        <div class="text-muted small">Eaten</div>
+        <div class="fw-semibold"><%= @daily_log.total_calories %> kcal</div>
+        <div class="small text-muted">target ~<%= @daily_log.calorie_target %></div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="text-muted small">Burned</div>
+        <div class="fw-semibold"><%= @daily_log.calories_burned %> kcal</div>
+        <div class="small text-muted">net <%= @daily_log.net_calories %></div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="text-muted small">Protein</div>
+        <div class="fw-semibold"><%= @daily_log.total_protein.round(0) %> g</div>
+        <div class="small text-muted">goal <%= goal.protein_min_g %>–<%= goal.protein_max_g %> g</div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="text-muted small">Carbs</div>
+        <div class="fw-semibold"><%= @daily_log.total_carbs.round(0) %> g</div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="text-muted small">Fat</div>
+        <div class="fw-semibold"><%= @daily_log.total_fat.round(0) %> g</div>
+      </div>
+      <div class="col-6 col-md-2">
+        <div class="text-muted small">Weight</div>
+        <div class="fw-semibold"><%= @daily_log.weight_kg || "—" %></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card stat-card mb-4 border-dark border-opacity-10">
+      <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <h2 class="h5 mb-0">Toning / strength</h2>
+          <%= link_to "All plans", workout_plans_path, class: "btn btn-sm btn-outline-secondary" %>
+        </div>
+
+        <% if @daily_log.strength_sessions.any? %>
+          <ul class="list-group list-group-flush mb-3">
+            <% @daily_log.strength_sessions.each do |session| %>
+              <li class="list-group-item px-0">
+                <%= link_to daily_log_strength_session_path(@daily_log, session), class: "text-decoration-none text-dark" do %>
+                  <div class="fw-semibold"><%= session.title %></div>
+                  <div class="small text-muted">
+                    <%= session.location_label %>
+                    · <%= session.difficulty_label %>
+                    <% if session.duration_min.present? %> · <%= session.duration_min %> min<% end %>
+                  </div>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-muted mb-3">No strength session logged yet.</p>
+        <% end %>
+
+        <% if @suggested_strength %>
+          <div class="alert alert-light border mb-3">
+            <strong>Supplemental suggestion:</strong> <%= @suggested_strength.name %>
+            (<%= @suggested_strength.plan_kind_label %> · <%= @suggested_strength.location_label %>)
+            <div class="small text-muted mt-1"><%= @suggestion_context %></div>
+            <%= link_to "Log this add-on", new_daily_log_strength_session_path(@daily_log, workout_plan_id: @suggested_strength.id), class: "alert-link" %>
+          </div>
+        <% end %>
+
+        <p class="small text-muted mb-3">Runna covers Wed/Sat strength — use templates below to log those sessions. Pick any supplemental or swap days freely.</p>
+        <% if @supplemental_plans.any? %>
+          <p class="small fw-semibold text-muted mb-2">Supplemental</p>
+          <div class="d-grid gap-2 mb-3">
+            <% @supplemental_plans.each do |plan| %>
+              <%= link_to "Log: #{plan.name} (#{plan.plan_kind_label})",
+                    new_daily_log_strength_session_path(@daily_log, workout_plan_id: plan.id),
+                    class: "btn btn-outline-primary text-start#{" active" if plan == @suggested_strength}" %>
+            <% end %>
+          </div>
+        <% end %>
+        <% if @runna_plans.any? %>
+          <p class="small fw-semibold text-muted mb-2">Runna (log after app)</p>
+          <div class="d-grid gap-2">
+            <% @runna_plans.each do |plan| %>
+              <%= link_to "Log: #{plan.name}",
+                    new_daily_log_strength_session_path(@daily_log, workout_plan_id: plan.id),
+                    class: "btn btn-outline-secondary text-start" %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="card stat-card mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 mb-0">Workouts</h2>
+        </div>
+
+        <% if @daily_log.workouts.any? %>
+          <ul class="list-group list-group-flush mb-3">
+            <% @daily_log.workouts.each do |workout| %>
+              <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+                <div>
+                  <div class="fw-semibold"><%= workout.activity_type.humanize %></div>
+                  <div class="small text-muted"><%= workout.summary %></div>
+                </div>
+                <%= button_to "Remove", daily_log_workout_path(@daily_log, workout), method: :delete, class: "btn btn-sm btn-outline-danger" %>
+              </li>
+            <% end %>
+          </ul>
+        <% elsif @daily_log.run_km.present? || @daily_log.walk_km.present? %>
+          <p class="text-muted small mb-3"><%= @daily_log.training_summary %> <span class="text-muted">(from edit form — add workouts below to replace)</span></p>
+        <% else %>
+          <p class="text-muted mb-3">No workouts logged yet.</p>
+        <% end %>
+
+        <%= form_with model: [@daily_log, @workout], class: "row g-2" do |f| %>
+          <div class="col-md-4">
+            <%= f.label :activity_type, "Activity", class: "form-label" %>
+            <%= f.select :activity_type, Workout.activity_types.keys.map { |k| [k.humanize, k] }, {}, class: "form-select" %>
+          </div>
+          <div class="col-md-3">
+            <%= f.label :distance_km, "Distance (km)", class: "form-label" %>
+            <%= f.number_field :distance_km, step: 0.1, class: "form-control", placeholder: "optional" %>
+          </div>
+          <div class="col-md-3">
+            <%= f.label :calories_burned, "Calories burned", class: "form-label" %>
+            <%= f.number_field :calories_burned, class: "form-control", required: true %>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <%= f.submit "Add", class: "btn btn-primary w-100" %>
+          </div>
+          <div class="col-12">
+            <%= f.label :notes, class: "form-label" %>
+            <%= f.text_field :notes, class: "form-control", placeholder: "e.g. Runna 8km, gym full body" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="card stat-card mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 mb-0">Meals</h2>
+          <% if (yesterday = DailyLog.find_by(logged_on: @daily_log.logged_on - 1.day)) %>
+            <%= button_to "Copy yesterday", copy_meals_daily_log_path(@daily_log, source_id: yesterday.id), method: :post, class: "btn btn-sm btn-outline-secondary" %>
+          <% end %>
+        </div>
+
+        <% if @daily_log.meal_entries.any? %>
+          <ul class="list-group list-group-flush mb-4">
+            <% @daily_log.meal_entries.each do |entry| %>
+              <li class="list-group-item px-0">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div class="flex-grow-1">
+                    <div class="fw-semibold"><%= entry.name %></div>
+                    <div class="small text-muted">
+                      <%= meal_type_label(entry.meal_type) %>
+                      · <%= entry.calories %> kcal
+                      · <%= entry.protein_g %>g protein
+                      <% if entry.carbs_g.to_f.positive? %> · <%= entry.carbs_g %>g carbs<% end %>
+                      <% if entry.fat_g.to_f.positive? %> · <%= entry.fat_g %>g fat<% end %>
+                    </div>
+                    <% if entry.notes.present? %><div class="small"><%= entry.notes %></div><% end %>
+                    <div class="mt-2 d-flex flex-wrap align-items-center gap-2">
+                      <% if entry.water_logged? %>
+                        <span class="badge text-bg-info">
+                          <i class="bi bi-droplet-fill"></i> <%= entry.water_logged_ml %> ml with meal
+                        </span>
+                      <% else %>
+                        <span class="small text-muted"><%= entry.water_prompt %></span>
+                        <%= button_to log_water_daily_log_meal_entry_path(@daily_log, entry), method: :post,
+                              class: "btn btn-sm btn-info",
+                              title: "Log #{entry.water_suggestion_ml} ml" do %>
+                          <i class="bi bi-plus-lg"></i> <%= entry.water_cups_label %>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </div>
+                  <%= button_to "Remove", daily_log_meal_entry_path(@daily_log, entry), method: :delete, class: "btn btn-sm btn-outline-danger", form: { data: { turbo_confirm: "Remove?" } } %>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-muted mb-4">No meals yet.</p>
+        <% end %>
+
+        <h3 class="h6 text-muted">Add custom meal</h3>
+        <%= form_with url: daily_log_meal_entries_path(@daily_log), method: :post,
+              data: {
+                controller: "meal-calculator",
+                meal_calculator_current_calories_value: @daily_log.total_calories,
+                meal_calculator_current_protein_value: @daily_log.total_protein.to_f,
+                meal_calculator_protein_min_value: goal.protein_min_g,
+                meal_calculator_calorie_target_value: @daily_log.calorie_target
+              },
+              class: "row g-2 mb-2" do %>
+          <%= fields_for :meal_entry, @custom_meal do |f| %>
+            <div class="col-md-6">
+              <%= f.label :name, class: "form-label" %>
+              <%= f.text_field :name, class: "form-control", required: true, placeholder: "e.g. Nantes burger + fries" %>
+            </div>
+            <div class="col-md-6">
+              <%= f.label :meal_type, class: "form-label" %>
+              <%= f.select :meal_type, MealEntry.meal_types.keys.map { |k| [k.humanize, k] }, {}, class: "form-select" %>
+            </div>
+            <div class="col-6 col-md-3">
+              <%= f.label :calories, class: "form-label" %>
+              <%= f.number_field :calories, class: "form-control", required: true, data: { meal_calculator_target: "calories", action: "input->meal-calculator#recalculate" } %>
+            </div>
+            <div class="col-6 col-md-3">
+              <%= f.label :protein_g, "Protein (g)", class: "form-label" %>
+              <%= f.number_field :protein_g, step: 0.1, class: "form-control", required: true, data: { meal_calculator_target: "protein", action: "input->meal-calculator#recalculate" } %>
+            </div>
+            <div class="col-6 col-md-3">
+              <%= f.label :carbs_g, "Carbs (g)", class: "form-label" %>
+              <%= f.number_field :carbs_g, step: 0.1, class: "form-control", data: { meal_calculator_target: "carbs" } %>
+            </div>
+            <div class="col-6 col-md-3">
+              <%= f.label :fat_g, "Fat (g)", class: "form-label" %>
+              <%= f.number_field :fat_g, step: 0.1, class: "form-control", data: { meal_calculator_target: "fat" } %>
+            </div>
+            <div class="col-12">
+              <%= f.label :notes, class: "form-label" %>
+              <%= f.text_field :notes, class: "form-control" %>
+            </div>
+          <% end %>
+          <div class="col-12">
+            <div class="alert alert-light border small mb-2">
+              If saved: <span data-meal-calculator-target="previewCalories">—</span> ·
+              <span data-meal-calculator-target="previewProtein">—</span> ·
+              <span data-meal-calculator-target="previewRemainingProtein">—</span>
+            </div>
+            <%= submit_tag "Add custom meal", class: "btn btn-primary" %>
+          </div>
+        <% end %>
+
+        <hr>
+
+        <h3 class="h6 text-muted">Add from saved product</h3>
+        <%= form_with url: daily_log_meal_entries_path(@daily_log), method: :post,
+              data: {
+                controller: "meal-calculator",
+                meal_calculator_current_calories_value: @daily_log.total_calories,
+                meal_calculator_current_protein_value: @daily_log.total_protein.to_f,
+                meal_calculator_protein_min_value: goal.protein_min_g,
+                meal_calculator_calorie_target_value: @daily_log.calorie_target
+              },
+              class: "row g-2 mb-4" do |f| %>
+          <div class="col-md-5">
+            <label class="form-label">Product</label>
+            <select name="product_id" class="form-select" required data-meal-calculator-target="product" data-action="change->meal-calculator#recalculate">
+              <option value="">Choose…</option>
+              <% @products.each do |product| %>
+                <option value="<%= product.id %>"
+                  data-calories="<%= product.calories_per_100g %>"
+                  data-protein="<%= product.protein_per_100g %>"
+                  data-carbs="<%= product.carbs_per_100g %>"
+                  data-fat="<%= product.fat_per_100g %>">
+                  <%= product.name %><%= " (#{product.brand})" if product.brand.present? %>
+                </option>
+              <% end %>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Amount (g)</label>
+            <input type="number" name="quantity_g" step="0.1" class="form-control" required value="100"
+              data-meal-calculator-target="quantity" data-action="input->meal-calculator#recalculate">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Meal type</label>
+            <select name="meal_type" class="form-select">
+              <% MealEntry.meal_types.each_key do |type| %>
+                <option value="<%= type %>"><%= type.humanize %></option>
+              <% end %>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Name override (optional)</label>
+            <input type="text" name="name" class="form-control" data-meal-calculator-target="name">
+          </div>
+          <div class="col-12">
+            <div class="alert alert-light border small mb-2">
+              If saved: <span data-meal-calculator-target="previewCalories">—</span> ·
+              <span data-meal-calculator-target="previewProtein">—</span>
+            </div>
+            <%= submit_tag "Add from product", class: "btn btn-outline-primary" %>
+            <%= link_to "New product", new_product_path(return_to: daily_log_path(@daily_log)), class: "btn btn-link" %>
+          </div>
+        <% end %>
+
+        <h3 class="h6 text-muted">Quick templates</h3>
+        <div class="d-grid gap-2">
+          <% @meal_templates.each do |template| %>
+            <%= button_to "#{template.name} (#{template.total_calories} kcal · #{template.total_protein} g protein)",
+                  daily_log_meal_entries_path(@daily_log, meal_template_id: template.id),
+                  method: :post,
+                  class: "btn btn-light border text-start quick-meal-btn" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <%= render "wellness", daily_log: @daily_log, goal: @goal %>
+
+    <div class="card stat-card mb-4">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Progress photos</h2>
+        <% if @daily_log.progress_photos.any? %>
+          <div class="photo-grid mb-3">
+            <% @daily_log.progress_photos.each do |photo| %>
+              <div>
+                <%= image_tag photo.image.variant(resize_to_limit: [400, 600]), class: "rounded", alt: photo.photo_type %>
+                <div class="small text-muted"><%= photo.photo_type.humanize %></div>
+                <%= button_to "Remove", daily_log_progress_photo_path(@daily_log, photo), method: :delete, class: "btn btn-sm btn-link text-danger p-0" %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <%= form_with model: [@daily_log, ProgressPhoto.new], html: { multipart: true } do |f| %>
+          <div class="upload-zone mb-3">
+            <%= f.file_field :image, accept: "image/*", capture: "environment", class: "form-control" %>
+          </div>
+          <div class="mb-3">
+            <%= f.label :photo_type, class: "form-label" %>
+            <%= f.select :photo_type, ProgressPhoto.photo_types.keys.map { |k| [k.humanize, k] }, {}, class: "form-select" %>
+          </div>
+          <%= f.submit "Upload progress photo", class: "btn btn-primary w-100" %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="card stat-card">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Outfit snap</h2>
+        <div class="d-grid gap-2">
+          <%= link_to "Feeling cute", new_outfit_photo_path(category: :feeling_cute, logged_on: @daily_log.logged_on), class: "btn btn-outline-dark" %>
+          <%= link_to "Not as bad as you think", new_outfit_photo_path(category: :reality_check, logged_on: @daily_log.logged_on), class: "btn btn-outline-secondary" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

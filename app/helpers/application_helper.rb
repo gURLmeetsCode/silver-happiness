@@ -1,0 +1,43 @@
+module ApplicationHelper
+  def portions_badge(log)
+    return tag.span("—", class: "text-muted") unless log.portions_on_plan
+
+    css = { "yes" => "success", "mostly" => "warning", "no" => "danger" }[log.portions_on_plan]
+    tag.span(log.portions_on_plan.humanize, class: "badge text-bg-#{css}")
+  end
+
+  def meal_type_label(meal_type)
+    meal_type.to_s.humanize
+  end
+
+  def outfit_category_options
+    OutfitPhoto.categories.keys.map do |key|
+      [ OutfitPhoto::CATEGORY_LABELS[key], key ]
+    end
+  end
+
+  def target_status_badge(status)
+    return tag.span("—", class: "text-muted") if status == :unknown
+
+    labels = {
+      on_target: [ "On target", "success" ],
+      above_target: [ "Above target", "warning" ],
+      below_target: [ "Below target", "info" ]
+    }
+    label, css = labels.fetch(status)
+    tag.span(label, class: "badge text-bg-#{css}")
+  end
+
+  def weight_vs_goal_label(goal, weight)
+    delta = goal.weight_delta(weight)
+    return "No weight logged" if delta.nil?
+
+    if delta.zero?
+      "At target (#{goal.target_weight_kg} kg)"
+    elsif delta.positive?
+      "#{delta} kg above target"
+    else
+      "#{delta.abs} kg below target"
+    end
+  end
+end

@@ -1,0 +1,74 @@
+<% location_options = WorkoutPlan.locations.keys.map { |k| [WorkoutPlan::LOCATION_LABELS[k], k] } %>
+<% difficulty_options = (1..10).map { |n| [StrengthSession.new(perceived_difficulty: n).difficulty_label, n] } %>
+
+<div class="mb-4">
+  <%= link_to "← Today’s log", @daily_log, class: "small" %>
+  <h1 class="h3 mt-2"><%= title %></h1>
+  <% if @strength_session.workout_plan %>
+    <p class="text-muted mb-0">Plan: <%= @strength_session.workout_plan.name %></p>
+  <% end %>
+</div>
+
+<%= form_with model: [@daily_log, @strength_session], class: "row g-3" do |f| %>
+  <% if @strength_session.errors.any? %>
+    <div class="col-12 alert alert-danger"><%= @strength_session.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <div class="col-md-4">
+    <%= f.label :location, "Where?", class: "form-label" %>
+    <%= f.select :location, location_options, {}, class: "form-select" %>
+    <div class="form-text">Home · Gym · Runna app</div>
+  </div>
+  <div class="col-md-4">
+    <%= f.label :perceived_difficulty, "Difficulty (1–10)", class: "form-label" %>
+    <%= f.select :perceived_difficulty, difficulty_options, { include_blank: "How hard was it?" }, class: "form-select" %>
+  </div>
+  <div class="col-md-4">
+    <%= f.label :duration_min, "Duration (min)", class: "form-label" %>
+    <%= f.number_field :duration_min, class: "form-control" %>
+  </div>
+
+  <div class="col-12">
+    <%= f.label :notes, "Session notes", class: "form-label" %>
+    <%= f.text_area :notes, rows: 2, class: "form-control", placeholder: "e.g. Moved Saturday gym to Friday. Felt strong on rows." %>
+  </div>
+
+  <div class="col-12">
+    <h2 class="h5 mb-3">Exercises — equipment & weights</h2>
+    <%= f.fields_for :strength_exercise_logs do |ef| %>
+      <div class="card stat-card mb-3">
+        <div class="card-body row g-2">
+          <div class="col-12"><strong><%= ef.object.name.presence || "Exercise" %></strong></div>
+          <%= ef.hidden_field :name %>
+          <%= ef.hidden_field :position %>
+          <div class="col-md-4">
+            <%= ef.label :equipment, class: "form-label" %>
+            <%= ef.text_field :equipment, class: "form-control", placeholder: "e.g. Dumbbells, cable machine" %>
+          </div>
+          <div class="col-md-2">
+            <%= ef.label :weight_kg, "Weight (kg)", class: "form-label" %>
+            <%= ef.number_field :weight_kg, step: 0.5, class: "form-control", placeholder: "10" %>
+            <div class="form-text">Per side if DBs</div>
+          </div>
+          <div class="col-md-2">
+            <%= ef.label :sets, class: "form-label" %>
+            <%= ef.number_field :sets, class: "form-control" %>
+          </div>
+          <div class="col-md-4">
+            <%= ef.label :reps, class: "form-label" %>
+            <%= ef.text_field :reps, class: "form-control", placeholder: "10-12 or AMRAP" %>
+          </div>
+          <div class="col-12">
+            <%= ef.label :notes, class: "form-label" %>
+            <%= ef.text_field :notes, class: "form-control", placeholder: "Form notes, progression target" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="col-12 d-flex gap-2">
+    <%= f.submit "Save session", class: "btn btn-primary btn-lg" %>
+    <%= link_to "Cancel", @daily_log, class: "btn btn-outline-secondary btn-lg" %>
+  </div>
+<% end %>

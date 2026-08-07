@@ -1,0 +1,32 @@
+<div class="mb-4">
+  <%= link_to "← All plans", workout_plans_path, class: "small" %>
+  <h1 class="h3 mt-2"><%= @workout_plan.name %></h1>
+  <p class="text-muted mb-0">
+    <%= @workout_plan.location_label %>
+    · <%= @workout_plan.scheduled_day_name %>
+    <% if @workout_plan.duration_hint.present? %> · <%= @workout_plan.duration_hint %><% end %>
+  </p>
+</div>
+
+<% if @workout_plan.description.present? %>
+  <p><%= @workout_plan.description %></p>
+<% end %>
+
+<div class="card stat-card mb-4">
+  <div class="card-body">
+    <h2 class="h5">Exercises</h2>
+    <ol class="mb-0">
+      <% @workout_plan.workout_plan_exercises.each do |ex| %>
+        <li class="mb-3">
+          <strong><%= ex.name %></strong>
+          <% if ex.equipment_hint.present? %><div class="small text-muted">Equipment: <%= ex.equipment_hint %></div><% end %>
+          <% if ex.sets_prescription.present? || ex.reps_prescription.present? %>
+            <div class="small"><%= [ex.sets_prescription, ex.reps_prescription].compact.join(" · ") %></div>
+          <% end %>
+        </li>
+      <% end %>
+    </ol>
+  </div>
+</div>
+
+<%= link_to "Do today & log weights", new_daily_log_strength_session_path(@today, workout_plan_id: @workout_plan.id), class: "btn btn-primary btn-lg" %>

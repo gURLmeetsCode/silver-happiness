@@ -1,0 +1,60 @@
+<div class="mb-4">
+  <%= link_to "← Today’s log", @daily_log, class: "small" %>
+  <h1 class="h3 mt-2"><%= @strength_session.title %></h1>
+  <p class="text-muted mb-0">
+    <%= @daily_log.logged_on.strftime("%A, %B %-d") %>
+    · <%= @strength_session.location_label %>
+    <% if @strength_session.duration_min.present? %> · <%= @strength_session.duration_min %> min<% end %>
+  </p>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card stat-card"><div class="card-body">
+      <div class="text-muted small">Difficulty</div>
+      <div class="fw-semibold"><%= @strength_session.difficulty_label %></div>
+    </div></div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card"><div class="card-body">
+      <div class="text-muted small">Location</div>
+      <div class="fw-semibold"><%= @strength_session.location_label %></div>
+    </div></div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card"><div class="card-body">
+      <div class="text-muted small">Exercises</div>
+      <div class="fw-semibold"><%= @strength_session.strength_exercise_logs.size %></div>
+    </div></div>
+  </div>
+</div>
+
+<% if @strength_session.notes.present? %>
+  <p class="mb-4"><%= @strength_session.notes %></p>
+<% end %>
+
+<div class="card stat-card mb-4">
+  <div class="card-body">
+    <h2 class="h5">What you lifted</h2>
+    <ul class="list-group list-group-flush">
+      <% @strength_session.strength_exercise_logs.each do |log| %>
+        <li class="list-group-item px-0">
+          <div class="fw-semibold"><%= log.name %></div>
+          <div class="small text-muted">
+            <% parts = [] %>
+            <% parts << log.equipment if log.equipment.present? %>
+            <% parts << "#{log.weight_kg} kg" if log.weight_kg.present? %>
+            <% parts << "#{log.sets}×#{log.reps}" if log.sets.present? && log.reps.present? %>
+            <%= parts.join(" · ") %>
+          </div>
+          <% if log.notes.present? %><div class="small"><%= log.notes %></div><% end %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+<div class="d-flex gap-2">
+  <%= link_to "Edit", edit_daily_log_strength_session_path(@daily_log, @strength_session), class: "btn btn-primary" %>
+  <%= button_to "Delete", daily_log_strength_session_path(@daily_log, @strength_session), method: :delete, class: "btn btn-outline-danger", form: { data: { turbo_confirm: "Delete this session?" } } %>
+</div>

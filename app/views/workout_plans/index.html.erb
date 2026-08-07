@@ -1,0 +1,40 @@
+<% content_for :title, "Strength plans" %>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <div>
+    <h1 class="h3 mb-1">Toning & strength plans</h1>
+    <p class="text-muted mb-0">Runna handles Wed/Sat — these are extras to log or follow on other days.</p>
+  </div>
+  <%= link_to "Today’s log", today_path, class: "btn btn-primary" %>
+</div>
+
+<% if @suggested %>
+  <div class="alert alert-primary">
+    <strong>Today’s supplemental suggestion (<%= Date.current.strftime("%A") %>):</strong>
+    <%= @suggested.name %> — <%= @suggested.plan_kind_label %> · <%= @suggested.location_label %>
+    <div class="small mt-1"><%= @suggestion_context %></div>
+    <%= link_to "Log it", new_daily_log_strength_session_path(@today, workout_plan_id: @suggested.id), class: "alert-link ms-1" %>
+  </div>
+<% end %>
+
+<% if @supplemental_plans.any? %>
+  <h2 class="h5 mb-3">Supplemental (suggested on other days)</h2>
+  <div class="row g-3 mb-4">
+    <% @supplemental_plans.each do |plan| %>
+      <div class="col-md-6 col-lg-4">
+        <%= render "plan_card", plan: plan, today: @today, highlight: plan == @suggested %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @runna_plans.any? %>
+  <h2 class="h5 mb-3">Runna sessions (log after the app)</h2>
+  <div class="row g-3">
+    <% @runna_plans.each do |plan| %>
+      <div class="col-md-6 col-lg-4">
+        <%= render "plan_card", plan: plan, today: @today, highlight: false %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

@@ -1,0 +1,41 @@
+<h1 class="h3 mb-2">Snap outfit photo</h1>
+<p class="text-muted mb-4"><%= @outfit_photo.category_hint %></p>
+
+<%= form_with model: @outfit_photo, html: { multipart: true }, class: "row g-3" do |f| %>
+  <% if @outfit_photo.errors.any? %>
+    <div class="col-12 alert alert-danger"><%= @outfit_photo.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <div class="col-12">
+    <div class="upload-zone">
+      <%= f.label :image, "Take or choose photo", class: "form-label fw-semibold" %>
+      <%= f.file_field :image, accept: "image/*", capture: "user", class: "form-control form-control-lg", required: true %>
+      <div class="form-text">On iPhone this opens your camera or photo library.</div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <%= f.label :category, class: "form-label" %>
+    <%= f.select :category, outfit_category_options, {}, class: "form-select" %>
+  </div>
+
+  <div class="col-md-6">
+    <%= f.label :logged_on, class: "form-label" %>
+    <%= f.date_field :logged_on, class: "form-control" %>
+  </div>
+
+  <div class="col-12">
+    <%= f.label :caption, "Short caption (optional)", class: "form-label" %>
+    <%= f.text_field :caption, class: "form-control", placeholder: "e.g. post-run, new leggings, mirror at gym" %>
+  </div>
+
+  <div class="col-12">
+    <%= f.label :note, "Note to future you (optional)", class: "form-label" %>
+    <%= f.text_area :note, rows: 3, class: "form-control", placeholder: "e.g. I felt gross today but looking at this — it’s not as bad as I thought." %>
+  </div>
+
+  <div class="col-12 d-flex gap-2">
+    <%= f.submit "Save photo", class: "btn btn-primary btn-lg flex-grow-1" %>
+    <%= link_to "Cancel", outfit_photos_path, class: "btn btn-outline-secondary btn-lg" %>
+  </div>
+<% end %>

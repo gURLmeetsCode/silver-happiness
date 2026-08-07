@@ -1,0 +1,84 @@
+<% content_for :title, "Recipes" %>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <div>
+    <h1 class="h3 mb-1">Recipes</h1>
+    <p class="text-muted mb-0">What’s in your meals — rate them, note your tweaks, add your own.</p>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <%= link_to "Add recipe", new_recipe_path, class: "btn btn-primary" %>
+    <%= link_to "Grocery list", grocery_recipes_path, class: "btn btn-success" %>
+    <%= link_to "Today’s log", today_path, class: "btn btn-outline-secondary" %>
+  </div>
+</div>
+
+<div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
+  <div class="btn-group flex-wrap" role="group">
+    <%= link_to "All", recipes_path(show_archived: params[:show_archived]), class: "btn btn-sm #{params[:filter].blank? ? 'btn-dark' : 'btn-outline-dark'}" %>
+    <% Recipe.meal_types.each_key do |type| %>
+      <%= link_to Recipe::MEAL_TYPE_LABELS[type] || type.humanize,
+            recipes_path(filter: type, show_archived: params[:show_archived]),
+            class: "btn btn-sm #{params[:filter] == type ? 'btn-dark' : 'btn-outline-dark'}" %>
+    <% end %>
+  </div>
+  <% if @archived_count.positive? || params[:show_archived] == "1" %>
+    <%= link_to params[:show_archived] == "1" ? "Hide archived" : "Show archived",
+          recipes_path(filter: params[:filter], show_archived: params[:show_archived] == "1" ? nil : "1"),
+          class: "btn btn-sm btn-outline-secondary" %>
+  <% end %>
+</div>
+
+<% if params[:filter].present? %>
+  <div class="row g-3">
+    <% @recipes.each do |recipe| %>
+      <div class="col-md-6 col-lg-4">
+        <%= render "recipe_card", recipe: recipe %>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <% if @active_regular.any? %>
+    <h2 class="h5 mb-3">Your regular meals</h2>
+    <div class="row g-3 mb-4">
+      <% @active_regular.each do |recipe| %>
+        <div class="col-md-6 col-lg-4">
+          <%= render "recipe_card", recipe: recipe %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if @tired_recipes.any? %>
+    <h2 class="h5 mb-3 text-muted">Tired of these</h2>
+    <p class="small text-muted">Still saved — just off your regular rotation and grocery list.</p>
+    <div class="row g-3 mb-4">
+      <% @tired_recipes.each do |recipe| %>
+        <div class="col-md-6 col-lg-4">
+          <%= render "recipe_card", recipe: recipe %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if @suggested_recipes.any? %>
+    <h2 class="h5 mb-3">Suggested & swaps</h2>
+    <div class="row g-3 mb-4">
+      <% @suggested_recipes.each do |recipe| %>
+        <div class="col-md-6 col-lg-4">
+          <%= render "recipe_card", recipe: recipe %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if @archived_recipes&.any? %>
+    <h2 class="h5 mb-3 text-muted">Archived</h2>
+    <div class="row g-3">
+      <% @archived_recipes.each do |recipe| %>
+        <div class="col-md-6 col-lg-4">
+          <%= render "recipe_card", recipe: recipe %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

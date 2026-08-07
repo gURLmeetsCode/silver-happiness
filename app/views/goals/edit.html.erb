@@ -1,0 +1,53 @@
+<h1 class="h3 mb-4">Your goals</h1>
+<p class="text-muted">Adjust targets anytime. Charts and weekly status use these numbers.</p>
+
+<%= form_with model: @goal, url: goal_path, method: :patch, class: "row g-3" do |f| %>
+  <% if @goal.errors.any? %>
+    <div class="col-12 alert alert-danger"><%= @goal.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <div class="col-12"><h2 class="h5">Weight</h2></div>
+  <div class="col-md-4">
+    <%= f.label :target_weight_kg, "Target weight (kg)", class: "form-label" %>
+    <%= f.number_field :target_weight_kg, step: 0.1, class: "form-control" %>
+  </div>
+  <div class="col-md-4">
+    <%= f.label :starting_weight_kg, "Starting weight (kg)", class: "form-label" %>
+    <%= f.number_field :starting_weight_kg, step: 0.1, class: "form-control" %>
+  </div>
+  <div class="col-md-4">
+    <%= f.label :target_date, "Target date", class: "form-label" %>
+    <%= f.date_field :target_date, class: "form-control" %>
+  </div>
+
+  <div class="col-12 mt-2"><h2 class="h5">Protein</h2></div>
+  <div class="col-md-6">
+    <%= f.label :protein_min_g, "Daily minimum (g)", class: "form-label" %>
+    <%= f.number_field :protein_min_g, class: "form-control" %>
+  </div>
+  <div class="col-md-6">
+    <%= f.label :protein_max_g, "Daily maximum (g)", class: "form-label" %>
+    <%= f.number_field :protein_max_g, class: "form-control" %>
+  </div>
+
+  <div class="col-12 mt-2"><h2 class="h5">Calories</h2></div>
+  <div class="col-md-6">
+    <%= f.label :calories_training_day, "Training day target (kcal)", class: "form-label" %>
+    <%= f.number_field :calories_training_day, class: "form-control" %>
+  </div>
+  <div class="col-md-6">
+    <%= f.label :calories_rest_day, "Rest day target (kcal)", class: "form-label" %>
+    <%= f.number_field :calories_rest_day, class: "form-control" %>
+  </div>
+
+  <div class="col-12 mt-2"><h2 class="h5">Wellness</h2></div>
+  <div class="col-md-6">
+    <%= f.label :water_goal_ml, "Daily water goal (ml)", class: "form-label" %>
+    <%= f.number_field :water_goal_ml, class: "form-control", min: 500, step: 250 %>
+  </div>
+
+  <div class="col-12 d-flex gap-2">
+    <%= f.submit "Save goals", class: "btn btn-primary" %>
+    <%= link_to "Cancel", root_path, class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>

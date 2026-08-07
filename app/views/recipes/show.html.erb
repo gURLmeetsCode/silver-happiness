@@ -1,0 +1,159 @@
+<% content_for :title, @recipe.name %>
+
+<div class="mb-4">
+  <%= link_to "← All recipes", recipes_path, class: "text-decoration-none small" %>
+</div>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+  <div>
+    <h1 class="h3 mb-1"><%= @recipe.name %></h1>
+    <p class="text-muted mb-0">
+      <%= @recipe.meal_type_label %>
+      <% if @recipe.prep_time.present? %> · <%= @recipe.prep_time %><% end %>
+      <% if @recipe.serves.present? %> · Serves <%= @recipe.serves %><% end %>
+    </p>
+    <% if @recipe.tracked_ingredients.any? %>
+      <% per = @recipe.nutrition_per_serving %>
+      <p class="small mb-0 mt-1">
+        <strong><%= per[:calories] %> kcal · <%= per[:protein].round(0) %> g protein</strong>
+        tracked from your products
+        <% if @recipe.untracked_ingredients.any? %>
+          <span class="text-muted">(+ salad veg, dressing, etc.)</span>
+        <% end %>
+      </p>
+    <% elsif @recipe.macros_label.present? %>
+      <p class="small mb-0 mt-1"><%= @recipe.macros_label %></p>
+    <% end %>
+  </div>
+  <div class="d-flex flex-wrap gap-1">
+    <% if @recipe.user_created? %>
+      <span class="badge text-bg-primary">Your recipe</span>
+    <% elsif @recipe.regular_meal? %>
+      <span class="badge text-bg-success">Regular meal</span>
+    <% else %>
+      <span class="badge text-bg-light text-dark border">Suggested</span>
+    <% end %>
+    <% if @recipe.status_tired_of? %>
+      <span class="badge text-bg-warning text-dark">Tired of this</span>
+    <% elsif @recipe.status_archived? %>
+      <span class="badge text-bg-secondary">Archived</span>
+    <% end %>
+  </div>
+</div>
+
+<% if @recipe.description.present? %>
+  <p class="mb-4"><%= @recipe.description %></p>
+<% end %>
+
+<div class="alert alert-info py-2 small mb-3">
+  <i class="bi bi-droplet"></i> <%= @recipe.water_prompt %>
+</div>
+
+<% if @recipe.meal_template.present? %>
+  <div class="alert alert-light border mb-4">
+    <strong>Logged as meal template:</strong> <%= @recipe.meal_template.name %>
+    (<%= @recipe.meal_template.total_calories %> kcal · <%= @recipe.meal_template.total_protein.round(0) %> g protein)
+    — one tap on your daily log.
+  </div>
+<% end %>
+
+<div class="card stat-card mb-4 border-primary border-opacity-25">
+  <div class="card-body">
+    <h2 class="h5 mb-3">How do you feel about this?</h2>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <%= button_to react_recipe_path(@recipe, reaction: "up"), method: :patch,
+            class: "btn #{@recipe.reaction_up? ? 'btn-success' : 'btn-outline-success'}" do %>
+        <i class="bi bi-hand-thumbs-up"></i> Love it
+      <% end %>
+      <%= button_to react_recipe_path(@recipe, reaction: "down"), method: :patch,
+            class: "btn #{@recipe.reaction_down? ? 'btn-danger' : 'btn-outline-danger'}" do %>
+        <i class="bi bi-hand-thumbs-down"></i> Not for me
+      <% end %>
+      <% if @recipe.reaction_up? || @recipe.reaction_down? %>
+        <%= button_to react_recipe_path(@recipe, reaction: "none"), method: :patch, class: "btn btn-outline-secondary btn-sm" do %>
+          Clear
+        <% end %>
+      <% end %>
+    </div>
+
+    <%= form_with model: @recipe, class: "mb-0" do |f| %>
+      <%= f.label :personal_notes, "My tweaks & notes", class: "form-label" %>
+      <p class="small text-muted">Changes you make — different amounts, swaps, what worked.</p>
+      <%= f.text_area :personal_notes, rows: 3, class: "form-control mb-2",
+            placeholder: "e.g. I use 140g tofu, extra lemon, skip cabbage in summer…" %>
+      <%= f.submit "Save my tweaks", class: "btn btn-primary btn-sm" %>
+    <% end %>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-5">
+    <div class="card stat-card">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Ingredients</h2>
+        <% if @recipe.tracked_ingredients.any? && @recipe.untracked_ingredients.any? %>
+          <p class="small text-muted">Bold = your saved products with calculated macros. Other items are generic (not counted).</p>
+        <% end %>
+        <ul class="list-unstyled mb-0">
+          <% @recipe.recipe_ingredients.group_by(&:grocery_category).each do |category, items| %>
+            <li class="mb-3">
+              <div class="small fw-semibold text-muted text-uppercase"><%= items.first.category_label %></div>
+              <ul class="ps-3 mb-0">
+                <% items.each do |ing| %>
+                  <li class="<%= "fw-semibold" if ing.tracked? %>">
+                    <%= ing.display_with_nutrition %>
+                    <% if ing.product&.brand.present? %>
+                      <span class="text-muted small">(<%= ing.product.brand %>)</span>
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-7">
+    <div class="card stat-card">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Steps</h2>
+        <% if @recipe.steps.present? %>
+          <div class="recipe-steps"><%= simple_format(@recipe.steps) %></div>
+        <% else %>
+          <p class="text-muted mb-0">No steps yet.</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex flex-wrap gap-2 mt-4">
+  <%= link_to "Grocery list", grocery_recipes_path, class: "btn btn-success" %>
+  <%= link_to "Log a meal today", today_path, class: "btn btn-outline-primary" %>
+  <% if @recipe.editable? %>
+    <%= link_to "Edit recipe", edit_recipe_path(@recipe), class: "btn btn-outline-dark" %>
+  <% end %>
+</div>
+
+<div class="card stat-card mt-4 border-secondary border-opacity-25">
+  <div class="card-body">
+    <h2 class="h6 mb-2">Manage this recipe</h2>
+    <div class="d-flex flex-wrap gap-2">
+      <% if @recipe.status_active? %>
+        <%= button_to "I'm tired of this", tired_of_recipe_path(@recipe), method: :patch,
+              class: "btn btn-outline-warning btn-sm",
+              data: { turbo_confirm: "Move off your regular list and grocery shop?" } %>
+        <%= button_to "Archive", archive_recipe_path(@recipe), method: :patch,
+              class: "btn btn-outline-secondary btn-sm",
+              data: { turbo_confirm: "Hide this recipe? You can restore it later." } %>
+      <% else %>
+        <%= button_to "Restore to active", restore_recipe_path(@recipe), method: :patch, class: "btn btn-outline-primary btn-sm" %>
+        <% if @recipe.status_tired_of? %>
+          <%= button_to "Archive instead", archive_recipe_path(@recipe), method: :patch, class: "btn btn-outline-secondary btn-sm" %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

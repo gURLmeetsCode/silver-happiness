@@ -1,0 +1,94 @@
+<h1 class="h3 mb-4">Edit <%= @daily_log.logged_on.strftime("%B %-d") %></h1>
+
+<%= form_with model: @daily_log, class: "row g-3" do |f| %>
+  <div class="col-md-4">
+    <%= f.label :weight_kg, "Weight (kg)", class: "form-label" %>
+    <%= f.number_field :weight_kg, step: 0.1, class: "form-control" %>
+  </div>
+  <div class="col-md-4 d-flex align-items-end">
+    <div class="form-check">
+      <%= f.check_box :weight_pre_run, class: "form-check-input" %>
+      <%= f.label :weight_pre_run, "Pre-run weigh-in", class: "form-check-label" %>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <%= f.label :run_km, "Run (km)", class: "form-label" %>
+    <%= f.number_field :run_km, step: 0.1, class: "form-control" %>
+  </div>
+  <div class="col-md-3">
+    <%= f.label :run_calories, "Run calories burned", class: "form-label" %>
+    <%= f.number_field :run_calories, class: "form-control" %>
+  </div>
+  <div class="col-md-3">
+    <%= f.label :walk_km, "Walk (km)", class: "form-label" %>
+    <%= f.number_field :walk_km, step: 0.1, class: "form-control" %>
+  </div>
+  <div class="col-md-3">
+    <%= f.label :walk_calories, "Walk calories burned", class: "form-label" %>
+    <%= f.number_field :walk_calories, class: "form-control" %>
+  </div>
+
+  <div class="col-12">
+    <%= f.label :training_notes, class: "form-label" %>
+    <%= f.text_area :training_notes, rows: 2, class: "form-control" %>
+  </div>
+
+  <div class="col-md-4">
+    <%= f.label :portions_on_plan, "Portions on plan?", class: "form-label" %>
+    <%= f.select :portions_on_plan, DailyLog.portions_on_plans.keys.map { |k| [k.humanize, k] }, { include_blank: "—" }, class: "form-select" %>
+  </div>
+
+  <div class="col-12">
+    <%= f.label :energy_notes, "Energy / training feel", class: "form-label" %>
+    <%= f.text_area :energy_notes, rows: 2, class: "form-control" %>
+  </div>
+
+  <div class="col-12 mt-2"><h2 class="h5">Wellness check-in</h2></div>
+
+  <div class="col-12">
+    <div class="form-check">
+      <%= f.check_box :on_period, class: "form-check-input" %>
+      <%= f.label :on_period, "On my period today", class: "form-check-label" %>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <%= f.label :water_ml, "Water (ml)", class: "form-label" %>
+    <%= f.number_field :water_ml, class: "form-control", min: 0, step: 50 %>
+  </div>
+  <div class="col-md-4">
+    <%= f.label :bed_time, "Bed time", class: "form-label" %>
+    <%= f.time_field :bed_time, class: "form-control" %>
+  </div>
+  <div class="col-md-4">
+    <%= f.label :wake_time, "Wake time", class: "form-label" %>
+    <%= f.time_field :wake_time, class: "form-control" %>
+  </div>
+  <div class="col-md-4">
+    <%= f.label :sleep_quality, "Sleep quality (1–10)", class: "form-label" %>
+    <%= f.number_field :sleep_quality, class: "form-control", min: 1, max: 10 %>
+  </div>
+
+  <div class="col-12" data-controller="feeling-tags">
+    <%= f.label :feeling_check_in, "How am I feeling?", class: "form-label" %>
+    <div class="d-flex flex-wrap gap-1 mb-2">
+      <% DailyLog::FEELING_TAGS.each do |tag| %>
+        <button type="button" class="btn btn-sm btn-light border" data-tag="<%= tag %>" data-action="feeling-tags#append">
+          <%= tag %>
+        </button>
+      <% end %>
+    </div>
+    <%= f.text_area :feeling_check_in, rows: 2, class: "form-control", data: { feeling_tags_target: "input" } %>
+  </div>
+
+  <div class="col-12">
+    <%= f.label :notes, "Daily notes", class: "form-label" %>
+    <%= f.text_area :notes, rows: 4, class: "form-control", placeholder: "Anything else for the day…" %>
+  </div>
+
+  <div class="col-12 d-flex gap-2">
+    <%= f.submit "Save day", class: "btn btn-primary" %>
+    <%= link_to "Cancel", @daily_log, class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>

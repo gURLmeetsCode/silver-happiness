@@ -1,0 +1,99 @@
+<%= form_with model: recipe, class: "row g-3" do |f| %>
+  <% if recipe.errors.any? %>
+    <div class="col-12 alert alert-danger"><%= recipe.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <div class="col-md-8">
+    <%= f.label :name, class: "form-label" %>
+    <%= f.text_field :name, class: "form-control", required: true, placeholder: "e.g. Quick tofu bowl" %>
+  </div>
+  <div class="col-md-4">
+    <%= f.label :meal_type, class: "form-label" %>
+    <%= f.select :meal_type, Recipe.meal_types.keys.map { |k| [Recipe::MEAL_TYPE_LABELS[k], k] }, {}, class: "form-select" %>
+  </div>
+
+  <div class="col-12">
+    <%= f.label :description, "Short description", class: "form-label" %>
+    <%= f.text_area :description, rows: 2, class: "form-control", placeholder: "When you eat this, why you like it…" %>
+  </div>
+
+  <div class="col-md-3">
+    <%= f.label :prep_time, class: "form-label" %>
+    <%= f.text_field :prep_time, class: "form-control", placeholder: "e.g. 15 min" %>
+  </div>
+  <div class="col-md-3">
+    <%= f.label :serves, class: "form-label" %>
+    <%= f.number_field :serves, class: "form-control", min: 1, value: recipe.serves || 1 %>
+  </div>
+  <div class="col-md-3">
+    <%= f.label :calories, "Calories (approx)", class: "form-label" %>
+    <%= f.number_field :calories, class: "form-control", min: 0 %>
+  </div>
+  <div class="col-md-3">
+    <%= f.label :protein_g, "Protein (g)", class: "form-label" %>
+    <%= f.number_field :protein_g, class: "form-control", min: 0 %>
+  </div>
+
+  <div class="col-md-3">
+    <%= f.label :water_suggestion_ml, "Water with meal (ml)", class: "form-label" %>
+    <%= f.number_field :water_suggestion_ml, class: "form-control", min: 0, step: 50, value: recipe.water_suggestion_ml || 250 %>
+    <div class="form-text">Default 250 ml = 1 cup</div>
+  </div>
+
+  <div class="col-12">
+      <%= f.label :regular_meal, "Regular meal (include on grocery list when active)", class: "form-check-label" %>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <h2 class="h6 mb-2">Ingredients</h2>
+    <p class="small text-muted">Link saved products for auto-calculated calories. Leave product blank for generic items (salad veg, spices).</p>
+    <div id="ingredients">
+      <%= f.fields_for :recipe_ingredients do |ing| %>
+        <div class="row g-2 mb-2 align-items-end border-bottom pb-2">
+          <div class="col-md-4">
+            <%= ing.label :product_id, "Your product", class: "form-label small" %>
+            <%= ing.collection_select :product_id, @products, :id, :name,
+                  { include_blank: "Generic ingredient" }, class: "form-select form-select-sm" %>
+          </div>
+          <div class="col-md-2">
+            <%= ing.label :quantity_g, "Grams", class: "form-label small" %>
+            <%= ing.number_field :quantity_g, step: 0.1, class: "form-control form-control-sm", placeholder: "g" %>
+          </div>
+          <div class="col-md-2">
+            <%= ing.label :amount, "Label", class: "form-label small" %>
+            <%= ing.text_field :amount, class: "form-control form-control-sm", placeholder: "e.g. 150 g" %>
+          </div>
+          <div class="col-md-3">
+            <%= ing.label :name, "Name if generic", class: "form-label small" %>
+            <%= ing.text_field :name, class: "form-control form-control-sm", placeholder: "e.g. cherry tomatoes" %>
+          </div>
+          <div class="col-md-1">
+            <%= ing.select :grocery_category,
+                  RecipeIngredient.grocery_categories.keys.map { |k| [RecipeIngredient::CATEGORY_LABELS[k], k] },
+                  {}, class: "form-select form-select-sm" %>
+          </div>
+          <div class="col-12">
+            <% if ing.object.persisted? %>
+              <%= ing.hidden_field :id %>
+              <div class="form-check form-check-inline">
+                <%= ing.check_box :_destroy, class: "form-check-input" %>
+                <%= ing.label :_destroy, "Remove", class: "form-check-label small" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <%= f.label :steps, "Steps", class: "form-label" %>
+    <%= f.text_area :steps, rows: 6, class: "form-control", placeholder: "1. First step…\n2. Then…" %>
+  </div>
+
+  <div class="col-12 d-flex gap-2">
+    <%= f.submit recipe.persisted? ? "Save recipe" : "Add recipe", class: "btn btn-primary" %>
+    <%= link_to "Cancel", recipe.persisted? ? recipe_path(recipe) : recipes_path, class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>
