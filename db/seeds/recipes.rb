@@ -173,6 +173,32 @@ seed_recipe "power-salad", {
   3. Drizzle exactly 2 tbsp dressing. Eat from this bowl only — no refills.
 STEPS
 
+seed_recipe "chipotle-yogurt-salad", {
+  name: "Chipotle yogurt salad",
+  meal_type: :lunch,
+  regular_meal: true,
+  meal_template_slug: "chipotle-yogurt-salad",
+  prep_time: "5 min",
+  serves: 1,
+  position: 1,
+  description: "Big salad base with creamy Sojasun nature, avocado, and Cholula Chipotle. Greens and veg are extra — macros tracked from yogurt, avocado, and sauce."
+}, [
+  [ :produce, "2 big handfuls", "mixed greens (mâche / mesclun)", nil, nil ],
+  [ :produce, "1 handful", "baby spinach", nil, nil ],
+  [ :produce, "10", "cherry tomatoes, halved", nil, nil ],
+  [ :produce, "¼", "red pepper, sliced", nil, nil ],
+  [ :produce, "6–8 slices", "jalapeños (from jar or fresh)", nil, nil ],
+  [ :fats, "½", "avocado", "Avocado", 75 ],
+  [ :protein, "1 pot", "Sojasun yaourt nature plain (100 g)", "Sojasun yaourt nature", 100 ],
+  [ :pantry, "1 tbsp", "Cholula Chipotle hot sauce", "Cholula Chipotle sauce", 15 ]
+], <<~STEPS
+  1. Fill a large bowl with mixed greens, spinach, cherry tomatoes, and red pepper.
+  2. Add ½ avocado and sliced jalapeños.
+  3. Spoon one full pot of plain Sojasun nature over the salad (creamy dressing).
+  4. Drizzle Cholula Chipotle to taste. Toss and eat from one bowl.
+  5. Log with one tap — tracked: ~163 kcal · ~6 g protein (yogurt + avocado).
+STEPS
+
 # --- Dinners ---
 
 seed_recipe "mexican-zucchini-bowl", {

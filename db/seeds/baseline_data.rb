@@ -87,6 +87,37 @@ Product.find_or_create_by!(name: "Quinoa cuit") do |p|
   p.notes = "Weigh cooked quinoa for logging. ¼ cup dry tricolor ≈ 120 g cooked."
 end
 
+Product.find_or_create_by!(name: "Sojasun yaourt nature") do |p|
+  p.brand = "Sojasun"
+  p.calories_per_100g = 43
+  p.protein_per_100g = 4.6
+  p.carbs_per_100g = 0
+  p.fat_per_100g = 2.7
+  p.default_serving_g = 100
+  p.serving_label = "1 pot (100 g)"
+  p.notes = "Plain unsweetened soy yogurt — nature sans sucre (not Skyr)"
+end
+
+Product.find_or_create_by!(name: "Avocado") do |p|
+  p.calories_per_100g = 160
+  p.protein_per_100g = 2
+  p.carbs_per_100g = 8.5
+  p.fat_per_100g = 14.7
+  p.default_serving_g = 75
+  p.serving_label = "½ avocado"
+end
+
+Product.find_or_create_by!(name: "Cholula Chipotle sauce") do |p|
+  p.brand = "Cholula"
+  p.calories_per_100g = 0
+  p.protein_per_100g = 0
+  p.carbs_per_100g = 0
+  p.fat_per_100g = 0
+  p.default_serving_g = 15
+  p.serving_label = "1 tbsp drizzle"
+  p.notes = "Chipotle hot sauce — negligible calories per serving"
+end
+
 def seed_template(slug, name, meal_type, items)
   template = MealTemplate.find_or_create_by!(slug: slug) do |t|
     t.name = name
@@ -131,6 +162,16 @@ seed_template("banana-pb-skyr-snack", "Banana + PB + Skyr", :snack, [
   [ banana, 118, "1 whole banana, sliced" ],
   [ koro, 8, "1 large tsp Koro PB" ],
   [ skyr, 15, "1 tbsp plain Skyr" ]
+])
+
+sojasun_nature = Product.find_by!(name: "Sojasun yaourt nature")
+avocado = Product.find_by!(name: "Avocado")
+cholula = Product.find_by!(name: "Cholula Chipotle sauce")
+
+seed_template("chipotle-yogurt-salad", "Chipotle yogurt salad", :lunch, [
+  [ avocado, 75, "½ avocado" ],
+  [ sojasun_nature, 100, "1 pot Sojasun nature plain" ],
+  [ cholula, 15, "Cholula Chipotle drizzle" ]
 ])
 
 # --- Aug 6, 2026 (real day — Nantes outing) ---
