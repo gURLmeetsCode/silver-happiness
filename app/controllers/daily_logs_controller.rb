@@ -1,21 +1,12 @@
 class DailyLogsController < ApplicationController
   before_action :set_daily_log, only: [ :show, :edit, :update, :copy_meals, :add_water ]
+  before_action :load_show_page, only: [ :show, :update ]
 
   def index
     @daily_logs = DailyLog.recent.limit(60)
   end
 
   def show
-    @goal = Goal.current
-    @meal_templates = MealTemplate.order(:meal_type, :name)
-    @products = Product.order(:name)
-    @custom_meal = MealEntry.new
-    @workout = Workout.new
-    @suggested_strength = WorkoutPlan.suggested_for(@daily_log.logged_on)
-    @suggestion_context = WorkoutPlan.suggestion_context(@daily_log.logged_on)
-    @workout_plans = WorkoutPlan.ordered
-    @supplemental_plans = @workout_plans.supplemental
-    @runna_plans = @workout_plans.kind_runna_reference
   end
 
   def edit
@@ -23,9 +14,10 @@ class DailyLogsController < ApplicationController
 
   def update
     if @daily_log.update(daily_log_params)
-      redirect_to @daily_log, notice: "Day updated."
+      redirect_to @daily_log, notice: "Check-in saved."
     else
-      render :edit, status: :unprocessable_entity
+      flash.now[:alert] = @daily_log.errors.full_messages.to_sentence
+      render :show, status: :unprocessable_entity
     end
   end
 
@@ -50,6 +42,19 @@ class DailyLogsController < ApplicationController
 
   def set_daily_log
     @daily_log = params[:id] == "today" ? DailyLog.today : DailyLog.find(params[:id])
+  end
+
+  def load_show_page
+    @goal = Goal.current
+    @meal_templates = MealTemplate.order(:meal_type, :name)
+    @products = Product.order(:name)
+    @custom_meal = MealEntry.new
+    @workout = Workout.new
+    @suggested_strength = WorkoutPlan.suggested_for(@daily_log.logged_on)
+    @suggestion_context = WorkoutPlan.suggestion_context(@daily_log.logged_on)
+    @workout_plans = WorkoutPlan.ordered
+    @supplemental_plans = @workout_plans.supplemental
+    @runna_plans = @workout_plans.kind_runna_reference
   end
 
   def daily_log_params
