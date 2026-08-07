@@ -39,6 +39,6 @@ sudo systemctl restart silver-happiness
 
 echo "==> Health check"
 sleep 2
-curl -sf http://127.0.0.1:3000/up > /dev/null
+curl -sf -H "X-Forwarded-Proto: https" http://127.0.0.1:3000/up > /dev/null
 
 echo "Deploy complete."
