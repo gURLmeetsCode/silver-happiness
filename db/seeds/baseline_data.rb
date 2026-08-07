@@ -83,6 +83,8 @@ Product.find_or_create_by!(name: "Quinoa cuit") do |p|
   p.protein_per_100g = 4.4
   p.carbs_per_100g = 21
   p.default_serving_g = 120
+  p.serving_label = "120 g cooked (~¼ cup dry)"
+  p.notes = "Weigh cooked quinoa for logging. ¼ cup dry tricolor ≈ 120 g cooked."
 end
 
 def seed_template(slug, name, meal_type, items)
@@ -121,7 +123,7 @@ seed_template("rest-breakfast", "Yogurt + ½ protein", :breakfast, [
 
 seed_template("power-salad", "Power salad lunch", :lunch, [
   [ tofu, 125, "125g tofu" ],
-  [ quinoa, 120, "120g quinoa" ]
+  [ quinoa, 120, "120 g cooked (~¼ cup dry)" ]
 ])
 
 banana = Product.find_by!(name: "Banana")
