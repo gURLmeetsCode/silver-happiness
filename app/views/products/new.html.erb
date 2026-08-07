@@ -13,13 +13,13 @@
       <button type="button" class="btn btn-outline-secondary" data-action="barcode-scanner#stopScan">Stop</button>
     </div>
 
-    <div id="barcode-reader" class="rounded overflow-hidden mb-3 d-none" data-barcode-scanner-target="reader" style="max-width: 320px;"></div>
+    <div id="barcode-reader" class="rounded overflow-hidden mb-3 d-none" data-barcode-scanner-target="reader" style="max-width: 100%; min-height: 240px;"></div>
     <p class="small text-primary mb-3" data-barcode-scanner-target="status"></p>
 
     <div class="row g-2 align-items-end">
       <div class="col-sm-8">
         <label class="form-label small mb-1">Or type barcode (EAN)</label>
-        <input type="text" class="form-control" placeholder="e.g. 3259011034000" data-barcode-scanner-target="manualBarcode">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" class="form-control" placeholder="e.g. 3259011034000" data-barcode-scanner-target="manualBarcode">
       </div>
       <div class="col-sm-4">
         <button type="button" class="btn btn-outline-primary w-100" data-action="barcode-scanner#lookupManual">Look up</button>

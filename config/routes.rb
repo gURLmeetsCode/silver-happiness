@@ -15,7 +15,7 @@ Rails.application.routes.draw do
       post :add_water
       post :set_water
     end
-    resources :meal_entries, only: [ :create, :destroy ] do
+    resources :meal_entries, only: [ :create, :edit, :update, :destroy ] do
       member do
         post :log_water
       end
@@ -28,6 +28,7 @@ Rails.application.routes.draw do
   resources :products, only: [ :new, :create ] do
     collection do
       get :lookup_barcode
+      post :lookup_barcode
     end
   end
 

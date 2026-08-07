@@ -50,15 +50,7 @@
 </div>
 
 <% if @recipe.meal_template.present? %>
-  <div class="alert alert-light border mb-4">
-    <strong>Logged as meal template:</strong> <%= @recipe.meal_template.name %>
-    (<%= @recipe.meal_template.total_calories %> kcal · <%= @recipe.meal_template.total_protein.round(0) %> g protein)
-    — one tap on your daily log.
-    <%= button_to "Log this snack today",
-          daily_log_meal_entries_path(DailyLog.today, meal_template_id: @recipe.meal_template.id),
-          method: :post,
-          class: "btn btn-primary btn-sm mt-2" %>
-  </div>
+  <%= render "log_meal_form" %>
 <% end %>
 
 <div class="card stat-card mb-4 border-primary border-opacity-25">

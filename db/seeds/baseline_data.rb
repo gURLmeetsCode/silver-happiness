@@ -200,6 +200,31 @@ homemade_dressing.update!(
   notes: "Your eyeball batch — ~80 kcal per tbsp measured onto salad (2 tbsp = ~160 kcal)."
 )
 
+Product.find_or_create_by!(name: "Zucchini")
+zucchini = Product.find_by!(name: "Zucchini")
+zucchini.update!(
+  calories_per_100g: 17,
+  protein_per_100g: 1.2,
+  carbs_per_100g: 3.1,
+  fat_per_100g: 0.3,
+  default_serving_g: 100,
+  serving_label: "½ zucchini (~100 g)",
+  notes: "Raw — half medium zucchini"
+)
+
+Product.find_or_create_by!(name: "Puget Huile d'olive vierge extra")
+puget_oil = Product.find_by!(name: "Puget Huile d'olive vierge extra")
+puget_oil.update!(
+  brand: "Puget",
+  calories_per_100g: 900,
+  protein_per_100g: 0,
+  carbs_per_100g: 0,
+  fat_per_100g: 100,
+  default_serving_g: 10,
+  serving_label: "1 tbsp (10 g)",
+  notes: "Label: 900 kcal · 100 g fat / 100 ml. 1 tbsp = 10 g = 90 kcal."
+)
+
 def seed_template(slug, name, meal_type, items)
   template = MealTemplate.find_or_create_by!(slug: slug) do |t|
     t.name = name

@@ -16,6 +16,14 @@ class MealTemplate < ApplicationRecord
     meal_template_items.sum(&:protein_g)
   end
 
+  def total_carbs
+    meal_template_items.sum(&:carbs_g)
+  end
+
+  def total_fat
+    meal_template_items.sum(&:fat_g)
+  end
+
   def summary
     meal_template_items.map(&:display_label).join(" · ")
   end

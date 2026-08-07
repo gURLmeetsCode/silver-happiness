@@ -26,6 +26,7 @@ class RecipesController < ApplicationController
   end
 
   def show
+    @products = Product.order(:name)
   end
 
   def new

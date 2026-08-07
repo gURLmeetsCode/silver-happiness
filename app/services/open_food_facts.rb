@@ -5,7 +5,10 @@ require "json"
 
 # Look up packaged foods by barcode — strong coverage for French products.
 class OpenFoodFacts
-  API_BASE = "https://world.openfoodfacts.org/api/v2/product"
+  API_BASES = [
+    "https://world.openfoodfacts.org/api/v2/product",
+    "https://fr.openfoodfacts.org/api/v2/product"
+  ].freeze
 
   class NotFound < StandardError; end
 
@@ -29,18 +32,29 @@ class OpenFoodFacts
   private
 
   def fetch_product
-    uri = URI("#{API_BASE}/#{@barcode}.json?fields=code,product_name,product_name_fr,brands,nutriments,serving_size,serving_quantity")
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.open_timeout = 5
-    http.read_timeout = 8
+    last_error = nil
 
-    request = Net::HTTP::Get.new(uri)
-    request["User-Agent"] = "SilverHappiness/1.0 (personal nutrition tracker)"
+    API_BASES.each do |base|
+      uri = URI("#{base}/#{@barcode}.json?fields=code,product_name,product_name_fr,brands,nutriments,serving_size,serving_quantity")
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      http.open_timeout = 5
+      http.read_timeout = 8
 
-    JSON.parse(http.request(request).body)
-  rescue JSON::ParserError, Net::OpenTimeout, Net::ReadTimeout, SocketError
-    raise NotFound, "Could not reach Open Food Facts"
+      request = Net::HTTP::Get.new(uri)
+      request["User-Agent"] = "SilverHappiness/1.0 (personal nutrition tracker)"
+
+      body = http.request(request).body
+      response = JSON.parse(body)
+      return response if response["status"] == 1
+    rescue JSON::ParserError, Net::OpenTimeout, Net::ReadTimeout, SocketError => e
+      last_error = e
+      next
+    end
+
+    raise NotFound, "Could not reach Open Food Facts" if last_error
+
+    { "status" => 0 }
   end
 
   def parse(product)

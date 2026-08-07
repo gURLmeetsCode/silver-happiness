@@ -16,6 +16,14 @@ class MealTemplateItem < ApplicationRecord
     nutrition[:protein]
   end
 
+  def carbs_g
+    nutrition[:carbs]
+  end
+
+  def fat_g
+    nutrition[:fat]
+  end
+
   def display_label
     label.presence || "#{quantity_g.to_i}g #{product.name}"
   end

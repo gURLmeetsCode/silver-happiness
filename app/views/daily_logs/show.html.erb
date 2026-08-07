@@ -194,6 +194,7 @@
                       <% end %>
                     </div>
                   </div>
+                  <%= link_to "Edit", edit_daily_log_meal_entry_path(@daily_log, entry), class: "btn btn-sm btn-outline-primary" %>
                   <%= button_to "Remove", daily_log_meal_entry_path(@daily_log, entry), method: :delete, class: "btn btn-sm btn-outline-danger", form: { data: { turbo_confirm: "Remove?" } } %>
                 </div>
               </li>

@@ -1,5 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
+const LIBRARY_URL = "/javascript/html5-qrcode.min.js"
+
 export default class extends Controller {
   static targets = [
     "reader", "status", "manualBarcode", "name", "brand", "barcode",
@@ -13,122 +15,163 @@ export default class extends Controller {
   connect() {
     this.scanner = null
     this.scanning = false
+    this.manualBarcodeTarget?.addEventListener("keydown", this.onManualKeydown)
   }
 
   disconnect() {
     this.stopScan()
+    this.manualBarcodeTarget?.removeEventListener("keydown", this.onManualKeydown)
+  }
+
+  onManualKeydown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault()
+      this.lookupManual()
+    }
   }
 
   async startScan() {
     if (this.scanning) return
 
-    this.setStatus("Starting camera…")
+    this.setStatus("Loading scanner…")
     this.readerTarget.classList.remove("d-none")
+    this.readerTarget.innerHTML = ""
 
-    if ("BarcodeDetector" in window) {
-      await this.startNativeScan()
-    } else {
-      await this.startLibraryScan()
+    try {
+      await this.ensureLibrary()
+      await this.startHtml5Scan()
+    } catch (error) {
+      this.setStatus(`${error.message} — type the barcode below and tap Look up.`)
+      this.stopScan()
     }
   }
 
   stopScan() {
     this.scanning = false
-    if (this.scanner?.stop) {
+    if (this.scanner?.isScanning) {
       this.scanner.stop().catch(() => {})
-      this.scanner = null
     }
-    if (this.nativeStream) {
-      this.nativeStream.getTracks().forEach((track) => track.stop())
-      this.nativeStream = null
+    this.scanner = null
+    if (this.readerTarget) {
+      this.readerTarget.innerHTML = ""
+      this.readerTarget.classList.add("d-none")
     }
-    if (this.nativeInterval) {
-      clearInterval(this.nativeInterval)
-      this.nativeInterval = null
-    }
-    this.readerTarget.innerHTML = ""
-    this.readerTarget.classList.add("d-none")
-    this.setStatus("")
   }
 
-  async startNativeScan() {
-    try {
-      this.nativeStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-        audio: false
-      })
+  async ensureLibrary() {
+    if (window.__Html5QrcodeLibrary__) return
 
-      const video = document.createElement("video")
-      video.setAttribute("playsinline", true)
-      video.srcObject = this.nativeStream
-      await video.play()
-      this.readerTarget.appendChild(video)
-
-      const detector = new BarcodeDetector({ formats: [ "ean_13", "ean_8", "upc_a", "upc_e" ] })
-      this.scanning = true
-      this.setStatus("Point at the barcode on the package")
-
-      this.nativeInterval = setInterval(async () => {
-        if (!this.scanning) return
-        try {
-          const codes = await detector.detect(video)
-          if (codes.length > 0) {
-            this.stopScan()
-            await this.lookup(codes[0].rawValue)
-          }
-        } catch (_error) {
-          // keep scanning
+    await new Promise((resolve, reject) => {
+      const existing = document.querySelector(`script[src="${LIBRARY_URL}"]`)
+      if (existing) {
+        if (window.__Html5QrcodeLibrary__) {
+          resolve()
+          return
         }
-      }, 400)
-    } catch (_error) {
-      this.setStatus("Camera blocked — enter barcode manually below")
-      this.stopScan()
+        existing.addEventListener("load", resolve, { once: true })
+        existing.addEventListener("error", () => reject(new Error("Scanner failed to load")), { once: true })
+        return
+      }
+
+      const script = document.createElement("script")
+      script.src = LIBRARY_URL
+      script.async = true
+      script.onload = resolve
+      script.onerror = () => reject(new Error("Scanner failed to load"))
+      document.head.appendChild(script)
+    })
+
+    if (!window.__Html5QrcodeLibrary__) {
+      throw new Error("Scanner failed to load")
     }
   }
 
-  async startLibraryScan() {
-    try {
-      const { Html5Qrcode } = await import("https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/+esm")
-      this.scanner = new Html5Qrcode(this.readerTarget.id)
-      this.scanning = true
-      this.setStatus("Point at the barcode on the package")
+  async cameraConfig() {
+    const { Html5Qrcode } = window.__Html5QrcodeLibrary__
 
-      await this.scanner.start(
-        { facingMode: "environment" },
-        { fps: 8, qrbox: { width: 260, height: 160 } },
-        async (decoded) => {
-          this.stopScan()
-          await this.lookup(decoded)
-        },
-        () => {}
-      )
+    try {
+      const cameras = await Html5Qrcode.getCameras()
+      if (cameras?.length) {
+        const back = cameras.find((camera) => /back|rear|environment|arrière/i.test(camera.label))
+        const chosen = back || cameras[cameras.length - 1]
+        return chosen.id
+      }
     } catch (_error) {
-      this.setStatus("Scanner unavailable — enter barcode manually below")
-      this.stopScan()
+      // getCameras can fail before permission — fall back to facingMode
     }
+
+    return { facingMode: "environment" }
+  }
+
+  async startHtml5Scan() {
+    const { Html5Qrcode, Html5QrcodeSupportedFormats: F } = window.__Html5QrcodeLibrary__
+    this.scanner = new Html5Qrcode(this.readerTarget.id)
+    this.scanning = true
+    this.setStatus("Point at the barcode. Allow camera access if asked.")
+
+    const formats = [ F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.CODE_128 ].filter(Boolean)
+    const camera = await this.cameraConfig()
+
+    await this.scanner.start(
+      camera,
+      {
+        fps: 10,
+        qrbox: (viewfinderWidth, viewfinderHeight) => {
+          const width = Math.min(viewfinderWidth * 0.92, 320)
+          const height = Math.min(viewfinderHeight * 0.45, 180)
+          return { width: Math.floor(width), height: Math.floor(height) }
+        },
+        formatsToSupport: formats.length ? formats : undefined,
+        disableFlip: false,
+        aspectRatio: 1.777778
+      },
+      async (decoded) => {
+        this.stopScan()
+        await this.lookup(decoded)
+      },
+      () => {}
+    )
   }
 
   async lookupManual() {
-    const code = this.manualBarcodeTarget.value.trim()
-    if (!code) return
+    const code = this.manualBarcodeTarget.value.trim().replace(/\D/g, "")
+    if (code.length < 8) {
+      this.setStatus("Enter at least 8 digits from the barcode.")
+      return
+    }
     await this.lookup(code)
   }
 
   async lookup(barcode) {
     this.setStatus("Looking up product…")
+    const code = barcode.toString().replace(/\D/g, "")
 
     try {
-      const response = await fetch(`${this.lookupUrlValue}?barcode=${encodeURIComponent(barcode)}`, {
-        headers: { "Accept": "application/json", "X-CSRF-Token": this.csrfToken }
+      const response = await fetch(this.lookupUrlValue, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept": "application/json",
+          "X-CSRF-Token": this.csrfToken
+        },
+        credentials: "same-origin",
+        body: new URLSearchParams({ barcode: code })
       })
 
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error || "Not found")
+      let data = {}
+      try {
+        data = await response.json()
+      } catch (_error) {
+        throw new Error("Server returned an invalid response.")
+      }
+
+      if (!response.ok) throw new Error(data.error || `Lookup failed (${response.status})`)
 
       this.fillForm(data)
+      if (this.hasManualBarcodeTarget) this.manualBarcodeTarget.value = code
       this.setStatus(`Found: ${data.name}`)
     } catch (error) {
-      this.setStatus(error.message || "Product not found — enter details manually")
+      this.setStatus(error.message || "Product not found — enter details manually.")
     }
   }
 
