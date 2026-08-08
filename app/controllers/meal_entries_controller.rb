@@ -18,7 +18,9 @@ class MealEntriesController < ApplicationController
     finalize_recipe_nutrition! if @recipe
 
     if @entry.save
-      redirect_to @daily_log, notice: "#{@entry.name} added."
+      apply_product_water!(@entry) if params[:product_id].present?
+      notice = build_create_notice(@entry)
+      redirect_to @daily_log, notice: notice
     else
       redirect_to @daily_log, alert: @entry.errors.full_messages.to_sentence
     end
@@ -86,20 +88,38 @@ class MealEntriesController < ApplicationController
   end
 
   def build_from_product
-    product = Product.find(params[:product_id])
+    @product = Product.find(params[:product_id])
     quantity = params[:quantity_g].presence&.to_d
-    quantity = product.default_quantity_g if quantity.blank? || quantity.zero?
-    nutrition = product.nutrition_for(quantity)
+    quantity = @product.default_quantity_g if quantity.blank? || quantity.zero?
+    nutrition = @product.nutrition_for(quantity)
 
     @entry.assign_attributes(
-      meal_type: params[:meal_type].presence || :snack,
-      name: params[:name].presence || product.log_name(quantity),
+      meal_type: @product.quick_log_meal_type,
+      name: params[:name].presence || @product.log_name(quantity),
       calories: nutrition[:calories],
       protein_g: nutrition[:protein],
       carbs_g: nutrition[:carbs],
       fat_g: nutrition[:fat],
       notes: params[:notes]
     )
+  end
+
+  def apply_product_water!(entry)
+    ml = @product.water_volume_ml.to_i
+    return if ml <= 0
+
+    ActiveRecord::Base.transaction do
+      entry.update!(water_logged_ml: ml)
+      @daily_log.add_water!(ml)
+    end
+  end
+
+  def build_create_notice(entry)
+    parts = [ "#{entry.name} added." ]
+    if entry.water_logged?
+      parts << "+#{entry.water_logged_ml} ml water (#{@daily_log.water_ml} ml today)."
+    end
+    parts.join(" ")
   end
 
   def load_recipe_form_context

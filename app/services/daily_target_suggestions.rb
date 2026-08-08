@@ -110,7 +110,7 @@ class DailyTargetSuggestions
         ctx[:olive_oil] = true if blob.match?(/olive oil|huile/)
         ctx[:avocado] = true if blob.match?(/avocado|wrap|chipotle/)
         ctx[:peanut_butter] = true if blob.match?(/pb|cacahu|peanut|koro/)
-        ctx[:snack] = true if entry.meal_type_snack?
+        ctx[:snack] = true if entry.meal_type_snack? && !entry.meal_type_beverage?
         ctx[:pasta_dinner] = true if blob.match?(/pasta/)
       end
 

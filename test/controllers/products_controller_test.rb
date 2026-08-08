@@ -4,18 +4,6 @@ require "test_helper"
 
 class ProductsControllerTest < ActionDispatch::IntegrationTest
   test "lookup_barcode returns product nutrition as json" do
-    payload = {
-      "code" => "3259011034000",
-      "product_name_fr" => "Test Product",
-      "brands" => "Test Brand",
-      "nutriments" => {
-        "energy-kcal_100g" => 42,
-        "proteins_100g" => 3.5,
-        "carbohydrates_100g" => 5.1,
-        "fat_100g" => 1.2
-      }
-    }
-
     OpenFoodFacts.stub(:lookup, {
       barcode: "3259011034000",
       name: "Test Product",
@@ -34,10 +22,11 @@ class ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 42, json["calories_per_100g"]
   end
 
-  test "new product page wires barcode scanner to form fields" do
+  test "new product page uses manual barcode lookup without camera" do
     get new_product_path
     assert_response :success
-    assert_select "[data-controller='barcode-scanner'] [data-barcode-scanner-target='name']"
-    assert_select "[data-controller='barcode-scanner'] [data-barcode-scanner-target='calories']"
+    assert_select "[data-controller='barcode-lookup'] [data-barcode-lookup-target='name']"
+    assert_select "[data-action='barcode-lookup#lookupManual']"
+    assert_no_match(/startScan|Open scanner|barcode-scanner/, response.body)
   end
 end

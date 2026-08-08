@@ -204,9 +204,9 @@
                     <div class="mt-2 d-flex flex-wrap align-items-center gap-2">
                       <% if entry.water_logged? %>
                         <span class="badge text-bg-info">
-                          <i class="bi bi-droplet-fill"></i> <%= entry.water_logged_ml %> ml with meal
+                          <i class="bi bi-droplet-fill"></i> <%= entry.water_logged_ml %> ml water
                         </span>
-                      <% else %>
+                      <% elsif entry.shows_meal_water_actions? %>
                         <span class="small text-muted"><%= entry.water_prompt %></span>
                         <%= button_to log_water_daily_log_meal_entry_path(@daily_log, entry), method: :post,
                               class: "btn btn-sm btn-info",

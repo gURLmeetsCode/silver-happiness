@@ -1,5 +1,5 @@
 class MealEntry < ApplicationRecord
-  enum :meal_type, { breakfast: 0, lunch: 1, dinner: 2, snack: 3 }, prefix: true
+  enum :meal_type, { breakfast: 0, lunch: 1, dinner: 2, snack: 3, beverage: 4 }, prefix: true
 
   belongs_to :daily_log
   belongs_to :meal_template, optional: true
@@ -20,7 +20,13 @@ class MealEntry < ApplicationRecord
   end
 
   def water_prompt
+    return nil if meal_type_beverage?
+
     "Drink #{water_cups_label} (#{water_suggestion_ml} ml) with this meal"
+  end
+
+  def shows_meal_water_actions?
+    !meal_type_beverage? && water_suggestion_ml.to_i.positive?
   end
 
   def log_water_with_meal!

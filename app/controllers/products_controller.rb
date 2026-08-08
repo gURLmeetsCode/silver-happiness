@@ -26,7 +26,8 @@ class ProductsController < ApplicationController
   def product_params
     params.require(:product).permit(
       :name, :brand, :barcode, :calories_per_100g, :protein_per_100g, :carbs_per_100g,
-      :fat_per_100g, :default_serving_g, :serving_label, :notes, :quick_log
+      :fat_per_100g, :default_serving_g, :serving_label, :notes, :quick_log,
+      :beverage, :water_volume_ml
     )
   end
 end

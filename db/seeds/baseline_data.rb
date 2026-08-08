@@ -71,6 +71,7 @@ Product.find_or_create_by!(name: "Coca-Cola Zero Zero mini") do |p|
   p.serving_label = "mini can (150 ml)"
   p.notes = "Zero Zero mini can — 0 kcal"
   p.quick_log = true
+  p.beverage = true
 end
 
 Product.find_or_create_by!(name: "Purée de cacahuètes") do |p|

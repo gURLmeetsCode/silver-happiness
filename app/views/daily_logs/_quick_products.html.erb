@@ -1,23 +1,46 @@
 <%# locals: daily_log, quick_products %>
 <% if quick_products.any? %>
-  <div class="card stat-card mb-4 border-info border-opacity-25">
-    <div class="card-body">
-      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-        <h2 class="h5 mb-0">Quick add drink / snack</h2>
-        <%= link_to "Scan barcode", new_product_path(return_to: daily_log_path(daily_log)), class: "btn btn-sm btn-outline-secondary" %>
-      </div>
-      <p class="small text-muted mb-3">One tap — uses the saved serving size (can, pot, etc.).</p>
-      <div class="d-grid gap-2">
-        <% quick_products.each do |product| %>
-          <%= button_to product.quick_log_label,
-                daily_log_meal_entries_path(daily_log,
-                  product_id: product.id,
-                  quantity_g: product.default_quantity_g,
-                  meal_type: :snack),
-                method: :post,
-                class: "btn btn-outline-info text-start quick-meal-btn" %>
-        <% end %>
+  <% beverages = quick_products.select(&:beverage?) %>
+  <% snacks = quick_products.reject(&:beverage?) %>
+
+  <% if beverages.any? %>
+    <div class="card stat-card mb-4 border-info border-opacity-25">
+      <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+          <h2 class="h5 mb-0">Quick add beverage</h2>
+          <%= link_to "Add product", new_product_path(return_to: daily_log_path(daily_log)), class: "btn btn-sm btn-outline-secondary" %>
+        </div>
+        <p class="small text-muted mb-3">One tap — logged as a beverage. Water bottles also add to your water total.</p>
+        <div class="d-grid gap-2">
+          <% beverages.each do |product| %>
+            <%= button_to product.quick_log_label,
+                  daily_log_meal_entries_path(daily_log,
+                    product_id: product.id,
+                    quantity_g: product.default_quantity_g),
+                  method: :post,
+                  class: "btn btn-outline-info text-start quick-meal-btn" %>
+          <% end %>
+        </div>
       </div>
     </div>
-  </div>
+  <% end %>
+
+  <% if snacks.any? %>
+    <div class="card stat-card mb-4 border-secondary border-opacity-25">
+      <div class="card-body">
+        <h2 class="h5 mb-2">Quick add snack</h2>
+        <p class="small text-muted mb-3">One tap — logged as a snack using the saved serving size.</p>
+        <div class="d-grid gap-2">
+          <% snacks.each do |product| %>
+            <%= button_to product.quick_log_label,
+                  daily_log_meal_entries_path(daily_log,
+                    product_id: product.id,
+                    quantity_g: product.default_quantity_g),
+                  method: :post,
+                  class: "btn btn-outline-secondary text-start quick-meal-btn" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
 <% end %>

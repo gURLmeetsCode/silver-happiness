@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_08_170000) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_08_190000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -148,7 +148,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_08_170000) do
     t.datetime "updated_at", null: false
     t.string "barcode"
     t.boolean "quick_log", default: false, null: false
+    t.boolean "beverage", default: false, null: false
+    t.integer "water_volume_ml"
     t.index ["barcode"], name: "index_products_on_barcode"
+    t.index ["beverage"], name: "index_products_on_beverage"
     t.index ["quick_log"], name: "index_products_on_quick_log"
   end
 

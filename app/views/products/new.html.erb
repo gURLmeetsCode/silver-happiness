@@ -1,34 +1,28 @@
-<div data-controller="barcode-scanner"
-     data-barcode-scanner-lookup-url-value="<%= lookup_barcode_products_path %>">
+<div data-controller="barcode-lookup"
+     data-barcode-lookup-lookup-url-value="<%= lookup_barcode_products_path %>">
   <h1 class="h3 mb-2">Add a product</h1>
-  <p class="text-muted mb-4">Scan a barcode or enter nutrition from the label (French packages work well via Open Food Facts).</p>
+  <p class="text-muted mb-1">Enter nutrition from the label (French packages work well via Open Food Facts).</p>
+  <p class="small text-muted mb-4"><span class="text-danger">*</span> Required fields</p>
 
   <div class="card stat-card mb-4">
     <div class="card-body">
-      <h2 class="h6 mb-3">Scan barcode</h2>
-      <p class="small text-muted">Uses your phone camera. Packaged foods in France are looked up from Open Food Facts — values are per 100 g from the label.</p>
-
-      <div class="d-flex flex-wrap gap-2 mb-3">
-        <button type="button" class="btn btn-primary" data-action="barcode-scanner#startScan">Open scanner</button>
-        <button type="button" class="btn btn-outline-secondary" data-action="barcode-scanner#stopScan">Stop</button>
-      </div>
-
-      <div id="barcode-reader" class="rounded overflow-hidden mb-3 d-none" data-barcode-scanner-target="reader" style="max-width: 100%; min-height: 240px;"></div>
-      <p class="small text-primary mb-3" data-barcode-scanner-target="status"></p>
+      <h2 class="h6 mb-3">Look up by barcode</h2>
+      <p class="small text-muted mb-3">Type the EAN from the package — values fill the form below.</p>
 
       <div class="row g-2 align-items-end">
         <div class="col-sm-8">
-          <label class="form-label small mb-1">Or type barcode (EAN)</label>
-          <input type="text" inputmode="numeric" pattern="[0-9]*" class="form-control" placeholder="e.g. 3259011034000" data-barcode-scanner-target="manualBarcode">
+          <label class="form-label small mb-1">Barcode (EAN) <span class="text-danger">*</span></label>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" class="form-control" placeholder="e.g. 3259011034000" data-barcode-lookup-target="manualBarcode" required>
         </div>
         <div class="col-sm-4">
-          <button type="button" class="btn btn-outline-primary w-100" data-action="barcode-scanner#lookupManual">Look up</button>
+          <button type="button" class="btn btn-outline-primary w-100" data-action="barcode-lookup#lookupManual">Look up</button>
         </div>
       </div>
+      <p class="small text-primary mb-0 mt-2" data-barcode-lookup-target="status"></p>
     </div>
   </div>
 
-  <%= form_with model: @product, class: "row g-3", data: { barcode_scanner_target: "form" } do |f| %>
+  <%= form_with model: @product, class: "row g-3 needs-validation", html: { novalidate: true, data: { barcode_lookup_target: "form", action: "submit->barcode-lookup#validateForm" } } do |f| %>
     <% if @product.errors.any? %>
       <div class="col-12 alert alert-danger"><%= @product.errors.full_messages.to_sentence %></div>
     <% end %>
@@ -36,52 +30,69 @@
     <%= hidden_field_tag :return_to, params[:return_to] %>
 
     <div class="col-md-8">
-      <%= f.label :name, class: "form-label" %>
-      <%= f.text_field :name, class: "form-control", required: true, data: { barcode_scanner_target: "name" } %>
+      <%= f.label :name, class: "form-label" do %>Name <span class="text-danger">*</span><% end %>
+      <%= f.text_field :name, class: "form-control", required: true, data: { barcode_lookup_target: "name" } %>
+      <div class="invalid-feedback">Product name is required.</div>
     </div>
     <div class="col-md-4">
       <%= f.label :brand, class: "form-label" %>
-      <%= f.text_field :brand, class: "form-control", data: { barcode_scanner_target: "brand" } %>
+      <%= f.text_field :brand, class: "form-control", data: { barcode_lookup_target: "brand" } %>
     </div>
     <div class="col-md-4">
       <%= f.label :barcode, "Barcode (EAN)", class: "form-label" %>
-      <%= f.text_field :barcode, class: "form-control", data: { barcode_scanner_target: "barcode" } %>
+      <%= f.text_field :barcode, class: "form-control", data: { barcode_lookup_target: "barcode" } %>
     </div>
 
     <div class="col-12"><p class="small text-muted mb-0">Per 100 g — as on « pour 100 g » on French labels</p></div>
     <div class="col-md-3">
-      <%= f.label :calories_per_100g, "Calories (kcal)", class: "form-label" %>
-      <%= f.number_field :calories_per_100g, step: 0.1, class: "form-control", required: true, data: { barcode_scanner_target: "calories" } %>
+      <%= f.label :calories_per_100g, "Calories (kcal)", class: "form-label" do %>Calories (kcal) <span class="text-danger">*</span><% end %>
+      <%= f.number_field :calories_per_100g, step: 0.1, min: 0, class: "form-control", required: true, data: { barcode_lookup_target: "calories" } %>
+      <div class="invalid-feedback">Calories per 100 g are required.</div>
     </div>
     <div class="col-md-3">
-      <%= f.label :protein_per_100g, "Protein (g)", class: "form-label" %>
-      <%= f.number_field :protein_per_100g, step: 0.1, class: "form-control", required: true, data: { barcode_scanner_target: "protein" } %>
+      <%= f.label :protein_per_100g, "Protein (g)", class: "form-label" do %>Protein (g) <span class="text-danger">*</span><% end %>
+      <%= f.number_field :protein_per_100g, step: 0.1, min: 0, class: "form-control", required: true, data: { barcode_lookup_target: "protein" } %>
+      <div class="invalid-feedback">Protein per 100 g is required.</div>
     </div>
     <div class="col-md-3">
       <%= f.label :carbs_per_100g, "Carbs (g)", class: "form-label" %>
-      <%= f.number_field :carbs_per_100g, step: 0.1, class: "form-control", data: { barcode_scanner_target: "carbs" } %>
+      <%= f.number_field :carbs_per_100g, step: 0.1, min: 0, class: "form-control", data: { barcode_lookup_target: "carbs" } %>
     </div>
     <div class="col-md-3">
       <%= f.label :fat_per_100g, "Fat (g)", class: "form-label" %>
-      <%= f.number_field :fat_per_100g, step: 0.1, class: "form-control", data: { barcode_scanner_target: "fat" } %>
+      <%= f.number_field :fat_per_100g, step: 0.1, min: 0, class: "form-control", data: { barcode_lookup_target: "fat" } %>
     </div>
 
     <div class="col-md-4">
-      <%= f.label :default_serving_g, "Typical serving (g)", class: "form-label" %>
-      <%= f.number_field :default_serving_g, step: 0.1, class: "form-control", data: { barcode_scanner_target: "servingG" } %>
+      <%= f.label :default_serving_g, "Typical serving (g or ml)", class: "form-label" %>
+      <%= f.number_field :default_serving_g, step: 0.1, min: 0.1, class: "form-control", data: { barcode_lookup_target: "servingG" } %>
+      <div class="form-text">Required if using one-tap quick log.</div>
     </div>
     <div class="col-md-8">
       <%= f.label :serving_label, class: "form-label" %>
-      <%= f.text_field :serving_label, class: "form-control", placeholder: "e.g. 1 pavé, 1 pot", data: { barcode_scanner_target: "servingLabel" } %>
+      <%= f.text_field :serving_label, class: "form-control", placeholder: "e.g. 1 mini can, 500 ml bottle", data: { barcode_lookup_target: "servingLabel" } %>
     </div>
     <div class="col-12">
       <%= f.label :notes, class: "form-label" %>
-      <%= f.text_field :notes, class: "form-control", data: { barcode_scanner_target: "notes" } %>
+      <%= f.text_field :notes, class: "form-control", data: { barcode_lookup_target: "notes" } %>
     </div>
+
+    <div class="col-12">
+      <div class="form-check mb-2">
+        <%= f.check_box :beverage, class: "form-check-input", data: { barcode_lookup_target: "beverage", action: "change->barcode-lookup#beverageChanged" } %>
+        <%= f.label :beverage, "This is a beverage (not a snack)", class: "form-check-label" %>
+      </div>
+      <div class="<%= @product.beverage? ? '' : 'd-none' %>" data-barcode-lookup-beverage-field>
+        <%= f.label :water_volume_ml, "Water added when logged (ml)", class: "form-label" %>
+        <%= f.number_field :water_volume_ml, min: 1, step: 50, class: "form-control", placeholder: "e.g. 500 for a water bottle", data: { barcode_lookup_target: "waterVolumeMl" } %>
+        <div class="form-text">For water bottles — adds this amount to your daily water total when you quick-log it.</div>
+      </div>
+    </div>
+
     <div class="col-12">
       <div class="form-check">
         <%= f.check_box :quick_log, class: "form-check-input" %>
-        <%= f.label :quick_log, "Show on Quick add drink / snack (one tap from home & daily log)", class: "form-check-label" %>
+        <%= f.label :quick_log, "Show on Quick add (one tap from home & daily log)", class: "form-check-label" %>
       </div>
     </div>
 

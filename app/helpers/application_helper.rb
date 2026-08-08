@@ -1,6 +1,6 @@
 module ApplicationHelper
   def meal_type_label(meal_type)
-    meal_type.to_s.humanize
+    { "beverage" => "Beverage" }.fetch(meal_type.to_s, meal_type.to_s.humanize)
   end
 
   def outfit_category_options
