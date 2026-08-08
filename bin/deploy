@@ -123,6 +123,13 @@ if ! verify_http "home page" "http://127.0.0.1:3000/"; then
   rollback
 fi
 
+RECIPE_PATH="$(bin/rails runner 'r = Recipe.joins(:meal_template).find_by(slug: "chipotle-yogurt-salad") || Recipe.joins(:meal_template).first; print r ? "/recipes/#{r.id}" : ""')"
+if [[ -n "${RECIPE_PATH}" ]]; then
+  if ! verify_http "chipotle recipe" "http://127.0.0.1:3000${RECIPE_PATH}"; then
+    rollback
+  fi
+fi
+
 mkdir -p tmp
 echo "${NEW_SHA}" > "${LAST_GOOD_FILE}"
 

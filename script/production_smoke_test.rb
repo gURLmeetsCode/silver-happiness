@@ -35,7 +35,9 @@ record_error(errors, "GET /") do
 end
 
 record_error(errors, "recipe meal form partial") do
-  recipe = Recipe.includes(:meal_template, recipe_ingredients: :product).joins(:meal_template).first
+  recipe = Recipe.includes(:meal_template, recipe_ingredients: :product)
+    .find_by(slug: "chipotle-yogurt-salad") ||
+    Recipe.includes(:meal_template, recipe_ingredients: :product).joins(:meal_template).first
   next unless recipe
 
   ApplicationController.render(
@@ -50,13 +52,14 @@ record_error(errors, "recipe meal form partial") do
   )
 end
 
-record_error(errors, "GET /recipes/:id") do
-  recipe = Recipe.joins(:meal_template).first
+record_error(errors, "GET chipotle tofu wrap") do
+  recipe = Recipe.joins(:meal_template).find_by(slug: "chipotle-yogurt-salad") ||
+    Recipe.joins(:meal_template).first
   next unless recipe
 
   session.get("/recipes/#{recipe.id}", headers: https)
   unless session.response.successful?
-    errors << "GET /recipes/#{recipe.id} returned HTTP #{session.response.status}"
+    errors << "GET /recipes/#{recipe.id} (#{recipe.slug}) returned HTTP #{session.response.status}"
   end
 end
 
