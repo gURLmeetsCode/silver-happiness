@@ -7,8 +7,8 @@
   Product.find_by(name: "Zucchini"),
   Product.find_by(name: "Puget Huile d'olive vierge extra")
 ].compact %>
-<% suggested_products = (suggested_products + recipe.recipe_ingredients.filter_map(&:product)).uniq.first(extra_rows) %>
 <% extra_rows = 4 %>
+<% suggested_products = (suggested_products + recipe.recipe_ingredients.filter_map(&:product)).uniq.first(extra_rows) %>
 <% inferred_servings = if entry && nutrition[:calories].to_i.positive?
      [ (entry.calories.to_f / nutrition[:calories]).round, 1 ].max
    else
