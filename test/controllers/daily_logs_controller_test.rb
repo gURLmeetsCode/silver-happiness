@@ -19,6 +19,6 @@ class DailyLogsControllerTest < ActionDispatch::IntegrationTest
     log.reload
     assert_equal 448, log.run_calories
     assert_equal 8, log.run_km.to_i
-    assert_equal 448, log.workouts.run.first.calories_burned
+    assert_equal 448, log.workouts.activity_type_run.first.calories_burned
   end
 end

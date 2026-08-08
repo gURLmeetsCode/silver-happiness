@@ -91,36 +91,34 @@ The runner must stay online (systemd service handles this after `svc.sh install`
 
 Push to `main`. Watch **Actions** in GitHub — CI, then **Deploy to Raspberry Pi**.
 
-### Manual deploy (fallback)
+### Manual deploy
 
-On the Pi — one block, no `./bin/deploy` required:
+**Normal update — one command on the Pi:**
 
 ```bash
-cd ~/silver-happiness
-
-set -a && source .env.production && set +a
-export RAILS_ENV=production
-
-git fetch origin main && git reset --hard origin/main
-
-bundle lock --add-platform ruby
-bundle config set --local deployment true
-bundle config set --local without 'development test'
-bundle install
-
-bin/rails db:migrate
-bin/rails assets:precompile
-sudo systemctl restart silver-happiness
+cd ~/silver-happiness && ./bin/deploy
 ```
 
-**Always** use `RAILS_ENV=production` (or `source .env.production` first) for any `bin/rails` command on the Pi. Running plain `bin/rails db:migrate` defaults to **development** and fails because dev gems (e.g. `debug`) are not installed.
+That script already loads `.env.production`, sets `RAILS_ENV=production`, pulls `main`, installs gems **if needed**, runs **pending** migrations, precompiles assets, and restarts the app. You do not need to type those steps yourself.
 
-Shortcut after `.env.production` exists:
+| Step | When it actually matters |
+|------|---------------------------|
+| `git fetch && reset` | Every deploy — gets your latest code |
+| `bundle install` | Only when `Gemfile.lock` changed (script runs it anyway; fast no-op if nothing new) |
+| `db:migrate` | Only when there are **new** migration files (no-op if already up to date) |
+| `assets:precompile` | When views/JS/CSS changed |
+| `db:seed` | **Not** part of deploy — run manually **once** if you need new seed products (e.g. Coke Zero). Safe to re-run but usually unnecessary |
+| `source .env.production` | Baked into `./bin/deploy` and `./bin/pi-rails` — only needed if you run `bin/rails` by hand |
+
+**After you push from your Mac:** SSH to the Pi and run `./bin/deploy`. That’s it.
+
+**One-off rails commands** (migrate status, console, etc.) — use `./bin/pi-rails`, not plain `bin/rails`:
 
 ```bash
-./bin/pi-rails db:migrate
 ./bin/pi-rails db:migrate:status
 ```
+
+Plain `bin/rails` without production env tries to load dev gems and fails on the Pi.
 
 ### Alternative: SSH deploy from GitHub cloud
 

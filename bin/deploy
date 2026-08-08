@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Production deploy — run on the Raspberry Pi (manually or via GitHub Actions self-hosted runner).
+# Production deploy on the Raspberry Pi — run after git push from your Mac:
+#   cd ~/silver-happiness && ./bin/deploy
 set -euo pipefail
 
 cd "$(dirname "$0")/.."

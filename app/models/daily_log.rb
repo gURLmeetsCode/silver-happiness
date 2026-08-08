@@ -59,13 +59,13 @@ class DailyLog < ApplicationRecord
   end
 
   def legacy_run_calories
-    return 0 if workouts.run.exists?
+    return 0 if workouts.activity_type_run.exists?
 
     run_calories.to_i
   end
 
   def legacy_walk_calories
-    return 0 if workouts.walk.exists?
+    return 0 if workouts.activity_type_walk.exists?
 
     walk_calories.to_i
   end
