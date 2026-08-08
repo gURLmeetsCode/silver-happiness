@@ -24,18 +24,16 @@ fi
 
 PREVIOUS_SHA="$(git rev-parse HEAD)"
 LAST_GOOD_FILE="tmp/last_good_revision"
-ROLLBACK_SHA="${PREVIOUS_SHA}"
-if [[ -f "${LAST_GOOD_FILE}" ]]; then
-  ROLLBACK_SHA="$(tr -d '[:space:]' < "${LAST_GOOD_FILE}")"
-fi
 echo "==> Current revision: ${PREVIOUS_SHA}"
-echo "==> Rollback target:  ${ROLLBACK_SHA}"
+if [[ -f "${LAST_GOOD_FILE}" ]]; then
+  echo "==> Last good deploy: $(tr -d '[:space:]' < "${LAST_GOOD_FILE}")"
+fi
 
 rollback() {
   echo ""
-  echo "==> DEPLOY FAILED — rolling back to ${ROLLBACK_SHA}"
-  git reset --hard "${ROLLBACK_SHA}"
-  echo "${ROLLBACK_SHA}" > tmp/revision
+  echo "==> DEPLOY FAILED — rolling back to ${PREVIOUS_SHA}"
+  git reset --hard "${PREVIOUS_SHA}"
+  echo "${PREVIOUS_SHA}" > tmp/revision
   bundle install
   bin/rails tmp:clear
   bin/rails assets:precompile
@@ -45,27 +43,48 @@ rollback() {
   exit 1
 }
 
-verify_http() {
+wait_for_http() {
   local label="$1"
   local url="$2"
   local expect="${3:-200}"
+  local max_attempts="${4:-30}"
+  local attempt=1
+  local code="000"
 
   echo "==> HTTP check: ${label} (${url})"
-  local code
-  code="$(curl -s -o /tmp/deploy_check_body.txt -w '%{http_code}' -H 'X-Forwarded-Proto: https' "${url}")"
-  if [[ "${code}" != "${expect}" ]]; then
-    echo "FAILED: expected HTTP ${expect}, got ${code}"
-    head -20 /tmp/deploy_check_body.txt 2>/dev/null || true
-    return 1
-  fi
-  return 0
+  while [[ "${attempt}" -le "${max_attempts}" ]]; do
+    code="$(curl -s -o /tmp/deploy_check_body.txt -w '%{http_code}' \
+      --connect-timeout 2 --max-time 8 \
+      -H 'X-Forwarded-Proto: https' \
+      "${url}" 2>/dev/null || echo "000")"
+
+    if [[ "${code}" == "${expect}" ]]; then
+      echo "    OK — HTTP ${code} (attempt ${attempt}/${max_attempts})"
+      return 0
+    fi
+
+    echo "    waiting… HTTP ${code} (attempt ${attempt}/${max_attempts})"
+    sleep 2
+    attempt=$((attempt + 1))
+  done
+
+  echo "FAILED: ${label} never returned HTTP ${expect} (last: ${code})"
+  head -20 /tmp/deploy_check_body.txt 2>/dev/null || true
+  echo ""
+  echo "--- recent service logs ---"
+  journalctl -u silver-happiness -n 20 --no-pager 2>/dev/null || true
+  return 1
+}
+
+verify_http() {
+  wait_for_http "$1" "$2" "${3:-200}" 1
 }
 
 verify_health_json() {
   echo "==> Health check: /health"
   local body code
-  body="$(curl -s -H 'X-Forwarded-Proto: https' http://127.0.0.1:3000/health)"
-  code="$(curl -s -o /dev/null -w '%{http_code}' -H 'X-Forwarded-Proto: https' http://127.0.0.1:3000/health)"
+  body="$(curl -s --connect-timeout 2 --max-time 8 -H 'X-Forwarded-Proto: https' http://127.0.0.1:3000/health 2>/dev/null || true)"
+  code="$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 2 --max-time 8 -H 'X-Forwarded-Proto: https' http://127.0.0.1:3000/health 2>/dev/null || echo "000")"
   echo "${body}" | head -c 500
   echo ""
   if [[ "${code}" != "200" ]]; then
@@ -111,17 +130,19 @@ bin/rails assets:precompile
 
 echo "==> Restart app"
 sudo systemctl restart silver-happiness
-sleep 3
 
-if ! verify_http "up" "http://127.0.0.1:3000/up"; then
+if ! wait_for_http "up" "http://127.0.0.1:3000/up"; then
   rollback
 fi
 
+if ! wait_for_http "health" "http://127.0.0.1:3000/health"; then
+  rollback
+fi
 if ! verify_health_json; then
   rollback
 fi
 
-if ! verify_http "home page" "http://127.0.0.1:3000/"; then
+if ! wait_for_http "home page" "http://127.0.0.1:3000/"; then
   rollback
 fi
 
@@ -130,7 +151,7 @@ if [[ -z "${RECIPE_PATH}" ]]; then
   echo "FAILED: no recipe with meal template found — cannot verify recipe pages"
   rollback
 fi
-if ! verify_http "chipotle recipe" "http://127.0.0.1:3000${RECIPE_PATH}"; then
+if ! wait_for_http "chipotle recipe" "http://127.0.0.1:3000${RECIPE_PATH}"; then
   rollback
 fi
 
