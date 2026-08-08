@@ -1,6 +1,10 @@
 <h1 class="h3 mb-4">Edit <%= @daily_log.logged_on.strftime("%B %-d") %></h1>
 
 <%= form_with model: @daily_log, class: "row g-3" do |f| %>
+  <% if @daily_log.errors.any? %>
+    <div class="col-12 alert alert-danger"><%= @daily_log.errors.full_messages.to_sentence %></div>
+  <% end %>
+
   <div class="col-md-4">
     <%= f.label :weight_kg, "Weight (kg)", class: "form-label" %>
     <%= f.number_field :weight_kg, step: 0.01, min: 0, class: "form-control", placeholder: "e.g. 58.25" %>
@@ -34,11 +38,6 @@
   <div class="col-12">
     <%= f.label :training_notes, class: "form-label" %>
     <%= f.text_area :training_notes, rows: 2, class: "form-control" %>
-  </div>
-
-  <div class="col-md-4">
-    <%= f.label :portions_on_plan, "Portions on plan?", class: "form-label" %>
-    <%= f.select :portions_on_plan, DailyLog.portions_on_plans.keys.map { |k| [k.humanize, k] }, { include_blank: "—" }, class: "form-select" %>
   </div>
 
   <div class="col-12">

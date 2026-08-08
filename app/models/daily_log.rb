@@ -1,12 +1,12 @@
 class DailyLog < ApplicationRecord
-  enum :portions_on_plan, { yes: 0, mostly: 1, no: 2 }, prefix: :portions
-
   has_many :meal_entries, -> { order(:position, :created_at) }, dependent: :destroy
   has_many :progress_photos, dependent: :destroy
   has_many :workouts, dependent: :destroy
   has_many :strength_sessions, dependent: :destroy
 
   validates :logged_on, presence: true, uniqueness: true
+
+  after_save :sync_run_walk_workouts!
 
   scope :recent, -> { order(logged_on: :desc) }
   scope :for_week_of, ->(date) { where(logged_on: date.beginning_of_week..date.end_of_week).order(:logged_on) }
@@ -171,6 +171,11 @@ class DailyLog < ApplicationRecord
     update!(water_ml: water_ml + amount_ml)
   end
 
+  def sync_run_walk_workouts!
+    sync_activity_workout!(:run, run_km, run_calories)
+    sync_activity_workout!(:walk, walk_km, walk_calories)
+  end
+
   def meals_with_water_logged
     meal_entries.count(&:water_logged?)
   end
@@ -188,6 +193,18 @@ class DailyLog < ApplicationRecord
   end
 
   private
+
+  def sync_activity_workout!(type, km, kcal)
+    if kcal.to_i.positive? || km.present?
+      workout = workouts.find_or_initialize_by(activity_type: type)
+      workout.calories_burned = kcal.to_i if kcal.to_i.positive?
+      workout.calories_burned = 0 if workout.calories_burned.nil?
+      workout.distance_km = km if km.present?
+      workout.save!
+    else
+      workouts.where(activity_type: type).destroy_all
+    end
+  end
 
   def format_time(time)
     time.strftime("%H:%M")

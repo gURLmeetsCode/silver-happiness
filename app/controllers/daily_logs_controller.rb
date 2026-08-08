@@ -18,7 +18,7 @@ class DailyLogsController < ApplicationController
       redirect_to @daily_log, notice: "Check-in saved."
     else
       flash.now[:alert] = @daily_log.errors.full_messages.to_sentence
-      render :show, status: :unprocessable_entity
+      render :edit, status: :unprocessable_entity
     end
   end
 
@@ -73,7 +73,7 @@ class DailyLogsController < ApplicationController
   def daily_log_params
     params.require(:daily_log).permit(
       :weight_kg, :weight_pre_run, :run_km, :run_calories, :walk_km, :walk_calories,
-      :training_notes, :notes, :portions_on_plan, :energy_notes,
+      :training_notes, :notes, :energy_notes,
       :on_period, :water_ml, :bed_time, :wake_time, :sleep_quality, :feeling_check_in
     )
   end

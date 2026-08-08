@@ -333,7 +333,6 @@ seed_template("pasta-salad-tofu-dinner", "Pasta salad + tofu", :dinner, [
 # --- Aug 6, 2026 (real day — Nantes outing) ---
 aug6 = DailyLog.find_or_create_by!(logged_on: Date.new(2026, 8, 6)) do |log|
   log.training_notes = "Rest · walked ~8 km Nantes (exhibitions, stairs)"
-  log.portions_on_plan = :mostly
   log.notes = "Nantes outing. Evening: light salad + 100g tofu fumé."
 end
 
@@ -367,7 +366,6 @@ aug7 = DailyLog.find_or_create_by!(logged_on: Date.new(2026, 8, 7)) do |log|
   log.walk_km = 2.9
   log.walk_calories = 159
   log.training_notes = "6am fasted 8 km Runna + 2.9 km walk after"
-  log.portions_on_plan = :yes
   log.bed_time = Time.zone.parse("22:30")
   log.wake_time = Time.zone.parse("05:45")
   log.sleep_quality = 7

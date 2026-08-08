@@ -1,11 +1,4 @@
 module ApplicationHelper
-  def portions_badge(log)
-    return tag.span("—", class: "text-muted") unless log.portions_on_plan
-
-    css = { "yes" => "success", "mostly" => "warning", "no" => "danger" }[log.portions_on_plan]
-    tag.span(log.portions_on_plan.humanize, class: "badge text-bg-#{css}")
-  end
-
   def meal_type_label(meal_type)
     meal_type.to_s.humanize
   end
