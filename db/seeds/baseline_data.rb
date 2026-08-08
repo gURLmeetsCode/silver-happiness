@@ -61,6 +61,18 @@ Product.find_or_create_by!(name: "Banana") do |p|
   p.serving_label = "1 medium"
 end
 
+Product.find_or_create_by!(name: "Coca-Cola Zero Zero mini") do |p|
+  p.brand = "Coca-Cola"
+  p.calories_per_100g = 0
+  p.protein_per_100g = 0
+  p.carbs_per_100g = 0
+  p.fat_per_100g = 0
+  p.default_serving_g = 150
+  p.serving_label = "mini can (150 ml)"
+  p.notes = "Zero Zero mini can — 0 kcal"
+  p.quick_log = true
+end
+
 Product.find_or_create_by!(name: "Purée de cacahuètes") do |p|
   p.brand = "Koro"
   p.calories_per_100g = 587
@@ -133,6 +145,16 @@ Product.find_or_create_by!(name: "Cholula Chipotle sauce") do |p|
   p.default_serving_g = 15
   p.serving_label = "1 tbsp drizzle"
   p.notes = "Chipotle hot sauce — negligible calories per serving"
+end
+
+Product.find_or_create_by!(name: "Jalapeños (pickled)") do |p|
+  p.calories_per_100g = 20
+  p.protein_per_100g = 0.5
+  p.carbs_per_100g = 4
+  p.fat_per_100g = 0.2
+  p.default_serving_g = 15
+  p.serving_label = "1 tbsp sliced"
+  p.notes = "Jarred jalapeños — use tbsp for extra heat"
 end
 
 Product.find_or_create_by!(name: "Old El Paso Wrap Extra Fins") do |p|
@@ -399,5 +421,17 @@ aug7.workouts.find_or_create_by!(activity_type: :walk, calories_burned: 159) do 
   w.distance_km = 2.9
   w.notes = "Walk after run"
 end
+
+# One-tap quick log on dashboard / daily log
+Product.find_or_create_by!(name: "Coca-Cola Zero Zero mini").update!(
+  quick_log: true,
+  default_serving_g: 150,
+  serving_label: "mini can (150 ml)",
+  calories_per_100g: 0,
+  protein_per_100g: 0,
+  carbs_per_100g: 0,
+  fat_per_100g: 0
+)
+Product.find_by(name: "Banana")&.update!(quick_log: true)
 
 puts "Baseline loaded — #{Product.count} products, #{MealTemplate.count} meal templates, #{DailyLog.count} daily logs."

@@ -1,5 +1,6 @@
 class DailyLogsController < ApplicationController
   before_action :set_daily_log, only: [ :show, :edit, :update, :copy_meals, :add_water, :set_water ]
+  before_action :load_strength_context, only: [ :show, :edit, :update ]
   before_action :load_show_page, only: [ :show, :update ]
 
   def index
@@ -50,13 +51,17 @@ class DailyLogsController < ApplicationController
     @daily_log = params[:id] == "today" ? DailyLog.today : DailyLog.find(params[:id])
   end
 
+  def load_strength_context
+    @runna_strength_today = WorkoutPlan.runna_for(@daily_log.logged_on)
+  end
+
   def load_show_page
     @goal = Goal.current
-    @meal_templates = MealTemplate.order(:meal_type, :name)
+    @meal_templates = MealTemplate.includes(:recipe).order(:meal_type, :name)
     @products = Product.order(:name)
+    @quick_products = Product.quick_log
     @custom_meal = MealEntry.new
     @workout = Workout.new
-    @runna_strength_today = WorkoutPlan.runna_for(@daily_log.logged_on)
     @target_suggestions = DailyTargetSuggestions.new(@daily_log)
     @suggested_strength = WorkoutPlan.suggested_for(@daily_log.logged_on)
     @suggestion_context = WorkoutPlan.suggestion_context(@daily_log.logged_on)

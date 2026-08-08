@@ -4,6 +4,20 @@
   <%= link_to "← #{@daily_log.logged_on.strftime('%b %-d')}", @daily_log, class: "text-decoration-none small" %>
 </div>
 
+<% if @recipe %>
+  <p class="text-muted mb-3">
+    From recipe: <%= link_to @recipe.name, recipe_path(@recipe) %>.
+    Set servings (e.g. 3 wraps), add extras like jalapeños or Cholula in tbsp, then save.
+  </p>
+  <%= render "recipes/recipe_meal_form",
+        recipe: @recipe,
+        daily_log: @daily_log,
+        products: @products,
+        entry: @entry,
+        form_url: daily_log_meal_entry_path(@daily_log, @entry),
+        form_method: :patch %>
+<% else %>
+
 <h1 class="h3 mb-4">Edit meal</h1>
 
 <%= form_with model: [@daily_log, @entry], class: "row g-3" do |f| %>
@@ -43,4 +57,6 @@
     <%= f.submit "Save changes", class: "btn btn-primary" %>
     <%= link_to "Cancel", @daily_log, class: "btn btn-outline-secondary" %>
   </div>
+<% end %>
+
 <% end %>

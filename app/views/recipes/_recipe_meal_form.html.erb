@@ -1,0 +1,131 @@
+<%# locals: recipe, daily_log, products, entry: nil, form_url:, form_method: :post %>
+<% nutrition = recipe.nutrition_per_serving %>
+<% entry ||= nil %>
+<% suggested_products = [
+  Product.find_by(name: "Cholula Chipotle sauce"),
+  Product.find_by(name: "Jalapeños (pickled)"),
+  Product.find_by(name: "Zucchini"),
+  Product.find_by(name: "Puget Huile d'olive vierge extra")
+].compact %>
+<% suggested_products = (suggested_products + recipe.recipe_ingredients.filter_map(&:product)).uniq.first(extra_rows) %>
+<% extra_rows = 4 %>
+<% inferred_servings = if entry && nutrition[:calories].to_i.positive?
+     [ (entry.calories.to_f / nutrition[:calories]).round, 1 ].max
+   else
+     1
+   end %>
+
+<div class="card stat-card mb-4 border-primary">
+  <div class="card-body">
+    <h2 class="h5 mb-2"><%= entry ? "Adjust this meal" : "Log today with adjustments" %></h2>
+    <p class="small text-muted mb-3">
+      Base recipe (1 serving): <%= nutrition[:calories] %> kcal · <%= nutrition[:protein].round(1) %> g protein.
+      Change servings for multiple wraps/portions, then add extras in tbsp or grams.
+    </p>
+
+    <%= form_with url: form_url, method: form_method,
+          data: {
+            controller: "recipe-log",
+            recipe_log_base_calories_value: nutrition[:calories],
+            recipe_log_base_protein_value: nutrition[:protein],
+            recipe_log_base_carbs_value: nutrition[:carbs] || 0,
+            recipe_log_base_fat_value: nutrition[:fat] || 0,
+            recipe_log_skip_initial_recalc_value: entry.present?,
+            action: "change->recipe-log#recalculate input->recipe-log#recalculate submit->recipe-log#recalculate"
+          } do %>
+      <% if recipe.meal_template.present? && entry.nil? %>
+        <%= hidden_field_tag :meal_template_id, recipe.meal_template.id %>
+      <% end %>
+
+      <div class="row g-2 mb-3">
+        <div class="col-md-4">
+          <%= label_tag "servings", "Servings", class: "form-label" %>
+          <%= number_field_tag :servings, inferred_servings, min: 1, step: 1, class: "form-control",
+                data: { recipe_log_target: "servings", action: "input->recipe-log#recalculate" } %>
+          <div class="form-text">e.g. 3 for three wraps</div>
+        </div>
+        <div class="col-md-8">
+          <%= label_tag "meal_entry[name]", "Meal name", class: "form-label" %>
+          <%= text_field_tag "meal_entry[name]", entry&.name || recipe.name, class: "form-control", required: true %>
+        </div>
+        <div class="col-md-6">
+          <%= label_tag "meal_entry[meal_type]", "Meal type", class: "form-label" %>
+          <%= select_tag "meal_entry[meal_type]",
+                options_for_select(MealEntry.meal_types.keys.map { |k| [ k.humanize, k ] }, entry&.meal_type || recipe.meal_type),
+                class: "form-select" %>
+        </div>
+        <div class="col-6 col-md-3">
+          <%= label_tag "meal_entry[calories]", "Calories", class: "form-label" %>
+          <%= number_field_tag "meal_entry[calories]", entry&.calories || nutrition[:calories], class: "form-control", required: true,
+                data: { recipe_log_target: "calories" } %>
+        </div>
+        <div class="col-6 col-md-3">
+          <%= label_tag "meal_entry[protein_g]", "Protein (g)", class: "form-label" %>
+          <%= number_field_tag "meal_entry[protein_g]", entry&.protein_g || nutrition[:protein].round(1), step: 0.1, class: "form-control", required: true,
+                data: { recipe_log_target: "protein" } %>
+        </div>
+        <div class="col-6 col-md-3">
+          <%= label_tag "meal_entry[carbs_g]", "Carbs (g)", class: "form-label" %>
+          <%= number_field_tag "meal_entry[carbs_g]", entry&.carbs_g || nutrition[:carbs]&.round(1), step: 0.1, class: "form-control",
+                data: { recipe_log_target: "carbs" } %>
+        </div>
+        <div class="col-6 col-md-3">
+          <%= label_tag "meal_entry[fat_g]", "Fat (g)", class: "form-label" %>
+          <%= number_field_tag "meal_entry[fat_g]", entry&.fat_g || nutrition[:fat]&.round(1), step: 0.1, class: "form-control",
+                data: { recipe_log_target: "fat" } %>
+        </div>
+        <div class="col-12">
+          <%= label_tag "meal_entry[notes]", "Notes", class: "form-label" %>
+          <%= text_field_tag "meal_entry[notes]", entry&.notes, class: "form-control",
+                placeholder: "e.g. extra jalapeños, light on avocado",
+                data: { recipe_log_target: "notes" } %>
+        </div>
+      </div>
+
+      <h3 class="h6 text-muted">Add extras (optional)</h3>
+      <p class="small text-muted">Use tbsp for sauce/jalapeños — 1 tbsp = product serving size.</p>
+
+      <% extra_rows.times do |i| %>
+        <% suggested = suggested_products[i] %>
+        <div class="row g-2 mb-2 align-items-end" data-recipe-log-target="extraRow">
+          <div class="col-md-6">
+            <select name="extras[<%= i %>][product_id]" class="form-select form-select-sm"
+                    data-recipe-log-target="extraProduct" data-action="change->recipe-log#productChanged">
+              <option value="">Optional extra…</option>
+              <% products.each do |p| %>
+                <option value="<%= p.id %>"
+                  data-calories="<%= p.calories_per_100g %>"
+                  data-protein="<%= p.protein_per_100g %>"
+                  data-carbs="<%= p.carbs_per_100g %>"
+                  data-fat="<%= p.fat_per_100g %>"
+                  data-serving-g="<%= p.default_serving_g || 15 %>"
+                  data-serving-label="<%= p.serving_label.presence || '1 tbsp' %>"
+                  <%= "selected" if suggested && p.id == suggested.id %>>
+                  <%= p.name %><%= " (#{p.brand})" if p.brand.present? %>
+                </option>
+              <% end %>
+            </select>
+          </div>
+          <div class="col-4 col-md-2">
+            <input type="number" name="extras[<%= i %>][quantity]" step="0.5" min="0"
+                   class="form-control form-control-sm" placeholder="qty"
+                   data-recipe-log-target="extraQuantity" data-action="input->recipe-log#recalculate">
+          </div>
+          <div class="col-4 col-md-2">
+            <select name="extras[<%= i %>][unit]" class="form-select form-select-sm"
+                    data-recipe-log-target="extraUnit" data-action="change->recipe-log#recalculate">
+              <option value="tbsp">tbsp</option>
+              <option value="g">grams</option>
+            </select>
+          </div>
+          <div class="col-4 col-md-2">
+            <span class="small text-muted" data-recipe-log-target="extraHint"></span>
+          </div>
+        </div>
+      <% end %>
+
+      <p class="small fw-semibold mb-3" data-recipe-log-target="preview"></p>
+      <%= submit_tag entry ? "Save adjusted meal" : "Log this meal today", class: "btn btn-primary" %>
+    <% end %>
+  </div>
+</div>

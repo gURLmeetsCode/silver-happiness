@@ -29,6 +29,8 @@
     <%= f.number_field :walk_calories, class: "form-control" %>
   </div>
 
+  <%= render "strength_training", daily_log: @daily_log, runna_strength_today: @runna_strength_today %>
+
   <div class="col-12">
     <%= f.label :training_notes, class: "form-label" %>
     <%= f.text_area :training_notes, rows: 2, class: "form-control" %>

@@ -1,9 +1,11 @@
 class MealEntriesController < ApplicationController
   before_action :set_daily_log
   before_action :set_entry, only: [ :edit, :update, :destroy, :log_water ]
+  before_action :load_recipe_form_context, only: [ :edit, :update ]
 
   def create
     @entry = @daily_log.meal_entries.build
+    @recipe = recipe_for_log
 
     if params[:meal_template_id].present?
       build_from_template
@@ -12,6 +14,8 @@ class MealEntriesController < ApplicationController
     else
       @entry.assign_attributes(meal_entry_params)
     end
+
+    finalize_recipe_nutrition! if @recipe
 
     if @entry.save
       redirect_to @daily_log, notice: "#{@entry.name} added."
@@ -24,7 +28,10 @@ class MealEntriesController < ApplicationController
   end
 
   def update
-    if @entry.update(meal_entry_params)
+    @entry.assign_attributes(meal_entry_params)
+    finalize_recipe_nutrition! if @recipe
+
+    if @entry.save
       redirect_to @daily_log, notice: "#{@entry.name} updated."
     else
       render :edit, status: :unprocessable_entity
@@ -80,18 +87,38 @@ class MealEntriesController < ApplicationController
 
   def build_from_product
     product = Product.find(params[:product_id])
-    quantity = params[:quantity_g].to_d
+    quantity = params[:quantity_g].presence&.to_d
+    quantity = product.default_quantity_g if quantity.blank? || quantity.zero?
     nutrition = product.nutrition_for(quantity)
 
     @entry.assign_attributes(
       meal_type: params[:meal_type].presence || :snack,
-      name: params[:name].presence || "#{quantity.to_i}g #{product.name}",
+      name: params[:name].presence || product.log_name(quantity),
       calories: nutrition[:calories],
       protein_g: nutrition[:protein],
       carbs_g: nutrition[:carbs],
       fat_g: nutrition[:fat],
       notes: params[:notes]
     )
+  end
+
+  def load_recipe_form_context
+    @recipe = @entry.meal_template&.recipe
+    @products = Product.order(:name) if @recipe
+  end
+
+  def recipe_for_log
+    template = MealTemplate.find_by(id: params[:meal_template_id]) if params[:meal_template_id].present?
+    template&.recipe
+  end
+
+  def finalize_recipe_nutrition!
+    MealEntryNutritionBuilder.new(
+      @entry,
+      recipe: @recipe,
+      servings: params[:servings],
+      extras: params[:extras]
+    ).apply!
   end
 
   def meal_entry_params

@@ -93,11 +93,33 @@ Push to `main`. Watch **Actions** in GitHub — CI, then **Deploy to Raspberry P
 
 ### Manual deploy (fallback)
 
-Requires `.env.production` with `SECRET_KEY_BASE` (see README). Then:
+On the Pi — one block, no `./bin/deploy` required:
 
 ```bash
 cd ~/silver-happiness
-./bin/deploy
+
+set -a && source .env.production && set +a
+export RAILS_ENV=production
+
+git fetch origin main && git reset --hard origin/main
+
+bundle lock --add-platform ruby
+bundle config set --local deployment true
+bundle config set --local without 'development test'
+bundle install
+
+bin/rails db:migrate
+bin/rails assets:precompile
+sudo systemctl restart silver-happiness
+```
+
+**Always** use `RAILS_ENV=production` (or `source .env.production` first) for any `bin/rails` command on the Pi. Running plain `bin/rails db:migrate` defaults to **development** and fails because dev gems (e.g. `debug`) are not installed.
+
+Shortcut after `.env.production` exists:
+
+```bash
+./bin/pi-rails db:migrate
+./bin/pi-rails db:migrate:status
 ```
 
 ### Alternative: SSH deploy from GitHub cloud

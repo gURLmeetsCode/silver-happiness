@@ -4,6 +4,7 @@ class MealTemplate < ApplicationRecord
   has_many :meal_template_items, dependent: :destroy
   has_many :products, through: :meal_template_items
   has_many :meal_entries, dependent: :nullify
+  has_one :recipe, dependent: :nullify
 
   validates :name, :slug, presence: true
   validates :slug, uniqueness: true

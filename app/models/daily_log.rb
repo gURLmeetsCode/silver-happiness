@@ -36,12 +36,7 @@ class DailyLog < ApplicationRecord
   end
 
   def calories_burned
-    from_workouts = workouts.sum(:calories_burned)
-    from_strength = strength_sessions.sum(:calories_burned).to_i
-    combined = from_workouts + from_strength
-    return combined if combined.positive?
-
-    (run_calories || 0) + (walk_calories || 0)
+    calories_burned_breakdown.sum { |part| part[:kcal].to_i }
   end
 
   def calories_burned_breakdown
@@ -57,12 +52,22 @@ class DailyLog < ApplicationRecord
       parts << { label: session.title, kcal: session.calories_burned }
     end
 
-    if parts.empty?
-      parts << { label: "Run", kcal: run_calories } if run_calories.to_i.positive?
-      parts << { label: "Walk", kcal: walk_calories } if walk_calories.to_i.positive?
-    end
+    parts << { label: "Run", kcal: legacy_run_calories } if legacy_run_calories.positive?
+    parts << { label: "Walk", kcal: legacy_walk_calories } if legacy_walk_calories.positive?
 
     parts
+  end
+
+  def legacy_run_calories
+    return 0 if workouts.run.exists?
+
+    run_calories.to_i
+  end
+
+  def legacy_walk_calories
+    return 0 if workouts.walk.exists?
+
+    walk_calories.to_i
   end
 
   def training_day?

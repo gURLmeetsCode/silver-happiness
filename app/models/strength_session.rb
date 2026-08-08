@@ -11,12 +11,18 @@ class StrengthSession < ApplicationRecord
   validates :perceived_difficulty, inclusion: { in: 1..10 }, allow_nil: true
   validates :calories_burned, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
+  before_validation :purge_exercise_logs_for_runna
+
   def title
     workout_plan&.name || "Strength session"
   end
 
   def location_label
     WorkoutPlan::LOCATION_LABELS[location] || location.humanize
+  end
+
+  def runna_log_only?
+    workout_plan&.kind_runna_reference?
   end
 
   def difficulty_label
@@ -35,5 +41,13 @@ class StrengthSession < ApplicationRecord
       10 => "10 — Max effort"
     }
     labels[perceived_difficulty] || perceived_difficulty.to_s
+  end
+
+  private
+
+  def purge_exercise_logs_for_runna
+    return unless runna_log_only?
+
+    strength_exercise_logs.each(&:mark_for_destruction)
   end
 end

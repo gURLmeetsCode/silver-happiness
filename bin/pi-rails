@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Run Rails on the Pi in production — loads .env.production so you don't hit dev-gem errors.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+export RAILS_ENV=production
+
+if [[ -f .env.production ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source .env.production
+  set +a
+fi
+
+if [[ -z "${SECRET_KEY_BASE:-}" ]]; then
+  echo "ERROR: SECRET_KEY_BASE missing. Create .env.production first." >&2
+  exit 1
+fi
+
+exec bundle exec rails "$@"

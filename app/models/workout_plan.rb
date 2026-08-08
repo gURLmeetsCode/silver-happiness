@@ -101,6 +101,8 @@ class WorkoutPlan < ApplicationRecord
       location: location || self.location
     )
 
+    return session if kind_runna_reference?
+
     workout_plan_exercises.each do |exercise|
       session.strength_exercise_logs.build(
         name: exercise.name,

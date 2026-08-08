@@ -47,7 +47,12 @@
       <div class="card-body">
         <div class="text-muted small">Burned today</div>
         <div class="fs-4 fw-semibold"><%= @today.calories_burned %></div>
-        <div class="small text-muted">net <%= @today.net_calories %> kcal</div>
+        <div class="small text-muted">
+          net <%= @today.net_calories %> kcal
+          <% if @today.calories_burned_breakdown.any? %>
+            · <%= @today.calories_burned_breakdown.map { |p| "#{p[:label]} #{p[:kcal]}" }.join(" · ") %>
+          <% end %>
+        </div>
       </div>
     </div>
   </div>
@@ -225,6 +230,8 @@
         </div>
       </div>
     <% end %>
+
+    <%= render "daily_logs/quick_products", daily_log: @today, quick_products: @quick_products %>
 
     <div class="card stat-card">
       <div class="card-body">

@@ -1,0 +1,39 @@
+<div class="col-12 mt-2">
+  <h2 class="h5 mb-1">Strength training</h2>
+  <p class="small text-muted mb-3">
+    Run/walk calories are above. <strong>Strength calories (Garmin)</strong> are logged on a strength session — exercises, difficulty, and kcal burned.
+  </p>
+</div>
+
+<% if daily_log.strength_sessions.any? %>
+  <div class="col-12">
+    <ul class="list-group list-group-flush mb-3">
+      <% daily_log.strength_sessions.each do |session| %>
+        <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+          <div>
+            <div class="fw-semibold"><%= session.title %></div>
+            <div class="small text-muted">
+              <%= session.location_label %>
+              <% if session.duration_min.present? %> · <%= session.duration_min %> min<% end %>
+              <% if session.calories_burned.present? %> · <strong><%= session.calories_burned %> kcal</strong><% else %> · <span class="text-warning">no calories logged</span><% end %>
+            </div>
+          </div>
+          <%= link_to "Edit", edit_daily_log_strength_session_path(daily_log, session), class: "btn btn-sm btn-outline-primary" %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<div class="col-12 d-grid gap-2 mb-2">
+  <% if runna_strength_today %>
+    <%= link_to new_daily_log_strength_session_path(daily_log, workout_plan_id: runna_strength_today.id),
+          class: "btn btn-primary" do %>
+      Log today's Runna strength
+      <span class="d-block small fw-normal opacity-75"><%= runna_strength_today.name %></span>
+    <% end %>
+  <% end %>
+  <%= link_to "Log strength session (Garmin calories + notes)",
+        new_daily_log_strength_session_path(daily_log),
+        class: "btn #{runna_strength_today ? 'btn-outline-primary' : 'btn-primary'}" %>
+</div>

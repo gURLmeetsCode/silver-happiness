@@ -28,38 +28,51 @@
       <div class="fw-semibold"><%= @strength_session.calories_burned.present? ? "#{@strength_session.calories_burned} kcal" : "—" %></div>
     </div></div>
   </div>
-  <div class="col-md-3">
-    <div class="card stat-card"><div class="card-body">
-      <div class="text-muted small">Exercises</div>
-      <div class="fw-semibold"><%= @strength_session.strength_exercise_logs.size %></div>
-    </div></div>
-  </div>
+  <% unless @strength_session.runna_log_only? %>
+    <div class="col-md-3">
+      <div class="card stat-card"><div class="card-body">
+        <div class="text-muted small">Exercises</div>
+        <div class="fw-semibold"><%= @strength_session.strength_exercise_logs.size %></div>
+      </div></div>
+    </div>
+  <% end %>
 </div>
 
 <% if @strength_session.notes.present? %>
-  <p class="mb-4"><%= @strength_session.notes %></p>
+  <div class="card stat-card mb-4">
+    <div class="card-body">
+      <h2 class="h5">Notes</h2>
+      <p class="mb-0"><%= @strength_session.notes %></p>
+    </div>
+  </div>
 <% end %>
 
-<div class="card stat-card mb-4">
-  <div class="card-body">
-    <h2 class="h5">What you lifted</h2>
-    <ul class="list-group list-group-flush">
-      <% @strength_session.strength_exercise_logs.each do |log| %>
-        <li class="list-group-item px-0">
-          <div class="fw-semibold"><%= log.name %></div>
-          <div class="small text-muted">
-            <% parts = [] %>
-            <% parts << log.equipment if log.equipment.present? %>
-            <% parts << "#{log.weight_kg} kg" if log.weight_kg.present? %>
-            <% parts << "#{log.sets}×#{log.reps}" if log.sets.present? && log.reps.present? %>
-            <%= parts.join(" · ") %>
-          </div>
-          <% if log.notes.present? %><div class="small"><%= log.notes %></div><% end %>
-        </li>
+<% unless @strength_session.runna_log_only? %>
+  <div class="card stat-card mb-4">
+    <div class="card-body">
+      <h2 class="h5">What you lifted</h2>
+      <% if @strength_session.strength_exercise_logs.any? %>
+        <ul class="list-group list-group-flush">
+          <% @strength_session.strength_exercise_logs.each do |log| %>
+            <li class="list-group-item px-0">
+              <div class="fw-semibold"><%= log.name %></div>
+              <div class="small text-muted">
+                <% parts = [] %>
+                <% parts << log.equipment if log.equipment.present? %>
+                <% parts << "#{log.weight_kg} kg" if log.weight_kg.present? %>
+                <% parts << "#{log.sets}×#{log.reps}" if log.sets.present? && log.reps.present? %>
+                <%= parts.join(" · ") %>
+              </div>
+              <% if log.notes.present? %><div class="small"><%= log.notes %></div><% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-muted mb-0">No exercises logged.</p>
       <% end %>
-    </ul>
+    </div>
   </div>
-</div>
+<% end %>
 
 <div class="d-flex gap-2">
   <%= link_to "Edit", edit_daily_log_strength_session_path(@daily_log, @strength_session), class: "btn btn-primary" %>

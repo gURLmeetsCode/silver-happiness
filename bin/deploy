@@ -24,6 +24,10 @@ git fetch origin main
 git reset --hard origin/main
 
 echo "==> Install gems"
+# Pi rbenv sometimes reports generic "ruby" instead of aarch64-linux-gnu
+if ! grep -q "^  ruby$" Gemfile.lock; then
+  bundle lock --add-platform ruby
+fi
 bundle config set --local deployment 'true' 2>/dev/null || true
 bundle config set --local without 'development test' 2>/dev/null || true
 bundle install

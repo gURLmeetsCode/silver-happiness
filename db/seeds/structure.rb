@@ -27,15 +27,8 @@ seed_plan "wednesday-home", {
   scheduled_wday: 3,
   duration_hint: "Per Runna",
   body_targets: "Legs, Glutes, Back, Chest, Core",
-  description: "Your Runna Wednesday strength session. Log weights and difficulty here after you finish in the app."
-}, [
-  { name: "Goblet squat", sets_prescription: "3 sets", reps_prescription: "12 reps", equipment_hint: "Dumbbell (7.5→10 kg)", body_target: "Legs, Glutes" },
-  { name: "Single-arm row", sets_prescription: "3 sets", reps_prescription: "12 reps each side", equipment_hint: "Dumbbell", body_target: "Back, Arms" },
-  { name: "Glute bridge", sets_prescription: "3 sets", reps_prescription: "15 reps", equipment_hint: "Bodyweight or band", body_target: "Glutes" },
-  { name: "Push-ups", sets_prescription: "3 sets", reps_prescription: "AMRAP", equipment_hint: "Incline if needed", body_target: "Chest, Arms" },
-  { name: "Dead bug", sets_prescription: "3 sets", reps_prescription: "10/side", equipment_hint: "Bodyweight", body_target: "Core" },
-  { name: "Side plank", sets_prescription: "3 sets", reps_prescription: "20 sec/side", equipment_hint: "Bodyweight", body_target: "Core, Obliques" }
-]
+  description: "Your Runna Wednesday strength session. Log Garmin calories, difficulty, and notes here after you finish in the app."
+}, []
 
 seed_plan "saturday-gym", {
   name: "Saturday gym full body (Runna)",
@@ -44,16 +37,8 @@ seed_plan "saturday-gym", {
   scheduled_wday: 6,
   duration_hint: "Per Runna + gym",
   body_targets: "Legs, Glutes, Back, Chest, Shoulders, Core",
-  description: "Your Runna Saturday strength + gym day. Log what you actually did — machines, DBs, app session."
-}, [
-  { name: "Goblet squat or leg press", sets_prescription: "3 sets", reps_prescription: "10–12 reps", equipment_hint: "Dumbbell or leg press machine", body_target: "Legs, Glutes" },
-  { name: "Romanian deadlift", sets_prescription: "3 sets", reps_prescription: "10 reps", equipment_hint: "Dumbbell or barbell", body_target: "Hamstrings, Glutes, Back" },
-  { name: "Lat pulldown", sets_prescription: "3 sets", reps_prescription: "10–12 reps", equipment_hint: "Cable machine", body_target: "Back, Arms" },
-  { name: "Chest press", sets_prescription: "3 sets", reps_prescription: "10 reps", equipment_hint: "Dumbbell or machine", body_target: "Chest, Arms" },
-  { name: "Shoulder press", sets_prescription: "3 sets", reps_prescription: "10 reps", equipment_hint: "Dumbbells (try 10 kg → 12.5 kg)", body_target: "Shoulders, Arms" },
-  { name: "Plank", sets_prescription: "3 sets", reps_prescription: "30–45 sec", equipment_hint: "Bodyweight", body_target: "Core" },
-  { name: "Dead bug", sets_prescription: "3 sets", reps_prescription: "12/side", equipment_hint: "Bodyweight — lower stomach focus", body_target: "Core" }
-]
+  description: "Your Runna Saturday strength + gym day. Log Garmin calories, difficulty, and notes here after the session."
+}, []
 
 seed_plan "runna-strength", {
   name: "Runna app strength (generic)",
@@ -62,10 +47,8 @@ seed_plan "runna-strength", {
   scheduled_wday: nil,
   duration_hint: "Per app",
   body_targets: "Full body",
-  description: "When the Runna session doesn’t match the Wed/Sat templates — log weights and difficulty here after."
-}, [
-  { name: "Runna session exercises", sets_prescription: "As app", reps_prescription: "As app", equipment_hint: "Per Runna (usually 7.5 kg DBs home)", body_target: "Full body" }
-]
+  description: "When the Runna session doesn’t match Wed/Sat — log Garmin calories, difficulty, and notes here after."
+}, []
 
 # --- Supplemental quick add-ons (suggested on run days + after Runna strength) ---
 
