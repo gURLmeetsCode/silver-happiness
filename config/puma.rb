@@ -28,7 +28,13 @@ threads_count = ENV.fetch("RAILS_MAX_THREADS", 3)
 threads threads_count, threads_count
 
 # Specifies the `port` that Puma will listen on to receive requests; default is 3000.
-port ENV.fetch("PORT", 3000)
+# Production (Pi + Tailscale Serve) must listen on IPv4 localhost — Serve proxies to
+# http://127.0.0.1:3000; binding [::]:3000 only breaks the browser with connection refused.
+if ENV["RAILS_ENV"] == "production"
+  bind "tcp://127.0.0.1:#{ENV.fetch("PORT", 3000)}"
+else
+  port ENV.fetch("PORT", 3000)
+end
 
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart

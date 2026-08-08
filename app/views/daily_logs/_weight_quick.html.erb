@@ -1,0 +1,32 @@
+<div class="card stat-card mb-4 border-primary border-opacity-25">
+  <div class="card-body">
+    <h2 class="h5 mb-2">Weight</h2>
+    <% if daily_log.weight_kg.present? %>
+      <p class="mb-2">
+        <span class="fs-4 fw-semibold"><%= daily_log.weight_kg %> kg</span>
+        <% if daily_log.weight_pre_run? %>
+          <span class="badge text-bg-light text-dark border ms-1">Pre-run</span>
+        <% end %>
+      </p>
+    <% else %>
+      <p class="text-muted small mb-2">Log today's weigh-in (0.01 kg steps — e.g. 58.25).</p>
+    <% end %>
+
+    <%= form_with model: daily_log, class: "row g-2" do |f| %>
+      <div class="col-7">
+        <%= f.label :weight_kg, "Weight (kg)", class: "form-label small mb-1" %>
+        <%= f.number_field :weight_kg, step: 0.01, min: 0, class: "form-control",
+              placeholder: "58.25", value: daily_log.weight_kg %>
+      </div>
+      <div class="col-5 d-flex align-items-end">
+        <%= f.submit "Save", class: "btn btn-primary w-100" %>
+      </div>
+      <div class="col-12">
+        <div class="form-check">
+          <%= f.check_box :weight_pre_run, class: "form-check-input" %>
+          <%= f.label :weight_pre_run, "Pre-run weigh-in", class: "form-check-label small" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

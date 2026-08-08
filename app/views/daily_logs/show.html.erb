@@ -57,6 +57,22 @@
           <%= link_to "All plans", workout_plans_path, class: "btn btn-sm btn-outline-secondary" %>
         </div>
 
+        <% if @runna_strength_today %>
+          <%= link_to new_daily_log_strength_session_path(@daily_log, workout_plan_id: @runna_strength_today.id),
+                class: "btn btn-primary btn-lg w-100 mb-2" do %>
+            Log today's Runna strength
+            <span class="d-block small fw-normal opacity-75"><%= @runna_strength_today.name %></span>
+          <% end %>
+        <% end %>
+
+        <%= link_to "Log strength session",
+              new_daily_log_strength_session_path(@daily_log),
+              class: "btn #{@runna_strength_today ? 'btn-outline-primary' : 'btn-primary btn-lg'} w-100 mb-3" %>
+
+        <p class="small text-muted mb-3">
+          After Runna at the gym: log exercises, difficulty, duration, and <strong>Garmin calories</strong> on the next screen.
+        </p>
+
         <% if @daily_log.strength_sessions.any? %>
           <ul class="list-group list-group-flush mb-3">
             <% @daily_log.strength_sessions.each do |session| %>
@@ -330,6 +346,7 @@
   </div>
 
   <div class="col-lg-5">
+    <%= render "weight_quick", daily_log: @daily_log %>
     <%= render "water", daily_log: @daily_log, goal: @goal %>
     <%= render "wellness", daily_log: @daily_log, goal: @goal %>
 

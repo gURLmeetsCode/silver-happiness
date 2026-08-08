@@ -67,6 +67,11 @@ class WorkoutPlan < ApplicationRecord
     end
   end
 
+  def self.runna_for(date = Date.current)
+    kind_runna_reference.find_by(scheduled_wday: date.wday) ||
+      kind_runna_reference.find_by(slug: "runna-strength")
+  end
+
   def self.suggested_for(date = Date.current)
     if FULL_SUPPLEMENTAL_WDAYS.include?(date.wday)
       kind_supplemental_full.find_by(suggested_wday: date.wday) || kind_supplemental_full.first

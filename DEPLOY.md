@@ -10,7 +10,10 @@ The main setup guide is in **[README.md](README.md)** — local development, Ras
 | Start service | `sudo systemctl start silver-happiness` |
 | View logs | `journalctl -u silver-happiness -f` |
 | Tailscale URL | `tailscale serve status` |
+| Restart Serve | `sudo tailscale serve --bg http://127.0.0.1:3000` |
 | Regenerate secret | `bin/rails secret` |
+
+**Site down but Pi online in Tailscale?** See [README — Site appears down](README.md#site-appears-down-troubleshooting).
 
 ## Home Wi‑Fi only (no Tailscale)
 

@@ -207,6 +207,60 @@ cd ~/silver-happiness
 ./bin/deploy
 ```
 
+### Site appears down (troubleshooting)
+
+In the Tailscale admin, your Pi can show as **online** while the website still fails to load. Tailscale VPN and the web app are **two separate layers**:
+
+```
+Phone (Tailscale on) → https://raspberrypi….ts.net → Tailscale Serve → Puma :3000
+```
+
+If **Serve** or the **Rails service** stops (common after a Pi reboot), the site is down even though the Pi looks fine in Tailscale.
+
+**On your phone first**
+
+- Open the Tailscale app — confirm it is connected (not paused).
+- The `.ts.net` URL only works when your phone is on the same tailnet.
+- Try the URL in Safari again (not a stale home-screen bookmark).
+
+**On the Pi (SSH in, then run in order)**
+
+```bash
+# 1. Is the Rails app running?
+sudo systemctl status silver-happiness
+
+# 2. Does the app respond locally? (expect HTTP 200)
+curl -I http://127.0.0.1:3000/up
+
+# 3. Is Tailscale Serve forwarding HTTPS to port 3000?
+tailscale serve status
+
+# 4. If the service failed — read the error
+journalctl -u silver-happiness -n 50 --no-pager
+```
+
+| What you see | Likely cause | Fix |
+|--------------|--------------|-----|
+| `curl …/up` → **connection refused** but `systemctl` shows running | Puma bound to IPv6 only (`[::]:3000`); Serve uses `127.0.0.1` | Update `config/puma.rb` (production binds `127.0.0.1`), restart service; test `curl -I http://127.0.0.1:3000/up` |
+| `curl …/up` → **connection refused** | Puma not running | `sudo systemctl restart silver-happiness` · `journalctl -u silver-happiness -n 50` |
+| `systemctl status` → **failed** | Crash after deploy, migration, or config | Check `journalctl`; then `cd ~/silver-happiness && ./bin/deploy` |
+| App OK locally (`200` on `/up`), URL still dead | **Tailscale Serve** stopped | `sudo tailscale serve --bg http://127.0.0.1:3000` |
+| URL doesn’t load on phone only | Tailscale off on phone, or MagicDNS disabled | Connect Tailscale; enable MagicDNS in the tailnet admin |
+
+**Quick recovery (most common after reboot)**
+
+```bash
+cd ~/silver-happiness
+./bin/deploy                                    # optional: if you also need code/db updates
+sudo tailscale serve --bg http://127.0.0.1:3000
+tailscale serve status
+curl -I http://127.0.0.1:3000/up              # expect HTTP 200
+```
+
+Then open `https://raspberrypi.your-tailnet.ts.net/` on your phone with Tailscale connected.
+
+See also [DEPLOY.md](DEPLOY.md) for service commands and deploy notes.
+
 ---
 
 ## Security & backups
