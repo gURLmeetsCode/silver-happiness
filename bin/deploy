@@ -35,7 +35,9 @@ rollback() {
   echo ""
   echo "==> DEPLOY FAILED — rolling back to ${ROLLBACK_SHA}"
   git reset --hard "${ROLLBACK_SHA}"
+  echo "${ROLLBACK_SHA}" > tmp/revision
   bundle install
+  bin/rails tmp:clear
   bin/rails assets:precompile
   sudo systemctl restart silver-happiness
   sleep 2
@@ -82,7 +84,6 @@ git fetch origin main
 git reset --hard origin/main
 NEW_SHA="$(git rev-parse HEAD)"
 echo "==> New revision: ${NEW_SHA}"
-git rev-parse HEAD > tmp/revision
 
 echo "==> Install gems"
 if ! grep -q "^  ruby$" Gemfile.lock; then
@@ -105,6 +106,7 @@ if ! bin/rails runner script/production_smoke_test.rb; then
 fi
 
 echo "==> Precompile assets"
+bin/rails tmp:clear
 bin/rails assets:precompile
 
 echo "==> Restart app"
@@ -124,14 +126,18 @@ if ! verify_http "home page" "http://127.0.0.1:3000/"; then
 fi
 
 RECIPE_PATH="$(bin/rails runner 'r = Recipe.joins(:meal_template).find_by(slug: "chipotle-yogurt-salad") || Recipe.joins(:meal_template).first; print r ? "/recipes/#{r.id}" : ""')"
-if [[ -n "${RECIPE_PATH}" ]]; then
-  if ! verify_http "chipotle recipe" "http://127.0.0.1:3000${RECIPE_PATH}"; then
-    rollback
-  fi
+if [[ -z "${RECIPE_PATH}" ]]; then
+  echo "FAILED: no recipe with meal template found — cannot verify recipe pages"
+  rollback
+fi
+if ! verify_http "chipotle recipe" "http://127.0.0.1:3000${RECIPE_PATH}"; then
+  rollback
 fi
 
 mkdir -p tmp
+echo "${NEW_SHA}" > tmp/revision
 echo "${NEW_SHA}" > "${LAST_GOOD_FILE}"
+rm -f tmp/last_error.txt
 
 echo ""
 echo "Deploy complete — ${NEW_SHA}"

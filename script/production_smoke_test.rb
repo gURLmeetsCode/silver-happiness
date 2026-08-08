@@ -40,6 +40,8 @@ record_error(errors, "recipe meal form partial") do
     Recipe.includes(:meal_template, recipe_ingredients: :product).joins(:meal_template).first
   next unless recipe
 
+  RecipeMealFormBuilder.new(recipe)
+
   ApplicationController.render(
     partial: "recipes/recipe_meal_form",
     locals: {
@@ -55,7 +57,10 @@ end
 record_error(errors, "GET chipotle tofu wrap") do
   recipe = Recipe.joins(:meal_template).find_by(slug: "chipotle-yogurt-salad") ||
     Recipe.joins(:meal_template).first
-  next unless recipe
+  if recipe.nil?
+    errors << "No recipe with meal template in database"
+    next
+  end
 
   session.get("/recipes/#{recipe.id}", headers: https)
   unless session.response.successful?

@@ -4,6 +4,14 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+export RAILS_ENV=production
+if [[ -f .env.production ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source .env.production
+  set +a
+fi
+
 echo "=== Silver Happiness doctor ==="
 echo ""
 
@@ -27,7 +35,9 @@ echo ""
 
 echo "--- last app error (tmp/last_error.txt) ---"
 if [[ -f tmp/last_error.txt ]]; then
-  tail -15 tmp/last_error.txt
+  ERROR_AT="$(head -1 tmp/last_error.txt)"
+  echo "(logged at ${ERROR_AT} — may be from before the last deploy)"
+  tail -n +2 tmp/last_error.txt | tail -14
 else
   echo "(none recorded)"
 fi

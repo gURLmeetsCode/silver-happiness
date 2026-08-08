@@ -4,7 +4,7 @@ const LIBRARY_URL = "/javascript/html5-qrcode.min.js"
 
 export default class extends Controller {
   static targets = [
-    "reader", "status", "manualBarcode", "name", "brand", "barcode",
+    "reader", "status", "manualBarcode", "form", "name", "brand", "barcode",
     "calories", "protein", "carbs", "fat", "servingG", "servingLabel", "notes"
   ]
 
@@ -15,6 +15,9 @@ export default class extends Controller {
   connect() {
     this.scanner = null
     this.scanning = false
+    if (this.hasReaderTarget && !this.readerTarget.id) {
+      this.readerTarget.id = "barcode-reader"
+    }
     this.manualBarcodeTarget?.addEventListener("keydown", this.onManualKeydown)
   }
 
@@ -176,16 +179,33 @@ export default class extends Controller {
   }
 
   fillForm(data) {
-    if (this.hasNameTarget && data.name) this.nameTarget.value = data.name
-    if (this.hasBrandTarget && data.brand) this.brandTarget.value = data.brand
-    if (this.hasBarcodeTarget && data.barcode) this.barcodeTarget.value = data.barcode
-    if (this.hasCaloriesTarget && data.calories_per_100g != null) this.caloriesTarget.value = data.calories_per_100g
-    if (this.hasProteinTarget && data.protein_per_100g != null) this.proteinTarget.value = data.protein_per_100g
-    if (this.hasCarbsTarget && data.carbs_per_100g != null) this.carbsTarget.value = data.carbs_per_100g
-    if (this.hasFatTarget && data.fat_per_100g != null) this.fatTarget.value = data.fat_per_100g
-    if (this.hasServingGTarget && data.default_serving_g != null) this.servingGTarget.value = data.default_serving_g
-    if (this.hasServingLabelTarget && data.serving_label) this.servingLabelTarget.value = data.serving_label
-    if (this.hasNotesTarget && data.notes) this.notesTarget.value = data.notes
+    const fields = [
+      [ "name", data.name ],
+      [ "brand", data.brand ],
+      [ "barcode", data.barcode ],
+      [ "calories", data.calories_per_100g ],
+      [ "protein", data.protein_per_100g ],
+      [ "carbs", data.carbs_per_100g ],
+      [ "fat", data.fat_per_100g ],
+      [ "servingG", data.default_serving_g ],
+      [ "servingLabel", data.serving_label ],
+      [ "notes", data.notes ]
+    ]
+
+    let filled = 0
+    fields.forEach(([ target, value ]) => {
+      const el = this[`${target}Target`]
+      if (!el || value == null || value === "") return
+
+      el.value = value
+      el.dispatchEvent(new Event("input", { bubbles: true }))
+      filled += 1
+    })
+
+    if (filled > 0 && this.hasNameTarget) {
+      this.nameTarget.scrollIntoView({ behavior: "smooth", block: "center" })
+      this.nameTarget.focus({ preventScroll: true })
+    }
   }
 
   setStatus(message) {
