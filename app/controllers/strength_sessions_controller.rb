@@ -53,7 +53,7 @@ class StrengthSessionsController < ApplicationController
 
   def strength_session_params
     params.require(:strength_session).permit(
-      :workout_plan_id, :location, :perceived_difficulty, :notes, :duration_min,
+      :workout_plan_id, :location, :perceived_difficulty, :notes, :duration_min, :calories_burned,
       strength_exercise_logs_attributes: [
         :id, :name, :equipment, :weight_kg, :sets, :reps, :notes, :position, :_destroy
       ]

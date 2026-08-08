@@ -1,0 +1,34 @@
+<%# Shared sleep fields — sleep is logged on the day you WAKE up. Bed time = previous night. %>
+<div class="col-12">
+  <h3 class="h6 mb-1">Last night’s sleep</h3>
+  <p class="small text-muted mb-2">
+    Log sleep on <strong><%= f.object.logged_on.strftime("%A") %></strong> — the day you woke up.
+    Bed time is <strong><%= (f.object.logged_on - 1.day).strftime("%A") %> evening</strong>;
+    wake time is <strong><%= f.object.logged_on.strftime("%A") %> morning</strong>.
+  </p>
+</div>
+<div class="col-md-4">
+  <%= f.label :bed_time, "Bed time (last night)", class: "form-label" %>
+  <%= f.time_field :bed_time, class: "form-control" %>
+  <div class="form-text"><%= (f.object.logged_on - 1.day).strftime("%a %-d %b") %> evening</div>
+</div>
+<div class="col-md-4">
+  <%= f.label :wake_time, "Wake time (this morning)", class: "form-label" %>
+  <%= f.time_field :wake_time, class: "form-control" %>
+  <div class="form-text"><%= f.object.logged_on.strftime("%a %-d %b") %> morning</div>
+</div>
+<div class="col-md-4">
+  <%= f.label :sleep_quality, "How did you sleep?", class: "form-label" %>
+  <%= f.select :sleep_quality,
+        options_for_select(DailyLog::SLEEP_QUALITY_OPTIONS, f.object.sleep_quality),
+        { include_blank: "Rate last night…" },
+        class: "form-select" %>
+</div>
+<% if f.object.bed_time.present? && f.object.wake_time.present? %>
+  <div class="col-12">
+    <p class="small text-muted mb-0">
+      Preview: <%= f.object.sleep_window_label %>
+      <% if f.object.sleep_duration_hours.present? %> · <%= f.object.sleep_duration_hours %>h<% end %>
+    </p>
+  </div>
+<% end %>

@@ -5,23 +5,30 @@
     <%= @daily_log.logged_on.strftime("%A, %B %-d") %>
     · <%= @strength_session.location_label %>
     <% if @strength_session.duration_min.present? %> · <%= @strength_session.duration_min %> min<% end %>
+    <% if @strength_session.calories_burned.present? %> · <%= @strength_session.calories_burned %> kcal (Garmin)<% end %>
   </p>
 </div>
 
 <div class="row g-3 mb-4">
-  <div class="col-md-4">
+  <div class="col-md-3">
     <div class="card stat-card"><div class="card-body">
       <div class="text-muted small">Difficulty</div>
       <div class="fw-semibold"><%= @strength_session.difficulty_label %></div>
     </div></div>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-3">
     <div class="card stat-card"><div class="card-body">
       <div class="text-muted small">Location</div>
       <div class="fw-semibold"><%= @strength_session.location_label %></div>
     </div></div>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-3">
+    <div class="card stat-card"><div class="card-body">
+      <div class="text-muted small">Calories burned</div>
+      <div class="fw-semibold"><%= @strength_session.calories_burned.present? ? "#{@strength_session.calories_burned} kcal" : "—" %></div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
     <div class="card stat-card"><div class="card-body">
       <div class="text-muted small">Exercises</div>
       <div class="fw-semibold"><%= @strength_session.strength_exercise_logs.size %></div>

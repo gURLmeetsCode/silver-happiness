@@ -18,7 +18,12 @@
       <div class="col-6 col-md-2">
         <div class="text-muted small">Burned</div>
         <div class="fw-semibold"><%= @daily_log.calories_burned %> kcal</div>
-        <div class="small text-muted">net <%= @daily_log.net_calories %></div>
+        <div class="small text-muted">
+          net <%= @daily_log.net_calories %>
+          <% if @daily_log.calories_burned_breakdown.any? %>
+            · <%= @daily_log.calories_burned_breakdown.map { |p| "#{p[:label]} #{p[:kcal]}" }.join(" · ") %>
+          <% end %>
+        </div>
       </div>
       <div class="col-6 col-md-2">
         <div class="text-muted small">Protein</div>
@@ -41,6 +46,8 @@
   </div>
 </div>
 
+<%= render "target_suggestions", suggestions: @target_suggestions %>
+
 <div class="row g-4">
   <div class="col-lg-7">
     <div class="card stat-card mb-4 border-dark border-opacity-10">
@@ -60,6 +67,7 @@
                     <%= session.location_label %>
                     · <%= session.difficulty_label %>
                     <% if session.duration_min.present? %> · <%= session.duration_min %> min<% end %>
+                    <% if session.calories_burned.present? %> · <%= session.calories_burned %> kcal<% end %>
                   </div>
                 <% end %>
               </li>

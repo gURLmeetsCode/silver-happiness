@@ -260,9 +260,12 @@ seed_template("rest-breakfast", "Yogurt + ½ protein", :breakfast, [
   [ chia, 15, "1 tbsp chia" ]
 ])
 
+homemade_dressing = Product.find_by!(name: "Homemade salad dressing")
+
 seed_template("power-salad", "Power salad lunch", :lunch, [
   [ tofu, 125, "125 g tofu nature (1 pavé)" ],
-  [ quinoa, 120, "120 g cooked (~¼ cup dry)" ]
+  [ quinoa, 120, "120 g cooked (~¼ cup dry)" ],
+  [ homemade_dressing, 30, "2 tbsp homemade dressing" ]
 ])
 
 banana = Product.find_by!(name: "Banana")
@@ -350,12 +353,41 @@ aug7 = DailyLog.find_or_create_by!(logged_on: Date.new(2026, 8, 7)) do |log|
   log.feeling_check_in = "Light, good energy after run"
 end
 
-aug7.meal_entries.find_or_create_by!(name: "Run-day oats + protein") do |e|
-  e.meal_type = :breakfast
-  e.calories = 348
-  e.protein_g = 36
-  e.notes = "40g oats + 35g Vegan Protein 360 + chia + cinnamon + nutmeg + espresso + soja foam"
-  e.meal_template = run_breakfast
+power_salad = MealTemplate.find_by!(slug: "power-salad")
+banana_pb_snack = MealTemplate.find_by!(slug: "banana-pb-skyr-snack")
+
+aug7.meal_entries.find_or_initialize_by(name: "Run-day oats + protein").tap do |e|
+  e.assign_attributes(
+    meal_type: :breakfast, calories: 348, protein_g: 36,
+    meal_template: run_breakfast,
+    notes: "40g oats + 35g Vegan Protein 360 + chia + cinnamon + nutmeg + espresso + soja foam"
+  )
+  e.save!
+end
+
+aug7.meal_entries.find_or_initialize_by(name: "Power salad lunch").tap do |e|
+  e.assign_attributes(
+    meal_type: :lunch,
+    calories: power_salad.total_calories,
+    protein_g: power_salad.total_protein,
+    carbs_g: power_salad.total_carbs,
+    fat_g: power_salad.total_fat,
+    meal_template: power_salad,
+    notes: "125 g tofu + 120 g quinoa + 2 tbsp dressing"
+  )
+  e.save!
+end
+
+aug7.meal_entries.find_or_initialize_by(name: "Banana + PB + Skyr").tap do |e|
+  e.assign_attributes(
+    meal_type: :snack,
+    calories: banana_pb_snack.total_calories,
+    protein_g: banana_pb_snack.total_protein,
+    carbs_g: banana_pb_snack.total_carbs,
+    fat_g: banana_pb_snack.total_fat,
+    meal_template: banana_pb_snack
+  )
+  e.save!
 end
 
 aug7.workouts.find_or_create_by!(activity_type: :run, calories_burned: 448) do |w|

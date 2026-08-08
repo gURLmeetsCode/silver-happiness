@@ -37,17 +37,46 @@ class DailyLog < ApplicationRecord
 
   def calories_burned
     from_workouts = workouts.sum(:calories_burned)
-    return from_workouts if from_workouts.positive?
+    from_strength = strength_sessions.sum(:calories_burned).to_i
+    combined = from_workouts + from_strength
+    return combined if combined.positive?
 
     (run_calories || 0) + (walk_calories || 0)
   end
 
+  def calories_burned_breakdown
+    parts = workouts.filter_map do |workout|
+      next unless workout.calories_burned.to_i.positive?
+
+      { label: workout.activity_type.humanize, kcal: workout.calories_burned }
+    end
+
+    strength_sessions.each do |session|
+      next unless session.calories_burned.to_i.positive?
+
+      parts << { label: session.title, kcal: session.calories_burned }
+    end
+
+    if parts.empty?
+      parts << { label: "Run", kcal: run_calories } if run_calories.to_i.positive?
+      parts << { label: "Walk", kcal: walk_calories } if walk_calories.to_i.positive?
+    end
+
+    parts
+  end
+
   def training_day?
-    run_km.present? || run_calories.to_i.positive? || training_notes.to_s.match?(/strength|gym|lift/i)
+    run_km.present? || run_calories.to_i.positive? ||
+      strength_sessions.exists? ||
+      training_notes.to_s.match?(/strength|gym|lift/i)
   end
 
   def calorie_target
     Goal.current.calorie_target_for(self)
+  end
+
+  def target_suggestions
+    DailyTargetSuggestions.new(self)
   end
 
   def net_calories
@@ -56,6 +85,12 @@ class DailyLog < ApplicationRecord
 
   def training_summary
     parts = workouts.map(&:summary)
+    strength_sessions.each do |session|
+      line = session.title
+      line += " (#{session.calories_burned} kcal)" if session.calories_burned.to_i.positive?
+      line += " · #{session.duration_min} min" if session.duration_min.present?
+      parts << line
+    end
     parts << "Run #{run_km}km (#{run_calories} kcal)" if run_km.present? && workouts.none?
     parts << "Walk #{walk_km}km (#{walk_calories} kcal)" if walk_km.present? && workouts.none?
     parts << training_notes if training_notes.present?
@@ -65,6 +100,19 @@ class DailyLog < ApplicationRecord
   FEELING_TAGS = [
     "Bloated", "Light", "Tired", "Strong", "Crampy", "Hungry",
     "Puffy", "Good energy", "Sore", "Anxious", "Heavy", "Calm"
+  ].freeze
+
+  SLEEP_QUALITY_OPTIONS = [
+    [ "1 — Restless, barely slept", 1 ],
+    [ "2 — Very broken sleep", 2 ],
+    [ "3 — Poor", 3 ],
+    [ "4 — Below average", 4 ],
+    [ "5 — OK", 5 ],
+    [ "6 — Decent", 6 ],
+    [ "7 — Good", 7 ],
+    [ "8 — Very good", 8 ],
+    [ "9 — Great", 9 ],
+    [ "10 — Best sleep in ages", 10 ]
   ].freeze
 
   def water_glasses
@@ -84,11 +132,25 @@ class DailyLog < ApplicationRecord
   end
 
   def sleep_summary
-    parts = []
-    parts << "#{format_time(bed_time)} → #{format_time(wake_time)}" if bed_time && wake_time
+    return nil unless bed_time && wake_time
+
+    parts = [ sleep_window_label ]
     parts << "#{sleep_duration_hours}h" if sleep_duration_hours
-    parts << "quality #{sleep_quality}/10" if sleep_quality.present?
+    parts << sleep_quality_label if sleep_quality.present?
     parts.join(" · ")
+  end
+
+  def sleep_window_label
+    return nil unless bed_time && wake_time
+
+    bed_day = logged_on - 1.day
+    "#{bed_day.strftime('%a')} #{format_time(bed_time)} → #{logged_on.strftime('%a')} #{format_time(wake_time)}"
+  end
+
+  def sleep_quality_label
+    return nil unless sleep_quality.present?
+
+    DailyLog::SLEEP_QUALITY_OPTIONS.assoc(sleep_quality)&.first || "Quality #{sleep_quality}/10"
   end
 
   def wellness_summary

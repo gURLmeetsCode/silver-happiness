@@ -156,7 +156,7 @@ seed_recipe "power-salad", {
   prep_time: "5 min (if prepped)",
   serves: 1,
   position: 0,
-  description: "Default weekday lunch Mon–Thu. One measured bowl — no refills. Quinoa is logged by cooked weight (120 g ≈ ¼ cup dry before cooking). Macros from tofu + quinoa; salad veg and dressing extra."
+  description: "Default weekday lunch Mon–Thu. One measured bowl — no refills. Quinoa is logged by cooked weight (120 g ≈ ¼ cup dry before cooking). Macros from tofu + quinoa + 2 tbsp dressing; salad veg extra."
 }, [
   [ :produce, "80 g", "mâche or mesclun mix (2 big handfuls)", nil, nil ],
   [ :produce, "10", "cherry tomatoes, halved", nil, nil ],
@@ -164,9 +164,9 @@ seed_recipe "power-salad", {
   [ :produce, "¼", "red pepper, sliced", nil, nil ],
   [ :produce, "1 small fist", "red cabbage, shredded (optional)", nil, nil ],
   [ :produce, "2 tbsp", "shredded carrot (optional)", nil, nil ],
-  [ :protein, "150 g", "baked tofu", "Tofu", 150 ],
+  [ :protein, "125 g", "tofu nature (1 pavé)", "Tofu", 125 ],
   [ :carbs, "120 g", "cooked quinoa (~¼ cup dry)", "Quinoa cuit", 120 ],
-  [ :pantry, "2 tbsp", "measured balsamic dressing (max)", nil, nil ]
+  [ :pantry, "2 tbsp", "homemade dressing (measured)", "Homemade salad dressing", 30 ]
 ], <<~STEPS
   1. Add greens to your usual large bowl.
   2. Top with veg, then quinoa, then tofu.

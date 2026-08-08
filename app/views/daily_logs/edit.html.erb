@@ -57,18 +57,8 @@
     <%= f.label :water_ml, "Water (ml)", class: "form-label" %>
     <%= f.number_field :water_ml, class: "form-control", min: 0, step: 50 %>
   </div>
-  <div class="col-md-4">
-    <%= f.label :bed_time, "Bed time", class: "form-label" %>
-    <%= f.time_field :bed_time, class: "form-control" %>
-  </div>
-  <div class="col-md-4">
-    <%= f.label :wake_time, "Wake time", class: "form-label" %>
-    <%= f.time_field :wake_time, class: "form-control" %>
-  </div>
-  <div class="col-md-4">
-    <%= f.label :sleep_quality, "Sleep quality (1–10)", class: "form-label" %>
-    <%= f.number_field :sleep_quality, class: "form-control", min: 1, max: 10 %>
-  </div>
+
+  <%= render "sleep_fields", f: f %>
 
   <div class="col-12" data-controller="feeling-tags">
     <%= f.label :feeling_check_in, "How am I feeling?", class: "form-label" %>

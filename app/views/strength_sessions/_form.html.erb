@@ -14,18 +14,23 @@
     <div class="col-12 alert alert-danger"><%= @strength_session.errors.full_messages.to_sentence %></div>
   <% end %>
 
-  <div class="col-md-4">
+  <div class="col-md-6 col-lg-3">
     <%= f.label :location, "Where?", class: "form-label" %>
     <%= f.select :location, location_options, {}, class: "form-select" %>
     <div class="form-text">Home · Gym · Runna app</div>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-6 col-lg-3">
     <%= f.label :perceived_difficulty, "Difficulty (1–10)", class: "form-label" %>
     <%= f.select :perceived_difficulty, difficulty_options, { include_blank: "How hard was it?" }, class: "form-select" %>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-6 col-lg-3">
     <%= f.label :duration_min, "Duration (min)", class: "form-label" %>
     <%= f.number_field :duration_min, class: "form-control" %>
+  </div>
+  <div class="col-md-6 col-lg-3">
+    <%= f.label :calories_burned, "Calories burned (Garmin)", class: "form-label" %>
+    <%= f.number_field :calories_burned, class: "form-control", min: 0, placeholder: "e.g. 185" %>
+    <div class="form-text">From your watch after Runna strength</div>
   </div>
 
   <div class="col-12">

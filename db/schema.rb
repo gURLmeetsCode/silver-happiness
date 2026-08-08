@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_07_170002) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_08_140000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -221,6 +221,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_07_170002) do
     t.integer "duration_min"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "calories_burned"
     t.index ["daily_log_id"], name: "index_strength_sessions_on_daily_log_id"
     t.index ["workout_plan_id"], name: "index_strength_sessions_on_workout_plan_id"
   end
