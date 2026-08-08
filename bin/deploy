@@ -5,6 +5,7 @@
 # Refuses to go live if smoke tests or HTTP checks fail; rolls back to previous commit.
 set -euo pipefail
 
+DEPLOY_SCRIPT="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
 cd "$(dirname "$0")/.."
 
 export RAILS_ENV=production
@@ -22,11 +23,24 @@ if [[ -z "${SECRET_KEY_BASE:-}" ]]; then
   exit 1
 fi
 
-PREVIOUS_SHA="$(git rev-parse HEAD)"
+# Pull first, then re-exec so this script always runs the latest version of itself.
+if [[ "${SILVER_DEPLOY_REEXEC:-}" != "1" ]]; then
+  PREVIOUS_SHA="$(git rev-parse HEAD)"
+  echo "==> Pull latest code"
+  git fetch origin main
+  git reset --hard origin/main
+  echo "==> Re-running deploy with updated script"
+  exec env SILVER_DEPLOY_REEXEC=1 "SILVER_DEPLOY_PREVIOUS_SHA=${PREVIOUS_SHA}" "${DEPLOY_SCRIPT}" "$@"
+fi
+
+PREVIOUS_SHA="${SILVER_DEPLOY_PREVIOUS_SHA:-$(git rev-parse HEAD)}"
+NEW_SHA="$(git rev-parse HEAD)"
 LAST_GOOD_FILE="tmp/last_good_revision"
-echo "==> Current revision: ${PREVIOUS_SHA}"
+
+echo "==> Deploying revision: ${NEW_SHA}"
+echo "==> Rollback target:    ${PREVIOUS_SHA}"
 if [[ -f "${LAST_GOOD_FILE}" ]]; then
-  echo "==> Last good deploy: $(tr -d '[:space:]' < "${LAST_GOOD_FILE}")"
+  echo "==> Last good deploy:   $(tr -d '[:space:]' < "${LAST_GOOD_FILE}")"
 fi
 
 rollback() {
@@ -41,6 +55,27 @@ rollback() {
   sleep 2
   echo "Rolled back. Check ./bin/doctor and journalctl -u silver-happiness -n 30"
   exit 1
+}
+
+wait_for_service() {
+  local max_attempts="${1:-30}"
+  local attempt=1
+
+  echo "==> Waiting for silver-happiness service"
+  while [[ "${attempt}" -le "${max_attempts}" ]]; do
+    if systemctl is-active --quiet silver-happiness 2>/dev/null; then
+      echo "    service active (attempt ${attempt}/${max_attempts})"
+      return 0
+    fi
+    echo "    waiting for service… (attempt ${attempt}/${max_attempts})"
+    sleep 2
+    attempt=$((attempt + 1))
+  done
+
+  echo "FAILED: silver-happiness never became active"
+  systemctl status silver-happiness --no-pager 2>/dev/null || true
+  journalctl -u silver-happiness -n 20 --no-pager 2>/dev/null || true
+  return 1
 }
 
 wait_for_http() {
@@ -76,10 +111,6 @@ wait_for_http() {
   return 1
 }
 
-verify_http() {
-  wait_for_http "$1" "$2" "${3:-200}" 1
-}
-
 verify_health_json() {
   echo "==> Health check: /health"
   local body code
@@ -97,12 +128,6 @@ verify_health_json() {
   fi
   return 0
 }
-
-echo "==> Pull latest code"
-git fetch origin main
-git reset --hard origin/main
-NEW_SHA="$(git rev-parse HEAD)"
-echo "==> New revision: ${NEW_SHA}"
 
 echo "==> Install gems"
 if ! grep -q "^  ruby$" Gemfile.lock; then
@@ -130,6 +155,10 @@ bin/rails assets:precompile
 
 echo "==> Restart app"
 sudo systemctl restart silver-happiness
+
+if ! wait_for_service; then
+  rollback
+fi
 
 if ! wait_for_http "up" "http://127.0.0.1:3000/up"; then
   rollback
