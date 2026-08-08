@@ -99,26 +99,24 @@ Push to `main`. Watch **Actions** in GitHub — CI, then **Deploy to Raspberry P
 cd ~/silver-happiness && ./bin/deploy
 ```
 
-That script already loads `.env.production`, sets `RAILS_ENV=production`, pulls `main`, installs gems **if needed**, runs **pending** migrations, precompiles assets, and restarts the app. You do not need to type those steps yourself.
+Deploy **refuses to go live** if checks fail, and **rolls back** to the previous commit automatically.
 
-| Step | When it actually matters |
-|------|---------------------------|
-| `git fetch && reset` | Every deploy — gets your latest code |
-| `bundle install` | Only when `Gemfile.lock` changed (script runs it anyway; fast no-op if nothing new) |
-| `db:migrate` | Only when there are **new** migration files (no-op if already up to date) |
-| `assets:precompile` | When views/JS/CSS changed |
-| `db:seed` | **Not** part of deploy — run manually **once** if you need new seed products (e.g. Coke Zero). Safe to re-run but usually unnecessary |
-| `source .env.production` | Baked into `./bin/deploy` and `./bin/pi-rails` — only needed if you run `bin/rails` by hand |
+| Gate | When |
+|------|------|
+| GitHub CI tests + smoke test | Before Pi deploy (push to `main`) |
+| `script/production_smoke_test.rb` | On Pi, after migrate, **before** restart |
+| HTTP `/up`, `/health`, `/` | On Pi, after restart |
+| Rollback | Any check fails — previous code restored + service restarted |
 
-**After you push from your Mac:** SSH to the Pi and run `./bin/deploy`. That’s it.
-
-**One-off rails commands** (migrate status, console, etc.) — use `./bin/pi-rails`, not plain `bin/rails`:
+**When something looks wrong:**
 
 ```bash
-./bin/pi-rails db:migrate:status
+./bin/doctor                    # SSH — logs + HTTP checks
 ```
 
-Plain `bin/rails` without production env tries to load dev gems and fails on the Pi.
+**On your phone (bookmark):** `https://raspberrypi.tail57e96f.ts.net/status` — works even when home is 500; shows pending migrations, last error, etc.
+
+Plain `bin/rails` without production env fails on the Pi — use `./bin/pi-rails` for one-off commands.
 
 ### Alternative: SSH deploy from GitHub cloud
 

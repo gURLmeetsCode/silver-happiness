@@ -18,3 +18,8 @@ jobs:
       - name: Deploy
         working-directory: /home/pi/silver-happiness
         run: ./bin/deploy
+
+      - name: Diagnose on failure
+        if: failure()
+        working-directory: /home/pi/silver-happiness
+        run: ./bin/doctor || true

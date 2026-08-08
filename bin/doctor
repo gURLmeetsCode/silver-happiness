@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Quick diagnostics on the Pi when something looks wrong.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+echo "=== Silver Happiness doctor ==="
+echo ""
+
+echo "--- systemd ---"
+systemctl is-active silver-happiness 2>/dev/null || echo "service not active"
+echo ""
+
+echo "--- local HTTP ---"
+curl -s -o /dev/null -w "GET /up     → HTTP %{http_code}\n" http://127.0.0.1:3000/up || echo "GET /up     → failed"
+curl -s -o /dev/null -w "GET /       → HTTP %{http_code}\n" -H "X-Forwarded-Proto: https" http://127.0.0.1:3000/ || echo "GET /       → failed"
+echo ""
+
+echo "--- /health ---"
+curl -s -H "X-Forwarded-Proto: https" http://127.0.0.1:3000/health 2>/dev/null | head -c 800 || echo "(no response)"
+echo ""
+echo ""
+
+echo "--- last app error (tmp/last_error.txt) ---"
+if [[ -f tmp/last_error.txt ]]; then
+  tail -15 tmp/last_error.txt
+else
+  echo "(none recorded)"
+fi
+echo ""
+
+echo "--- recent logs ---"
+journalctl -u silver-happiness -n 20 --no-pager 2>/dev/null || echo "(journalctl unavailable)"
+echo ""
+
+echo "Bookmark on your phone: /status"
+echo "Fix deploy:            cd ~/silver-happiness && ./bin/deploy"

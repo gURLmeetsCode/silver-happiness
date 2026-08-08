@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Silver Happiness — status</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <main class="container py-4" style="max-width: 36rem;">
+    <h1 class="h4 mb-1">App status</h1>
+    <p class="text-muted small mb-4">Bookmark this page — it works even when the dashboard is broken.</p>
+
+    <% if @health.ok? %>
+      <div class="alert alert-success">
+        <strong>All checks passed.</strong> The app should be working.
+      </div>
+    <% else %>
+      <div class="alert alert-danger">
+        <strong>Something is wrong.</strong> The main site may show a 500 error until this is fixed.
+      </div>
+    <% end %>
+
+    <ul class="list-group mb-4">
+      <% @health.checks.each do |name, state| %>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <%= name.to_s.humanize %>
+          <span class="badge <%= state == 'ok' ? 'text-bg-success' : 'text-bg-danger' %>"><%= state %></span>
+        </li>
+      <% end %>
+    </ul>
+
+    <% if @health.issues.any? %>
+      <h2 class="h6">What broke</h2>
+      <ul class="small">
+        <% @health.issues.each do |issue| %>
+          <li><%= issue %></li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% if @health.last_error.present? %>
+      <h2 class="h6 mt-4">Last error (from app)</h2>
+      <pre class="small bg-white border rounded p-3" style="white-space: pre-wrap;"><%= @health.last_error %></pre>
+    <% end %>
+
+    <div class="card mt-4">
+      <div class="card-body small">
+        <h2 class="h6">On the Pi (SSH)</h2>
+        <pre class="mb-2 bg-light p-2 rounded"><code>journalctl -u silver-happiness -n 30 --no-pager
+cd ~/silver-happiness && ./bin/doctor
+cd ~/silver-happiness && ./bin/deploy</code></pre>
+        <% if @health.revision.present? %>
+          <p class="text-muted mb-0">Deployed revision: <code><%= @health.revision %></code></p>
+        <% end %>
+        <p class="text-muted mb-0">Checked: <%= @health.checked_at %></p>
+      </div>
+    </div>
+
+    <p class="mt-4 mb-0">
+      <%= link_to "Try home", root_path, class: "btn btn-primary" %>
+      <%= link_to "JSON health", health_path(format: :json), class: "btn btn-outline-secondary" %>
+    </p>
+  </main>
+</body>
+</html>

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Production deploy on the Raspberry Pi — run after git push from your Mac:
 #   cd ~/silver-happiness && ./bin/deploy
+#
+# Refuses to go live if smoke tests or HTTP checks fail; rolls back to previous commit.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -20,12 +22,69 @@ if [[ -z "${SECRET_KEY_BASE:-}" ]]; then
   exit 1
 fi
 
+PREVIOUS_SHA="$(git rev-parse HEAD)"
+LAST_GOOD_FILE="tmp/last_good_revision"
+ROLLBACK_SHA="${PREVIOUS_SHA}"
+if [[ -f "${LAST_GOOD_FILE}" ]]; then
+  ROLLBACK_SHA="$(tr -d '[:space:]' < "${LAST_GOOD_FILE}")"
+fi
+echo "==> Current revision: ${PREVIOUS_SHA}"
+echo "==> Rollback target:  ${ROLLBACK_SHA}"
+
+rollback() {
+  echo ""
+  echo "==> DEPLOY FAILED — rolling back to ${ROLLBACK_SHA}"
+  git reset --hard "${ROLLBACK_SHA}"
+  bundle install
+  bin/rails assets:precompile
+  sudo systemctl restart silver-happiness
+  sleep 2
+  echo "Rolled back. Check ./bin/doctor and journalctl -u silver-happiness -n 30"
+  exit 1
+}
+
+verify_http() {
+  local label="$1"
+  local url="$2"
+  local expect="${3:-200}"
+
+  echo "==> HTTP check: ${label} (${url})"
+  local code
+  code="$(curl -s -o /tmp/deploy_check_body.txt -w '%{http_code}' -H 'X-Forwarded-Proto: https' "${url}")"
+  if [[ "${code}" != "${expect}" ]]; then
+    echo "FAILED: expected HTTP ${expect}, got ${code}"
+    head -20 /tmp/deploy_check_body.txt 2>/dev/null || true
+    return 1
+  fi
+  return 0
+}
+
+verify_health_json() {
+  echo "==> Health check: /health"
+  local body code
+  body="$(curl -s -H 'X-Forwarded-Proto: https' http://127.0.0.1:3000/health)"
+  code="$(curl -s -o /dev/null -w '%{http_code}' -H 'X-Forwarded-Proto: https' http://127.0.0.1:3000/health)"
+  echo "${body}" | head -c 500
+  echo ""
+  if [[ "${code}" != "200" ]]; then
+    echo "FAILED: /health returned HTTP ${code}"
+    return 1
+  fi
+  if echo "${body}" | grep -q '"status":"error"'; then
+    echo "FAILED: /health reports errors (see above)"
+    return 1
+  fi
+  return 0
+}
+
 echo "==> Pull latest code"
 git fetch origin main
 git reset --hard origin/main
+NEW_SHA="$(git rev-parse HEAD)"
+echo "==> New revision: ${NEW_SHA}"
+git rev-parse HEAD > tmp/revision
 
 echo "==> Install gems"
-# Pi rbenv sometimes reports generic "ruby" instead of aarch64-linux-gnu
 if ! grep -q "^  ruby$" Gemfile.lock; then
   bundle lock --add-platform ruby
 fi
@@ -34,16 +93,39 @@ bundle config set --local without 'development test' 2>/dev/null || true
 bundle install
 
 echo "==> Migrate database"
-bin/rails db:migrate
+if ! bin/rails db:migrate; then
+  echo "Migration failed — rolling back code (DB may need manual attention)"
+  rollback
+fi
+
+echo "==> Smoke test (before restart)"
+if ! bin/rails runner script/production_smoke_test.rb; then
+  echo "Smoke test failed — not restarting with broken code"
+  rollback
+fi
 
 echo "==> Precompile assets"
 bin/rails assets:precompile
 
 echo "==> Restart app"
 sudo systemctl restart silver-happiness
+sleep 3
 
-echo "==> Health check"
-sleep 2
-curl -sf -H "X-Forwarded-Proto: https" http://127.0.0.1:3000/up > /dev/null
+if ! verify_http "up" "http://127.0.0.1:3000/up"; then
+  rollback
+fi
 
-echo "Deploy complete."
+if ! verify_health_json; then
+  rollback
+fi
+
+if ! verify_http "home page" "http://127.0.0.1:3000/"; then
+  rollback
+fi
+
+mkdir -p tmp
+echo "${NEW_SHA}" > "${LAST_GOOD_FILE}"
+
+echo ""
+echo "Deploy complete — ${NEW_SHA}"
+echo "Status page: https://raspberrypi.tail57e96f.ts.net/status"
