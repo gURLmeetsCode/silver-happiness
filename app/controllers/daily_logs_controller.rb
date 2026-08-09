@@ -28,8 +28,16 @@ class DailyLogsController < ApplicationController
 
   def copy_meals
     source = DailyLog.find(params[:source_id])
-    @daily_log.copy_meals_from!(source)
-    redirect_to @daily_log, notice: "Meals copied from #{source.logged_on.strftime('%b %-d')}."
+    added = @daily_log.copy_meals_from!(source)
+    from = source.logged_on.strftime("%b %-d")
+
+    notice = if added.zero?
+      "Nothing new to copy — every meal from #{from} is already logged."
+    else
+      "Added #{added} #{'meal'.pluralize(added)} from #{from}. Your existing meals were kept."
+    end
+
+    redirect_to @daily_log, notice: notice
   end
 
   def add_water

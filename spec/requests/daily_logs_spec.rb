@@ -104,6 +104,45 @@ RSpec.describe "Daily logs", type: :request do
       expect(target.reload.meal_entries.map(&:name)).to eq([ "Oats" ])
     end
 
+    # Copying used to wipe the day first, which would silently delete meals
+    # already logged before the button was pressed.
+    it "keeps meals already logged on the target day" do
+      source = create(:daily_log, logged_on: Date.current - 1.day)
+      create(:meal_entry, daily_log: source, name: "Oats", meal_type: :breakfast)
+      target = create(:daily_log, logged_on: Date.current)
+      mine = create(:meal_entry, daily_log: target, name: "My own lunch",
+                    meal_type: :lunch, calories: 640)
+
+      post copy_meals_daily_log_path(target), params: { source_id: source.id }
+
+      expect(target.reload.meal_entries.map(&:name)).to contain_exactly("My own lunch", "Oats")
+      expect(mine.reload.calories).to eq(640)
+    end
+
+    it "does not duplicate a meal that is already there" do
+      source = create(:daily_log, logged_on: Date.current - 1.day)
+      create(:meal_entry, daily_log: source, name: "Oats", meal_type: :breakfast)
+      target = create(:daily_log, logged_on: Date.current)
+      create(:meal_entry, daily_log: target, name: "Oats", meal_type: :breakfast)
+
+      expect {
+        post copy_meals_daily_log_path(target), params: { source_id: source.id }
+      }.not_to change { target.reload.meal_entries.count }
+
+      expect(flash[:notice]).to match(/Nothing new to copy/)
+    end
+
+    it "reports how many meals were added" do
+      source = create(:daily_log, logged_on: Date.current - 1.day)
+      create(:meal_entry, daily_log: source, name: "Oats", meal_type: :breakfast)
+      create(:meal_entry, daily_log: source, name: "Salad", meal_type: :lunch)
+      target = create(:daily_log, logged_on: Date.current)
+
+      post copy_meals_daily_log_path(target), params: { source_id: source.id }
+
+      expect(flash[:notice]).to match(/Added 2 meals/)
+    end
+
     it "returns 404 when the source day does not exist" do
       post copy_meals_daily_log_path(create(:daily_log)), params: { source_id: 999_999 }
 

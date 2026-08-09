@@ -192,21 +192,30 @@ class DailyLog < ApplicationRecord
     "#{logged}/#{total} meals with water"
   end
 
+  # Adds the meals from another day that aren't already here. Copying must never
+  # cost you something you already logged, so anything present is left alone and
+  # the count of newly added meals is returned.
   def copy_meals_from!(other_log)
+    existing = meal_entries.pluck(:meal_type, :name).to_set
+
     transaction do
-      meal_entries.destroy_all
-      other_log.meal_entries.each do |entry|
+      other_log.meal_entries.count do |entry|
+        next false if existing.include?([ entry.meal_type, entry.name ])
+
         meal_entries.create!(
           meal_type: entry.meal_type,
           name: entry.name,
           calories: entry.calories,
           protein_g: entry.protein_g,
+          carbs_g: entry.carbs_g,
+          fat_g: entry.fat_g,
           meal_template: entry.meal_template,
           notes: entry.notes,
           position: entry.position,
           water_suggestion_ml: entry.water_suggestion_ml,
           water_logged_ml: 0
         )
+        true
       end
     end
   end
