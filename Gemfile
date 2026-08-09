@@ -26,8 +26,11 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
-# Photo variants (progress/outfit uploads) — MiniMagick works on Pi; libvips 8.13+ is often too new on Raspbian
+# Photo variants (progress/outfit uploads) — MiniMagick works on Pi; libvips 8.13+ is often too new on Raspbian.
+# Active Storage drives MiniMagick through image_processing; without it every
+# `variant` call raises LoadError when the browser asks for the thumbnail.
 gem "mini_magick", "~> 4.12"
+gem "image_processing", "~> 1.2"
 
 gem "chartkick"
 gem "groupdate"

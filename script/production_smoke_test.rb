@@ -68,6 +68,16 @@ record_error(errors, "GET chipotle tofu wrap") do
   end
 end
 
+# Thumbnails are generated on demand, so a missing image_processing gem or
+# ImageMagick binary only shows up as a broken image in the browser — never in
+# the logs. Force one transform so a bad deploy fails here instead.
+record_error(errors, "photo thumbnail") do
+  photo = ProgressPhoto.with_attached_image.last || OutfitPhoto.with_attached_image.last
+  next unless photo&.image&.attached?
+
+  photo.image.variant(resize_to_limit: [ 400, 600 ]).processed
+end
+
 if errors.any?
   warn "SMOKE TEST FAILED"
   errors.each { |err| warn "  • #{err}" }

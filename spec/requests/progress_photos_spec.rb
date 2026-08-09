@@ -15,7 +15,7 @@ RSpec.describe "Progress photos", type: :request do
         }
       }.to change(ProgressPhoto, :count).by(1)
 
-      expect(response).to redirect_to(daily_log_path(log))
+      expect(response).to redirect_to(daily_log_path(log, anchor: "photos"))
     end
 
     it "redirects with an alert when the image is missing" do
@@ -23,7 +23,7 @@ RSpec.describe "Progress photos", type: :request do
         progress_photo: { photo_type: "front", caption: "No image" }
       }
 
-      expect(response).to redirect_to(daily_log_path(log))
+      expect(response).to redirect_to(daily_log_path(log, anchor: "photos"))
       expect(flash[:alert]).to be_present
     end
   end
@@ -34,7 +34,7 @@ RSpec.describe "Progress photos", type: :request do
 
       delete daily_log_progress_photo_path(log, photo)
 
-      expect(response).to redirect_to(daily_log_path(log))
+      expect(response).to redirect_to(daily_log_path(log, anchor: "photos"))
       expect(ProgressPhoto.exists?(photo.id)).to be false
     end
   end
