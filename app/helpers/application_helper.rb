@@ -1,4 +1,17 @@
 module ApplicationHelper
+  def time_of_day_greeting(now = Time.current)
+    case now.hour
+    when 5..11 then "Good morning"
+    when 12..17 then "Good afternoon"
+    when 18..21 then "Good evening"
+    else "Still up"
+    end
+  end
+
+  def home_greeting(goal, now = Time.current)
+    [ time_of_day_greeting(now), goal&.greeting_name ].compact_blank.join(", ")
+  end
+
   def meal_type_label(meal_type)
     { "beverage" => "Beverage" }.fetch(meal_type.to_s, meal_type.to_s.humanize)
   end
@@ -36,9 +49,12 @@ module ApplicationHelper
 
   def nav_active?(key)
     case key.to_sym
+    when :home
+      controller_name == "dashboard"
     when :today
-      controller_name == "dashboard" ||
-        (controller_name == "daily_logs" && action_name != "index")
+      controller_name == "daily_logs" && action_name != "index"
+    when :metrics
+      controller_name == "metrics"
     when :log
       controller_name == "daily_logs" && action_name == "index"
     when :recipes

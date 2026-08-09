@@ -1,0 +1,163 @@
+<% content_for :title, "Metrics" %>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <div>
+    <h1 class="h3 mb-1">Metrics</h1>
+    <p class="text-muted mb-0"><%= Date.current.strftime("%A, %B %-d") %></p>
+  </div>
+  <%= link_to "Today’s log", daily_log_path(@today), class: "btn btn-outline-secondary" %>
+</div>
+
+<h2 class="h6 text-uppercase text-muted mb-2">Today</h2>
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <div class="text-muted small">Weight</div>
+        <div class="fs-4 fw-semibold"><%= @today.weight_kg.present? ? "#{@today.weight_kg} kg" : "—" %></div>
+        <div class="small mt-1"><%= target_status_badge(@goal.weight_status(@today.weight_kg)) %></div>
+        <div class="small text-muted"><%= weight_vs_goal_label(@goal, @today.weight_kg) %></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <div class="text-muted small">Protein</div>
+        <div class="fs-4 fw-semibold"><%= @today.total_protein.round(0) %> g</div>
+        <div class="small mt-1"><%= target_status_badge(@goal.protein_status(@today.total_protein)) %></div>
+        <div class="small text-muted">goal <%= @goal.protein_min_g %>–<%= @goal.protein_max_g %> g</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <div class="text-muted small">Calories eaten</div>
+        <div class="fs-4 fw-semibold"><%= @today.total_calories %></div>
+        <div class="small text-muted">target ~<%= @today.calorie_target %> kcal</div>
+        <div class="small mt-1"><%= target_status_badge(@goal.calorie_status(@today.total_calories, @today.calories_burned, @today.calorie_target)) %></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <div class="text-muted small">Burned today</div>
+        <div class="fs-4 fw-semibold"><%= @today.calories_burned %></div>
+        <div class="small text-muted">
+          net <%= @today.net_calories %> kcal
+          <% if @today.calories_burned_breakdown.any? %>
+            · <%= @today.calories_burned_breakdown.map { |p| "#{p[:label]} #{p[:kcal]}" }.join(" · ") %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= render "daily_logs/target_suggestions", suggestions: @target_suggestions %>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4">
+    <div class="card stat-card h-100 border-info border-opacity-25">
+      <div class="card-body">
+        <div class="text-muted small">Water</div>
+        <div class="fs-4 fw-semibold"><%= @today.water_ml %> ml</div>
+        <div class="small text-muted">~<%= @today.water_glasses %> glasses · goal <%= @goal.water_goal_ml %> ml</div>
+        <div class="small mt-1"><%= link_to "Update bottle →", daily_log_path(@today, anchor: "water") %></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <div class="text-muted small">Sleep</div>
+        <div class="fs-4 fw-semibold"><%= @today.sleep_duration_hours ? "#{@today.sleep_duration_hours}h" : "—" %></div>
+        <div class="small text-muted"><%= @today.sleep_summary.presence || "Log bed & wake time" %></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-4">
+    <div class="card stat-card h-100">
+      <div class="card-body">
+        <div class="text-muted small">Period</div>
+        <div class="fs-4 fw-semibold"><%= @today.on_period? ? "Yes" : "No" %></div>
+        <div class="small text-muted"><%= link_to "Update →", edit_daily_log_path(@today) %></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card stat-card mb-4">
+  <div class="card-body">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      <div>
+        <h2 class="h5 mb-0">This week</h2>
+        <p class="text-muted small mb-0"><%= @week.week_label %></p>
+      </div>
+      <%= target_status_badge(@week.calorie_balance_status) %>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="border rounded p-2 bg-white">
+          <div class="small text-muted">Avg weight</div>
+          <div class="fw-semibold"><%= @week.avg_weight ? "#{@week.avg_weight} kg" : "—" %></div>
+          <%= target_status_badge(@goal.weight_status(@week.latest_weight)) %>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="border rounded p-2 bg-white">
+          <div class="small text-muted">Total eaten</div>
+          <div class="fw-semibold"><%= @week.total_eaten %> kcal</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="border rounded p-2 bg-white">
+          <div class="small text-muted">Total burned</div>
+          <div class="fw-semibold"><%= @week.total_burned %> kcal</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="border rounded p-2 bg-white">
+          <div class="small text-muted">Protein days on target</div>
+          <div class="fw-semibold"><%= @week.days_on_protein_target %> / <%= @week.logs.size %></div>
+          <div class="small text-muted">avg <%= @week.avg_daily_protein %> g/day</div>
+        </div>
+      </div>
+    </div>
+
+    <% if @week.logs.any? %>
+      <h3 class="h6 text-muted">Calories eaten vs burned vs target</h3>
+      <%= column_chart [
+            { name: "Eaten", data: @week.eaten_by_day },
+            { name: "Burned (tracker)", data: @week.burned_by_day },
+            { name: "Target", data: @week.target_by_day }
+          ], stacked: false, suffix: " kcal", library: { scales: { x: { stacked: false }, y: { stacked: false } } } %>
+
+      <h3 class="h6 text-muted mt-4">Protein vs goal (<%= @goal.protein_min_g %> g min)</h3>
+      <%= column_chart [
+            { name: "Protein", data: @week.protein_by_day },
+            { name: "Min goal", data: @week.protein_min_line }
+          ], suffix: " g" %>
+    <% else %>
+      <p class="text-muted mb-0">Log a few days this week to see weekly charts.</p>
+    <% end %>
+  </div>
+</div>
+
+<div class="card stat-card">
+  <div class="card-body">
+    <h2 class="h5">Weight vs target (<%= @goal.target_weight_kg %> kg)</h2>
+    <% if @weight_data.any? %>
+      <%= line_chart [
+            { name: "Weight", data: @weight_data },
+            { name: "Target", data: @weight_target_line }
+          ], suffix: " kg", library: { scales: { y: { beginAtZero: false } } } %>
+      <p class="small text-muted mb-0 mt-2"><%= weight_vs_goal_label(@goal, @week.latest_weight || @today.weight_kg) %></p>
+    <% else %>
+      <p class="text-muted mb-0">Log weight on your daily page to see a chart.</p>
+    <% end %>
+  </div>
+</div>

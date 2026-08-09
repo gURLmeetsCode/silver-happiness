@@ -7,6 +7,13 @@ def seed_recipe(slug, attrs, ingredients, steps)
     r.assign_attributes(attrs.except(:meal_template_slug))
   end
 
+  # A recipe you wrote yourself can land on a seeded slug (e.g. "baked-tofu").
+  # Seeding rewrites ingredients wholesale, so never touch one you own.
+  if recipe.user_created?
+    puts "  · #{slug} is your own recipe — leaving it untouched"
+    return recipe
+  end
+
   if attrs[:meal_template_slug]
     recipe.meal_template = MealTemplate.find_by!(slug: attrs[:meal_template_slug])
   end

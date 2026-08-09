@@ -20,6 +20,10 @@ class Goal < ApplicationRecord
     }
   end
 
+  def greeting_name
+    display_name.presence
+  end
+
   def calorie_target_for(log)
     log.training_day? ? calories_training_day : calories_rest_day
   end

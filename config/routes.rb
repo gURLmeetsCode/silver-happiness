@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   root "dashboard#show"
 
   resource :dashboard, only: :show, controller: "dashboard"
+  resource :metrics, only: :show, controller: "metrics"
 
   resource :goal, only: [ :edit, :update ]
 

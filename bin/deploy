@@ -137,9 +137,31 @@ bundle config set --local deployment 'true' 2>/dev/null || true
 bundle config set --local without 'development test' 2>/dev/null || true
 bundle install
 
+# A migration is the only thing in this script that can touch your logged data,
+# so snapshot first. `.backup` is safe to run while the app is serving.
+echo "==> Back up database"
+mkdir -p storage/backups
+BACKUP_FILE="storage/backups/production-$(date +%Y%m%d-%H%M%S).sqlite3"
+if ! command -v sqlite3 >/dev/null 2>&1; then
+  echo "FAILED: sqlite3 is not installed — refusing to migrate without a backup"
+  echo "Install it with: sudo apt-get install -y sqlite3"
+  exit 1
+fi
+if ! sqlite3 storage/production.sqlite3 ".backup ${BACKUP_FILE}"; then
+  echo "FAILED: could not back up the database — refusing to migrate"
+  exit 1
+fi
+echo "    saved ${BACKUP_FILE} ($(du -h "${BACKUP_FILE}" | cut -f1))"
+# Keep the 20 most recent, and never rotate away the one just written.
+ls -1t storage/backups/production-*.sqlite3 \
+  | grep -vxF "${BACKUP_FILE}" \
+  | tail -n +20 \
+  | xargs -r rm -f
+
 echo "==> Migrate database"
 if ! bin/rails db:migrate; then
-  echo "Migration failed — rolling back code (DB may need manual attention)"
+  echo "Migration failed — restoring database and rolling back code"
+  cp "${BACKUP_FILE}" storage/production.sqlite3
   rollback
 fi
 

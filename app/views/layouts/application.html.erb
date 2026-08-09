@@ -27,8 +27,18 @@
         <div class="site-nav-desktop">
           <ul class="navbar-nav site-nav-links">
             <li class="nav-item">
+              <%= link_to root_path, class: nav_item_class(:home) do %>
+                <i class="bi bi-house me-1"></i> Home
+              <% end %>
+            </li>
+            <li class="nav-item">
               <%= link_to today_path, class: nav_item_class(:today) do %>
                 <i class="bi bi-sun me-1"></i> Today
+              <% end %>
+            </li>
+            <li class="nav-item">
+              <%= link_to metrics_path, class: nav_item_class(:metrics) do %>
+                <i class="bi bi-graph-up me-1"></i> Metrics
               <% end %>
             </li>
             <li class="nav-item">
@@ -62,17 +72,21 @@
     </nav>
 
     <nav class="mobile-tab-bar d-lg-none" aria-label="Quick navigation">
+      <%= link_to root_path, class: mobile_tab_class(:home) do %>
+        <i class="bi bi-house"></i>
+        <span>Home</span>
+      <% end %>
       <%= link_to today_path, class: mobile_tab_class(:today) do %>
         <i class="bi bi-sun"></i>
         <span>Today</span>
       <% end %>
+      <%= link_to metrics_path, class: mobile_tab_class(:metrics) do %>
+        <i class="bi bi-graph-up"></i>
+        <span>Metrics</span>
+      <% end %>
       <%= link_to recipes_path, class: mobile_tab_class(:recipes) do %>
         <i class="bi bi-journal-text"></i>
         <span>Recipes</span>
-      <% end %>
-      <%= link_to daily_logs_path, class: mobile_tab_class(:log) do %>
-        <i class="bi bi-plus-circle"></i>
-        <span>Log</span>
       <% end %>
       <%= link_to workout_plans_path, class: mobile_tab_class(:strength) do %>
         <i class="bi bi-lightning"></i>
@@ -81,10 +95,6 @@
       <%= link_to outfit_photos_path, class: mobile_tab_class(:outfits) do %>
         <i class="bi bi-camera"></i>
         <span>Outfits</span>
-      <% end %>
-      <%= link_to edit_goal_path, class: mobile_tab_class(:goals) do %>
-        <i class="bi bi-bullseye"></i>
-        <span>Goals</span>
       <% end %>
     </nav>
 

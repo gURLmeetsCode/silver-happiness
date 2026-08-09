@@ -360,64 +360,68 @@ seed_template("pasta-salad-tofu-dinner", "Pasta salad + tofu", :dinner, [
   [ homemade_dressing, 30, "2 tbsp homemade dressing" ]
 ])
 
-# --- Aug 6, 2026 (real day — Nantes outing) ---
-aug6 = DailyLog.find_or_create_by!(logged_on: Date.new(2026, 8, 6)) do |log|
-  log.training_notes = "Rest · walked ~8 km Nantes (exhibitions, stairs)"
-  log.notes = "Nantes outing. Evening: light salad + 100g tofu fumé."
+# --- Personal history (Aug 6–7, 2026) ---
+#
+# These two days were hand-entered before the app could record them. A day that
+# already exists belongs to whoever logged it, so the seed skips it entirely
+# rather than reconciling field by field — re-running db:seed must never
+# overwrite or delete a real check-in.
+def seed_untouched_day(date)
+  if DailyLog.exists?(logged_on: date)
+    puts "  · #{date} already has a log — leaving it untouched"
+    return
+  end
+
+  yield DailyLog.create!(logged_on: date)
 end
 
-aug6.meal_entries.find_or_create_by!(name: "Rest-day breakfast") do |e|
-  e.meal_type = :breakfast
-  e.calories = 280
-  e.protein_g = 24
-  e.notes = "Yogurt + ½ scoop protein + strawberries + 1 tsp PB + chia + cinnamon + espresso"
+seed_untouched_day(Date.new(2026, 8, 6)) do |aug6|
+  aug6.update!(
+    training_notes: "Rest · walked ~8 km Nantes (exhibitions, stairs)",
+    notes: "Nantes outing. Evening: light salad + 100g tofu fumé."
+  )
+
+  aug6.meal_entries.create!(
+    name: "Rest-day breakfast", meal_type: :breakfast, calories: 280, protein_g: 24,
+    notes: "Yogurt + ½ scoop protein + strawberries + 1 tsp PB + chia + cinnamon + espresso"
+  )
+  aug6.meal_entries.create!(
+    name: "Nantes lunch", meal_type: :lunch, calories: 750, protein_g: 18,
+    notes: "Vegan burger + fries"
+  )
+  aug6.meal_entries.create!(
+    name: "Nantes snacks + evening salad", meal_type: :dinner, calories: 650, protein_g: 18,
+    notes: "Shared cake, 1½ cookies, 1× bubble tea 50% sugar, evening salad 100g tofu fumé, 2–3 tbsp dressing"
+  )
 end
 
-aug6.meal_entries.find_or_create_by!(name: "Nantes lunch") do |e|
-  e.meal_type = :lunch
-  e.calories = 750
-  e.protein_g = 18
-  e.notes = "Vegan burger + fries"
-end
+seed_untouched_day(Date.new(2026, 8, 7)) do |aug7|
+  power_salad = MealTemplate.find_by!(slug: "power-salad")
+  banana_pb_snack = MealTemplate.find_by!(slug: "banana-pb-skyr-snack")
 
-aug6.meal_entries.find_or_create_by!(name: "Nantes snacks + evening salad") do |e|
-  e.meal_type = :dinner
-  e.calories = 650
-  e.protein_g = 18
-  e.notes = "Shared cake, 1½ cookies, 1× bubble tea 50% sugar, evening salad 100g tofu fumé, 2–3 tbsp dressing"
-end
+  aug7.update!(
+    weight_kg: 59.0,
+    weight_pre_run: true,
+    run_km: 8,
+    run_calories: 448,
+    walk_km: 2.9,
+    walk_calories: 159,
+    training_notes: "6am fasted 8 km Runna + 2.9 km walk after",
+    bed_time: Time.zone.parse("22:30"),
+    wake_time: Time.zone.parse("05:45"),
+    sleep_quality: 7,
+    water_ml: 1750,
+    feeling_check_in: "Light, good energy after run"
+  )
 
-# --- Aug 7, 2026 (today — real logged data) ---
-aug7 = DailyLog.find_or_create_by!(logged_on: Date.new(2026, 8, 7)) do |log|
-  log.weight_kg = 59.0
-  log.weight_pre_run = true
-  log.run_km = 8
-  log.run_calories = 448
-  log.walk_km = 2.9
-  log.walk_calories = 159
-  log.training_notes = "6am fasted 8 km Runna + 2.9 km walk after"
-  log.bed_time = Time.zone.parse("22:30")
-  log.wake_time = Time.zone.parse("05:45")
-  log.sleep_quality = 7
-  log.water_ml = 1750
-  log.feeling_check_in = "Light, good energy after run"
-end
-
-power_salad = MealTemplate.find_by!(slug: "power-salad")
-banana_pb_snack = MealTemplate.find_by!(slug: "banana-pb-skyr-snack")
-
-aug7.meal_entries.find_or_initialize_by(name: "Run-day oats + protein").tap do |e|
-  e.assign_attributes(
-    meal_type: :breakfast, calories: 348, protein_g: 36,
+  aug7.meal_entries.create!(
+    name: "Run-day oats + protein", meal_type: :breakfast, calories: 348, protein_g: 36,
     meal_template: run_breakfast,
     notes: "40g oats + 35g Vegan Protein 360 + chia + cinnamon + nutmeg + espresso + soja foam"
   )
-  e.save!
-end
 
-aug7.meal_entries.find_or_initialize_by(name: "Power salad lunch").tap do |e|
-  e.assign_attributes(
-    meal_type: :lunch,
+  aug7.meal_entries.create!(
+    name: "Power salad lunch", meal_type: :lunch,
     calories: power_salad.total_calories,
     protein_g: power_salad.total_protein,
     carbs_g: power_salad.total_carbs,
@@ -425,29 +429,25 @@ aug7.meal_entries.find_or_initialize_by(name: "Power salad lunch").tap do |e|
     meal_template: power_salad,
     notes: "125 g tofu + 120 g quinoa + 2 tbsp dressing"
   )
-  e.save!
-end
 
-aug7.meal_entries.find_or_initialize_by(name: "Banana + PB + Skyr").tap do |e|
-  e.assign_attributes(
-    meal_type: :snack,
+  aug7.meal_entries.create!(
+    name: "Banana + PB + Skyr", meal_type: :snack,
     calories: banana_pb_snack.total_calories,
     protein_g: banana_pb_snack.total_protein,
     carbs_g: banana_pb_snack.total_carbs,
     fat_g: banana_pb_snack.total_fat,
     meal_template: banana_pb_snack
   )
-  e.save!
-end
 
-aug7.workouts.find_or_create_by!(activity_type: :run, calories_burned: 448) do |w|
-  w.distance_km = 8
-  w.notes = "6am fasted Runna run"
-end
+  aug7.workouts.find_or_create_by!(activity_type: :run, calories_burned: 448) do |w|
+    w.distance_km = 8
+    w.notes = "6am fasted Runna run"
+  end
 
-aug7.workouts.find_or_create_by!(activity_type: :walk, calories_burned: 159) do |w|
-  w.distance_km = 2.9
-  w.notes = "Walk after run"
+  aug7.workouts.find_or_create_by!(activity_type: :walk, calories_burned: 159) do |w|
+    w.distance_km = 2.9
+    w.notes = "Walk after run"
+  end
 end
 
 # One-tap quick log on dashboard / daily log

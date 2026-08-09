@@ -182,6 +182,80 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+/* --- Home screen --- */
+
+.home-hero {
+  padding: 0.5rem 0 0.25rem;
+}
+
+.home-hero-date {
+  color: #6c757d;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+.home-hero-greeting {
+  font-size: clamp(1.6rem, 6vw, 2.25rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.home-card {
+  border: 0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.home-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .home-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.home-action {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  color: #212529;
+  text-decoration: none;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.home-action:hover,
+.home-action:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  color: #212529;
+}
+
+.home-action i {
+  font-size: 1.4rem;
+  line-height: 1;
+  margin-bottom: 0.35rem;
+  color: #0d6efd;
+}
+
+.home-action-label {
+  font-weight: 600;
+}
+
+.home-action-hint {
+  font-size: 0.78rem;
+  color: #6c757d;
+  line-height: 1.25;
+}
+
 .upload-zone {
   border: 2px dashed #ced4da;
   border-radius: 0.75rem;
