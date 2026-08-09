@@ -1,0 +1,40 @@
+<%# locals: daily_log, goal %>
+<div class="summary-strip mb-3">
+  <div class="summary-cell">
+    <span class="summary-label">Eaten</span>
+    <span class="summary-value"><%= daily_log.total_calories %></span>
+    <span class="summary-hint">of ~<%= daily_log.calorie_target %> kcal</span>
+  </div>
+  <div class="summary-cell">
+    <span class="summary-label">Burned</span>
+    <span class="summary-value"><%= daily_log.calories_burned %></span>
+    <span class="summary-hint">net <%= daily_log.net_calories %> kcal</span>
+  </div>
+  <div class="summary-cell">
+    <span class="summary-label">Protein</span>
+    <span class="summary-value"><%= daily_log.total_protein.round(0) %> g</span>
+    <span class="summary-hint">goal <%= goal.protein_min_g %>–<%= goal.protein_max_g %> g</span>
+  </div>
+  <div class="summary-cell">
+    <span class="summary-label">Carbs</span>
+    <span class="summary-value"><%= daily_log.total_carbs.round(0) %> g</span>
+    <span class="summary-hint">&nbsp;</span>
+  </div>
+  <div class="summary-cell">
+    <span class="summary-label">Fat</span>
+    <span class="summary-value"><%= daily_log.total_fat.round(0) %> g</span>
+    <span class="summary-hint">&nbsp;</span>
+  </div>
+  <div class="summary-cell">
+    <span class="summary-label">Weight</span>
+    <span class="summary-value"><%= daily_log.weight_kg || "—" %></span>
+    <span class="summary-hint"><%= daily_log.weight_kg.present? ? "kg" : "not logged" %></span>
+  </div>
+</div>
+
+<% if daily_log.calories_burned_breakdown.any? %>
+  <p class="small text-muted mb-3">
+    Burned:
+    <%= daily_log.calories_burned_breakdown.map { |p| "#{p[:label]} #{p[:kcal]} kcal" }.join(" · ") %>
+  </p>
+<% end %>

@@ -1,0 +1,60 @@
+<%# locals: daily_log %>
+<section class="card day-card mb-3">
+  <div class="card-body">
+    <h2 class="h5 mb-1">Progress photos</h2>
+    <p class="text-muted small mb-3">Front, side and back shots for this day.</p>
+
+    <% if daily_log.progress_photos.any? %>
+      <div class="photo-grid mb-3">
+        <% daily_log.progress_photos.each do |photo| %>
+          <div>
+            <%= image_tag photo.image.variant(resize_to_limit: [ 400, 600 ]), class: "rounded", alt: photo.photo_type %>
+            <div class="small text-muted"><%= photo.photo_type.humanize %></div>
+            <%= button_to "Remove", daily_log_progress_photo_path(daily_log, photo), method: :delete,
+                  class: "btn btn-sm btn-link text-danger p-0" %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%= form_with model: [ daily_log, ProgressPhoto.new ], html: { multipart: true } do |f| %>
+      <div class="upload-zone mb-3">
+        <%= f.file_field :image, accept: "image/*", capture: "environment", class: "form-control" %>
+      </div>
+      <div class="row g-2 mb-3">
+        <div class="col-md-6">
+          <%= f.label :photo_type, class: "form-label small text-muted" %>
+          <%= f.select :photo_type, ProgressPhoto.photo_types.keys.map { |k| [ k.humanize, k ] }, {}, class: "form-select" %>
+        </div>
+        <div class="col-md-6">
+          <%= f.label :caption, class: "form-label small text-muted" %>
+          <%= f.text_field :caption, class: "form-control", placeholder: "optional" %>
+        </div>
+      </div>
+      <%= f.submit "Upload progress photo", class: "btn btn-primary w-100" %>
+    <% end %>
+  </div>
+</section>
+
+<section class="card day-card">
+  <div class="card-body">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      <h2 class="h5 mb-0">Outfit snap</h2>
+      <%= link_to "All outfits", outfit_photos_path, class: "small" %>
+    </div>
+    <div class="d-grid gap-2">
+      <%= link_to new_outfit_photo_path(category: :feeling_cute, logged_on: daily_log.logged_on), class: "btn btn-outline-dark text-start" do %>
+        <i class="bi bi-camera me-1"></i> Feeling cute
+      <% end %>
+      <%= link_to new_outfit_photo_path(category: :reality_check, logged_on: daily_log.logged_on), class: "btn btn-outline-secondary text-start" do %>
+        <i class="bi bi-heart me-1"></i> Not as bad as you think
+      <% end %>
+      <%= link_to new_outfit_photo_path(category: :workout, logged_on: daily_log.logged_on), class: "btn btn-outline-primary text-start" do %>
+        <i class="bi bi-lightning me-1"></i> Workout fit
+      <% end %>
+      <%= link_to new_outfit_photo_path(category: :everyday, logged_on: daily_log.logged_on), class: "btn btn-outline-secondary text-start" do %>
+        <i class="bi bi-bag me-1"></i> Everyday
+      <% end %>
+    </div>
+  </div>
+</section>

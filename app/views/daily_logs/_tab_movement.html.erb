@@ -1,0 +1,176 @@
+<%# locals: daily_log %>
+<section class="card day-card mb-3">
+  <div class="card-body">
+    <h2 class="h5 mb-1">Run &amp; walk</h2>
+    <p class="text-muted small mb-3">Distance and calories straight off your watch.</p>
+
+    <%= form_with model: daily_log, class: "row g-2" do |f| %>
+      <%= hidden_field_tag :return_to, daily_log_path(daily_log, anchor: "movement") %>
+      <div class="col-6 col-md-3">
+        <%= f.label :run_km, "Run (km)", class: "form-label small text-muted" %>
+        <%= f.number_field :run_km, step: 0.1, class: "form-control" %>
+      </div>
+      <div class="col-6 col-md-3">
+        <%= f.label :run_calories, "Run kcal", class: "form-label small text-muted" %>
+        <%= f.number_field :run_calories, class: "form-control" %>
+      </div>
+      <div class="col-6 col-md-3">
+        <%= f.label :walk_km, "Walk (km)", class: "form-label small text-muted" %>
+        <%= f.number_field :walk_km, step: 0.1, class: "form-control" %>
+      </div>
+      <div class="col-6 col-md-3">
+        <%= f.label :walk_calories, "Walk kcal", class: "form-label small text-muted" %>
+        <%= f.number_field :walk_calories, class: "form-control" %>
+      </div>
+      <div class="col-12">
+        <%= f.label :training_notes, "Training notes", class: "form-label small text-muted" %>
+        <%= f.text_field :training_notes, class: "form-control", placeholder: "e.g. 6am fasted Runna 8 km" %>
+      </div>
+      <div class="col-12">
+        <%= f.label :energy_notes, "Energy / training feel", class: "form-label small text-muted" %>
+        <%= f.text_field :energy_notes, class: "form-control", placeholder: "e.g. legs heavy first 2 km" %>
+      </div>
+      <div class="col-12">
+        <%= f.submit "Save run & walk", class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</section>
+
+<section class="card day-card mb-3">
+  <div class="card-body">
+    <h2 class="h5 mb-3">Other workouts</h2>
+
+    <% if daily_log.workouts.any? %>
+      <ul class="list-group list-group-flush mb-3">
+        <% daily_log.workouts.each do |workout| %>
+          <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+            <div>
+              <div class="fw-semibold"><%= workout.activity_type.humanize %></div>
+              <div class="small text-muted"><%= workout.summary %></div>
+            </div>
+            <%= button_to "Remove", daily_log_workout_path(daily_log, workout), method: :delete,
+                  class: "btn btn-sm btn-outline-danger" %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-muted mb-3">No workouts logged yet.</p>
+    <% end %>
+
+    <%= form_with model: [ daily_log, @workout ], class: "row g-2" do |f| %>
+      <div class="col-md-4">
+        <%= f.label :activity_type, "Activity", class: "form-label small text-muted" %>
+        <%= f.select :activity_type, Workout.activity_types.keys.map { |k| [ k.humanize, k ] }, {}, class: "form-select" %>
+      </div>
+      <div class="col-md-3">
+        <%= f.label :distance_km, "Distance (km)", class: "form-label small text-muted" %>
+        <%= f.number_field :distance_km, step: 0.1, class: "form-control", placeholder: "optional" %>
+      </div>
+      <div class="col-md-3">
+        <%= f.label :calories_burned, "Calories", class: "form-label small text-muted" %>
+        <%= f.number_field :calories_burned, class: "form-control", required: true %>
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <%= f.submit "Add", class: "btn btn-primary w-100" %>
+      </div>
+      <div class="col-12">
+        <%= f.label :notes, class: "form-label small text-muted" %>
+        <%= f.text_field :notes, class: "form-control", placeholder: "e.g. Runna 8km, gym full body" %>
+      </div>
+    <% end %>
+  </div>
+</section>
+
+<section class="card day-card">
+  <div class="card-body">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      <h2 class="h5 mb-0">Strength</h2>
+      <%= link_to "All plans", workout_plans_path, class: "btn btn-sm btn-outline-secondary" %>
+    </div>
+
+    <% if daily_log.strength_sessions.any? %>
+      <ul class="list-group list-group-flush mb-3">
+        <% daily_log.strength_sessions.each do |session| %>
+          <li class="list-group-item px-0">
+            <%= link_to daily_log_strength_session_path(daily_log, session), class: "text-decoration-none text-dark" do %>
+              <div class="fw-semibold"><%= session.title %></div>
+              <div class="small text-muted">
+                <%= session.location_label %>
+                · <%= session.difficulty_label %>
+                <% if session.duration_min.present? %> · <%= session.duration_min %> min<% end %>
+                <% if session.calories_burned.present? %> · <%= session.calories_burned %> kcal<% end %>
+              </div>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-muted mb-3">No strength session logged yet.</p>
+    <% end %>
+
+    <% if @runna_strength_today %>
+      <%= link_to new_daily_log_strength_session_path(daily_log, workout_plan_id: @runna_strength_today.id),
+            class: "btn btn-primary w-100 mb-2" do %>
+        Log today's Runna strength
+        <span class="d-block small fw-normal opacity-75"><%= @runna_strength_today.name %></span>
+      <% end %>
+    <% end %>
+
+    <%= link_to "Log a session (Garmin calories + notes)",
+          new_daily_log_strength_session_path(daily_log),
+          class: "btn #{@runna_strength_today ? 'btn-outline-primary' : 'btn-primary'} w-100 mb-3" %>
+
+    <% if @suggested_strength %>
+      <div class="alert alert-light border mb-3">
+        <strong>Suggested add-on:</strong> <%= @suggested_strength.name %>
+        (<%= @suggested_strength.plan_kind_label %> · <%= @suggested_strength.location_label %>)
+        <%= render "workout_plans/body_targets", plan: @suggested_strength, class: "mt-2 mb-1" %>
+        <div class="small text-muted"><%= @suggestion_context %></div>
+        <%= link_to "Log this add-on", new_daily_log_strength_session_path(daily_log, workout_plan_id: @suggested_strength.id), class: "alert-link" %>
+      </div>
+    <% end %>
+
+    <div class="accordion accordion-flush" id="strength-plans">
+      <div class="accordion-item">
+        <h3 class="accordion-header">
+          <button class="accordion-button collapsed px-0" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#strength-plan-list">
+            Log from a plan
+          </button>
+        </h3>
+        <div id="strength-plan-list" class="accordion-collapse collapse" data-bs-parent="#strength-plans">
+          <div class="accordion-body px-0">
+            <p class="small text-muted">Runna covers Wed/Sat strength. Pick any supplemental or swap days freely.</p>
+
+            <% if @supplemental_plans.any? %>
+              <p class="small fw-semibold text-muted mb-2">Supplemental</p>
+              <div class="d-grid gap-2 mb-3">
+                <% @supplemental_plans.each do |plan| %>
+                  <%= link_to new_daily_log_strength_session_path(daily_log, workout_plan_id: plan.id),
+                        class: "btn btn-outline-primary text-start#{" active" if plan == @suggested_strength}" do %>
+                    <span class="d-block">Log: <%= plan.name %> (<%= plan.plan_kind_label %>)</span>
+                    <% if plan.body_targets_summary.present? %>
+                      <span class="small text-muted">Targets: <%= plan.body_targets_summary %></span>
+                    <% end %>
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
+
+            <% if @runna_plans.any? %>
+              <p class="small fw-semibold text-muted mb-2">Runna (log after app)</p>
+              <div class="d-grid gap-2">
+                <% @runna_plans.each do |plan| %>
+                  <%= link_to "Log: #{plan.name}",
+                        new_daily_log_strength_session_path(daily_log, workout_plan_id: plan.id),
+                        class: "btn btn-outline-secondary text-start" %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -179,6 +179,7 @@ body {
 
 .stat-card {
   border: 0;
+  border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
@@ -254,6 +255,110 @@ body {
   font-size: 0.78rem;
   color: #6c757d;
   line-height: 1.25;
+}
+
+/* --- Day log --- */
+
+.day-header-eyebrow {
+  color: #6c757d;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.day-header-title {
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.day-card {
+  border: 0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+@media (min-width: 768px) {
+  .summary-strip {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.summary-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.7rem 0.75rem;
+  background: #fff;
+}
+
+.summary-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6c757d;
+}
+
+.summary-value {
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.summary-hint {
+  font-size: 0.72rem;
+  color: #6c757d;
+}
+
+/* Tab strip scrolls sideways on phones instead of wrapping to two rows. */
+.day-tabs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 0.35rem;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+}
+
+.day-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.day-tabs .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  color: #495057;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.day-tabs .nav-link.active {
+  color: #fff;
+  background: #212529;
+  border-color: #212529;
+}
+
+.accordion-flush .accordion-button {
+  font-weight: 600;
+  background: transparent;
+}
+
+.accordion-flush .accordion-button:not(.collapsed) {
+  color: #212529;
+  box-shadow: none;
 }
 
 .upload-zone {
