@@ -4,13 +4,23 @@ module ErrorReporting
   extend ActiveSupport::Concern
 
   included do
-    # Missing records are an expected outcome (stale bookmarks, deleted recipes),
-    # so they must resolve to 404 in every environment rather than falling through
-    # to the catch-all below and being reported as a crash.
-    rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
-    rescue_from ActionController::ParameterMissing, with: :render_bad_request
+    install_error_handlers(rescue_everything: !Rails.application.config.consider_all_requests_local)
+  end
 
-    rescue_from StandardError, with: :render_server_error unless Rails.application.config.consider_all_requests_local
+  class_methods do
+    # Rails picks a rescue_from handler with `rescue_handlers.reverse_each`, so
+    # the LAST one registered wins. The catch-all therefore has to be registered
+    # first; register it last and it swallows every specific handler below it,
+    # turning an expected 404 into a 500 in production only — development and
+    # test never register it at all, so tests cannot see the difference.
+    def install_error_handlers(rescue_everything:)
+      rescue_from StandardError, with: :render_server_error if rescue_everything
+
+      # Missing records are an expected outcome (stale bookmarks, retired
+      # recipes) rather than a crash.
+      rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
+      rescue_from ActionController::ParameterMissing, with: :render_bad_request
+    end
   end
 
   private

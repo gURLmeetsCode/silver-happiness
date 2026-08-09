@@ -62,15 +62,18 @@ RSpec.describe "Recipes", type: :request do
     end
 
     # Regression: a deleted recipe used to surface as a 500 via the catch-all
-    # StandardError handler instead of a 404.
-    it "returns 404 for a recipe id that no longer exists" do
+    # StandardError handler. A saved shortcut to a retired recipe should land on
+    # the list instead of any error page.
+    it "sends a recipe id that no longer exists to the list" do
       recipe = create(:recipe)
       id = recipe.id
       recipe.destroy!
 
       get recipe_path(id: id)
 
-      expect(response).to have_http_status(:not_found)
+      expect(response).to redirect_to(recipes_path)
+      follow_redirect!
+      expect(response.body).to include("no longer exists")
     end
   end
 

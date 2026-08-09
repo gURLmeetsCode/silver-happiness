@@ -105,7 +105,16 @@ class RecipesController < ApplicationController
     @checked_count = @checked_keys.size
   end
 
+  # A retired recipe is usually a saved home-screen shortcut, so send it to the
+  # list rather than a dead end. Registered after the app-wide 404 handler, which
+  # means it wins for recipes only.
+  rescue_from ActiveRecord::RecordNotFound, with: :recipe_no_longer_exists
+
   private
+
+  def recipe_no_longer_exists(_error)
+    redirect_to recipes_path, alert: "That recipe no longer exists. Here's everything you have."
+  end
 
   def set_recipe
     @recipe = Recipe.includes(:recipe_ingredients, :meal_template).find(params[:id])
