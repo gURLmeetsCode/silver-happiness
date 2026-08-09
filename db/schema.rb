@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_09_082034) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_09_131111) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -99,6 +99,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_09_082034) do
     t.decimal "fat_g", precision: 8, scale: 2, default: "0.0", null: false
     t.integer "water_suggestion_ml", default: 250, null: false
     t.integer "water_logged_ml", default: 0, null: false
+    t.text "ingredient_overrides"
     t.index ["daily_log_id"], name: "index_meal_entries_on_daily_log_id"
     t.index ["meal_template_id"], name: "index_meal_entries_on_meal_template_id"
   end

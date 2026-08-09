@@ -43,4 +43,28 @@ class RecipeMealFormBuilder
 
     [ (entry.calories.to_f / nutrition[:calories]).round, 1 ].max
   end
+
+  # Only ingredients linked to a product move the numbers, so only those are
+  # worth offering as adjustable.
+  def adjustable_ingredients
+    recipe.recipe_ingredients.select { |ingredient| ingredient.product.present? }
+  end
+
+  def untracked_ingredients
+    recipe.recipe_ingredients.reject { |ingredient| ingredient.product.present? }
+  end
+
+  # An excluded ingredient still shows its recipe amount, so ticking it back on
+  # returns a sensible number rather than a blank box.
+  def grams_for(ingredient)
+    override = entry&.override_for(ingredient)
+    return ingredient.quantity_g if override.nil? || override.zero?
+
+    override
+  end
+
+  def included?(ingredient)
+    override = entry&.override_for(ingredient)
+    override.nil? || override.positive?
+  end
 end

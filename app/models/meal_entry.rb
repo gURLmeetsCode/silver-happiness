@@ -4,6 +4,12 @@ class MealEntry < ApplicationRecord
   belongs_to :daily_log
   belongs_to :meal_template, optional: true
 
+  # Per-ingredient amounts chosen when logging a recipe, keyed by
+  # recipe_ingredient id: { "12" => 90.0 }. Zero means "left out". Stored so
+  # reopening the meal shows the wrap you actually ate rather than resetting to
+  # the recipe's defaults.
+  serialize :ingredient_overrides, coder: JSON, type: Hash
+
   validates :name, presence: true
   validates :calories, :protein_g, numericality: { greater_than_or_equal_to: 0 }
   validates :water_suggestion_ml, numericality: { greater_than: 0 }, allow_nil: true
@@ -12,6 +18,13 @@ class MealEntry < ApplicationRecord
 
   def water_logged?
     water_logged_ml.to_i.positive?
+  end
+
+  # Grams chosen for this ingredient, or nil when it was never adjusted.
+  def override_for(recipe_ingredient)
+    return nil if ingredient_overrides.blank?
+
+    ingredient_overrides[recipe_ingredient.id.to_s]&.to_d
   end
 
   def water_cups_label

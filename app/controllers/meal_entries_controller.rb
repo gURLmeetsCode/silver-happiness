@@ -137,7 +137,8 @@ class MealEntriesController < ApplicationController
       @entry,
       recipe: @recipe,
       servings: params[:servings],
-      extras: params[:extras]
+      extras: params[:extras],
+      ingredients: params[:ingredients]
     ).apply!
   end
 

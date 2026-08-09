@@ -257,6 +257,53 @@ body {
   line-height: 1.25;
 }
 
+/* --- Recipe meal form --- */
+
+.ingredient-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.ingredient-row:last-child {
+  border-bottom: 0;
+}
+
+.ingredient-row .form-check {
+  margin-bottom: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ingredient-row .form-check-label {
+  overflow-wrap: anywhere;
+}
+
+.ingredient-row.is-excluded .form-check-label {
+  color: #adb5bd;
+  text-decoration: line-through;
+}
+
+.ingredient-amount {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 0 0 auto;
+}
+
+.ingredient-amount .form-control {
+  width: 5rem;
+  text-align: right;
+}
+
+.input-group-text-plain {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
 /* --- Day log --- */
 
 .day-header-eyebrow {

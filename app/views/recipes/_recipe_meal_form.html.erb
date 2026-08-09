@@ -23,6 +23,7 @@
             recipe_log_base_protein_value: nutrition[:protein],
             recipe_log_base_carbs_value: nutrition[:carbs] || 0,
             recipe_log_base_fat_value: nutrition[:fat] || 0,
+            recipe_log_serves_value: (recipe.serves.to_i.positive? ? recipe.serves : 1),
             recipe_log_skip_initial_recalc_value: entry.present?,
             action: "change->recipe-log#recalculate input->recipe-log#recalculate submit->recipe-log#recalculate"
           } do %>
@@ -74,6 +75,58 @@
                 data: { recipe_log_target: "notes" } %>
         </div>
       </div>
+
+      <% if meal_form.adjustable_ingredients.any? %>
+        <h3 class="h6 text-muted">Ingredients</h3>
+        <p class="small text-muted">
+          Untick anything you left out, or change the amount.
+          <% if recipe.serves.to_i > 1 %>
+            Amounts are for the whole recipe (serves <%= recipe.serves %>).
+          <% end %>
+        </p>
+
+        <div class="ingredient-rows mb-3">
+          <% meal_form.adjustable_ingredients.each do |ingredient| %>
+            <% product = ingredient.product %>
+            <div class="ingredient-row" data-recipe-log-target="ingredientRow">
+              <div class="form-check">
+                <input type="hidden" name="ingredients[<%= ingredient.id %>][include]" value="0">
+                <input type="checkbox" class="form-check-input"
+                       id="ingredient-<%= ingredient.id %>"
+                       name="ingredients[<%= ingredient.id %>][include]" value="1"
+                       <%= "checked" if meal_form.included?(ingredient) %>
+                       data-recipe-log-target="ingredientInclude"
+                       data-action="change->recipe-log#recalculate">
+                <label class="form-check-label" for="ingredient-<%= ingredient.id %>">
+                  <%= product.name %>
+                </label>
+              </div>
+
+              <div class="ingredient-amount">
+                <input type="number" step="1" min="0" inputmode="numeric"
+                       class="form-control form-control-sm"
+                       name="ingredients[<%= ingredient.id %>][grams]"
+                       value="<%= meal_form.grams_for(ingredient).to_f.round %>"
+                       aria-label="Grams of <%= product.name %>"
+                       data-recipe-log-target="ingredientGrams"
+                       data-calories="<%= product.calories_per_100g %>"
+                       data-protein="<%= product.protein_per_100g %>"
+                       data-carbs="<%= product.carbs_per_100g %>"
+                       data-fat="<%= product.fat_per_100g %>"
+                       data-action="input->recipe-log#recalculate">
+                <span class="input-group-text-plain">g</span>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <% if meal_form.untracked_ingredients.any? %>
+          <p class="small text-muted mb-3">
+            Also in this recipe (no calories tracked):
+            <%= meal_form.untracked_ingredients.map(&:display).to_sentence %>
+          </p>
+        <% end %>
+      <% end %>
 
       <h3 class="h6 text-muted">Add extras (optional)</h3>
       <p class="small text-muted">Use tbsp for sauce/jalapeños — 1 tbsp = product serving size.</p>
