@@ -407,8 +407,8 @@ seed_untouched_day(Date.new(2026, 8, 7)) do |aug7|
     walk_km: 2.9,
     walk_calories: 159,
     training_notes: "6am fasted 8 km Runna + 2.9 km walk after",
-    bed_time: Time.zone.parse("22:30"),
-    wake_time: Time.zone.parse("05:45"),
+    bed_time: "22:30",
+    wake_time: "05:45",
     sleep_quality: 7,
     water_ml: 1750,
     feeling_check_in: "Light, good energy after run"

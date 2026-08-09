@@ -57,7 +57,7 @@ RSpec.describe DailyLog do
     end
 
     it "returns nil when either end of the window is missing" do
-      log = create(:daily_log, bed_time: Time.zone.parse("22:30"))
+      log = create(:daily_log, bed_time: "22:30")
 
       expect(log.sleep_duration_hours).to be_nil
       expect(log.sleep_summary).to be_nil

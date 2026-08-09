@@ -22,6 +22,7 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
 
   config.include FactoryBot::Syntax::Methods
+  config.include ActiveSupport::Testing::TimeHelpers
 
   # Active Storage writes uploads to disk in test; keep the tree clean.
   config.after(:suite) do

@@ -10,8 +10,9 @@ FactoryBot.define do
     end
 
     trait :with_sleep do
-      bed_time { Time.zone.parse("22:30") }
-      wake_time { Time.zone.parse("06:15") }
+      # Wall-clock strings, the same shape the time_field posts.
+      bed_time { "22:30" }
+      wake_time { "06:15" }
       sleep_quality { 7 }
     end
 
