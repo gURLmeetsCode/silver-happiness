@@ -42,9 +42,16 @@ RAILS_ENV=production bin/rails db:seed
 
 ---
 
-## Automated deploy (GitHub Actions)
+## Automated deploy (GitHub Actions) — NOT ACTIVE
 
-Push to `main` → CI runs tests → Pi deploys itself. No manual `git pull` after the one-time setup below.
+> **Deploys are manual today.** Push to `main` runs CI only. Nothing reaches the
+> Pi until you run `./bin/deploy` on it.
+>
+> There is no `.github/workflows/deploy.yml` in this repo. It was removed because
+> it required a self-hosted runner that was never registered, so every Deploy run
+> sat queued forever and the Actions tab implied the Pi was up to date when it was
+> several commits behind. A workflow that silently does nothing is worse than no
+> workflow. Follow the steps below to turn it back on.
 
 ### Why a self-hosted runner?
 
@@ -80,16 +87,75 @@ mkdir -p ~/actions-runner && cd ~/actions-runner
 
 ./config.sh --url https://github.com/gURLmeetsCode/silver-happiness --token YOUR_TOKEN_FROM_GITHUB
 
-sudo ./svc.sh install
+# Pass the user so the service runs as pi, not root
+sudo ./svc.sh install pi
 sudo ./svc.sh start
 sudo ./svc.sh status
 ```
 
-The runner must stay online (systemd service handles this after `svc.sh install`).
+Confirm it registered — this must list an **active** unit, and the runner must
+show as *Idle* on the GitHub Runners page:
 
-**3. First deploy**
+```bash
+systemctl list-units --all 'actions.runner*'
+```
+
+The runner service starts without a login shell, so it does not read `.bashrc`
+and may not find Ruby. Check what it will actually see:
+
+```bash
+env -i HOME="$HOME" PATH=/usr/local/bin:/usr/bin:/bin bash -c 'which ruby bundle git'
+```
+
+If `ruby` or `bundle` come back empty, hand the runner your real PATH and restart:
+
+```bash
+echo "PATH=$PATH" >> ~/actions-runner/.env
+cd ~/actions-runner && sudo ./svc.sh stop && sudo ./svc.sh start
+```
+
+**3. Restore the workflow**
+
+Recreate `.github/workflows/deploy.yml`:
+
+```yaml
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: deploy-pi
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Raspberry Pi
+    runs-on: self-hosted
+    # Fail visibly if the runner is offline instead of queueing forever.
+    timeout-minutes: 20
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+
+    steps:
+      - name: Deploy
+        working-directory: /home/pi/silver-happiness
+        run: ./bin/deploy
+
+      - name: Diagnose on failure
+        if: failure()
+        working-directory: /home/pi/silver-happiness
+        run: ./bin/doctor || true
+```
+
+**4. First deploy**
 
 Push to `main`. Watch **Actions** in GitHub — CI, then **Deploy to Raspberry Pi**.
+If Deploy sits at *Queued*, the runner is not connected; fix that before trusting it.
 
 ### Manual deploy
 

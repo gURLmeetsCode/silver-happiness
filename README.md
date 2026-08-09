@@ -198,14 +198,15 @@ tailscale serve --https=443 off
 
 ### 7. Deploy updates
 
-**Automated (recommended):** set up a [GitHub Actions self-hosted runner](DEPLOY.md#automated-deploy-github-actions) on the Pi once. After that, every push to `main` runs CI and deploys automatically.
-
-**Manual fallback:**
+Deploys are **manual**. Pushing to `main` runs CI only — it does not touch the Pi.
+Run this on the Pi whenever you want the new code live:
 
 ```bash
 cd ~/silver-happiness
 ./bin/deploy
 ```
+
+To make this automatic, see [enabling the deploy workflow](DEPLOY.md#automated-deploy-github-actions--not-active) — it needs a self-hosted runner on the Pi.
 
 ### Site appears down (troubleshooting)
 
