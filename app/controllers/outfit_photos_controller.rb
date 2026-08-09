@@ -30,6 +30,8 @@ class OutfitPhotosController < ApplicationController
   private
 
   def outfit_photo_params
-    params.require(:outfit_photo).permit(:logged_on, :category, :caption, :note, :image)
+    attrs = params.require(:outfit_photo).permit(:logged_on, :category, :caption, :note, :image)
+    attrs[:image] = ImageDownscaler.call(attrs[:image]) if attrs[:image].present?
+    attrs
   end
 end

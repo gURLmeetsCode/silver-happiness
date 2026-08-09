@@ -68,14 +68,21 @@ record_error(errors, "GET chipotle tofu wrap") do
   end
 end
 
-# Thumbnails are generated on demand, so a missing image_processing gem or
-# ImageMagick binary only shows up as a broken image in the browser — never in
-# the logs. Force one transform so a bad deploy fails here instead.
-record_error(errors, "photo thumbnail") do
+# A broken image only shows up in the browser, never in the logs, so check that
+# a stored photo can still be located and addressed.
+record_error(errors, "photo display") do
   photo = ProgressPhoto.with_attached_image.last || OutfitPhoto.with_attached_image.last
   next unless photo&.image&.attached?
 
-  photo.image.variant(resize_to_limit: [ 400, 600 ]).processed
+  errors << "photo blob missing from storage" unless photo.image.blob.service.exist?(photo.image.blob.key)
+  Rails.application.routes.url_helpers.rails_blob_path(photo.image, only_path: true)
+end
+
+# Uploads are downscaled with MiniMagick, which needs the ImageMagick binary.
+record_error(errors, "ImageMagick available") do
+  MiniMagick.cli_version
+rescue StandardError => e
+  errors << "ImageMagick not usable: #{e.message}"
 end
 
 if errors.any?

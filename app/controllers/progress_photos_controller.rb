@@ -30,6 +30,8 @@ class ProgressPhotosController < ApplicationController
   end
 
   def progress_photo_params
-    params.require(:progress_photo).permit(:photo_type, :caption, :image)
+    attrs = params.require(:progress_photo).permit(:photo_type, :caption, :image)
+    attrs[:image] = ImageDownscaler.call(attrs[:image]) if attrs[:image].present?
+    attrs
   end
 end

@@ -7,8 +7,8 @@
     <% if daily_log.progress_photos.any? %>
       <div class="photo-grid mb-3">
         <% daily_log.progress_photos.each do |photo| %>
-          <div>
-            <%= image_tag photo.image.variant(resize_to_limit: [ 400, 600 ]), class: "rounded", alt: photo.photo_type %>
+          <div class="photo-card">
+            <%= image_tag photo.image, loading: "lazy", alt: photo.photo_type %>
             <div class="small text-muted"><%= photo.photo_type.humanize %></div>
             <%= button_to "Remove", daily_log_progress_photo_path(daily_log, photo), method: :delete,
                   class: "btn btn-sm btn-link text-danger p-0" %>

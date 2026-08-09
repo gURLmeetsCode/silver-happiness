@@ -17,7 +17,7 @@
   <div class="photo-grid">
     <% @outfit_photos.each do |photo| %>
       <div class="card stat-card photo-card">
-        <%= image_tag photo.image.variant(resize_to_limit: [600, 800]), alt: photo.category_label %>
+        <%= image_tag photo.image, loading: "lazy", alt: photo.category_label %>
         <div class="card-body p-2">
           <div class="badge text-bg-light border mb-1"><%= photo.category_label %></div>
           <div class="small text-muted"><%= photo.logged_on.strftime("%b %-d, %Y") %></div>
