@@ -10,6 +10,10 @@ class RecipeMealFormBuilder
     "Puget Huile d'olive vierge extra"
   ].freeze
 
+  SUGGESTED_BY_RECIPE_SLUG = {
+    "noracooks-vegan-pancakes" => [ "Skyr vegan", "Strawberries" ]
+  }.freeze
+
   attr_reader :recipe, :entry
 
   def initialize(recipe, entry: nil)
@@ -27,7 +31,8 @@ class RecipeMealFormBuilder
 
   def suggested_products
     @suggested_products ||= begin
-      seeded = SUGGESTED_PRODUCT_NAMES.filter_map { |name| Product.find_by(name: name) }
+      names = SUGGESTED_PRODUCT_NAMES + (SUGGESTED_BY_RECIPE_SLUG[recipe.slug] || [])
+      seeded = names.filter_map { |name| Product.find_by(name: name) }
       from_recipe = recipe.recipe_ingredients.filter_map(&:product)
       (seeded + from_recipe).uniq.first(EXTRA_ROWS)
     end

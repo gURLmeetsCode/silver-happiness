@@ -16,7 +16,9 @@ def seed_recipe(slug, attrs, ingredients, steps)
 
   ingredients.each_with_index do |item, i|
     category, amount, name, product_name, quantity_g = item
-    prod = product_name.present? ? Product.find_by(name: product_name) : nil
+    prod = if product_name.present? && quantity_g.to_f.positive?
+      Product.find_by(name: product_name)
+    end
 
     recipe.recipe_ingredients.create!(
       grocery_category: category,
@@ -34,7 +36,7 @@ def seed_recipe(slug, attrs, ingredients, steps)
   recipe
 end
 
-# --- Batch prep ---
+unless $RECIPES_SEED_HELPER_ONLY
 
 seed_recipe "baked-tofu", {
   name: "Baked tofu (batch prep)",
@@ -464,8 +466,8 @@ seed_recipe "noracooks-vegan-pancakes", {
   [ :pantry, "19 ml", "water (per pancake)", nil, nil ],
   [ :fats, "3.5 g", "oil in batter (per pancake)", "Puget Huile d'olive vierge extra", 3.5 ],
   [ :pantry, "⅛ tsp", "baking powder, pinch salt, ~3 g sugar (per pancake)", nil, nil ],
-  [ :protein, "optional", "Sojasun Skyr topping", "Skyr vegan", nil ],
-  [ :produce, "several small", "strawberries", "Strawberries", nil ]
+  [ :protein, "optional", "Sojasun Skyr topping (add in extras when logging)", nil, nil ],
+  [ :produce, "several small", "strawberries (add in extras when logging)", nil, nil ]
 ], <<~STEPS
   From Nora Cooks (noracooks.com/vegan-pancakes). We make one base batch and share it — don't use Nora's “serves 3” for logging.
 
@@ -481,3 +483,4 @@ STEPS
 Recipe.find_by(slug: "lighter-pancakes")&.destroy
 
 puts "Recipes loaded — #{Recipe.count} recipes, #{RecipeIngredient.count} ingredients."
+end # unless $RECIPES_SEED_HELPER_ONLY
