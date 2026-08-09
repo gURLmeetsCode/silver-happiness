@@ -479,8 +479,9 @@ seed_recipe "noracooks-vegan-pancakes", {
   To log your meal: Servings = pancakes you ate (e.g. 7) → add skyr (tbsp) and strawberries (g) in extras → Log this meal today.
 STEPS
 
-# Remove legacy placeholder if it still exists from an older seed run.
-Recipe.find_by(slug: "lighter-pancakes")&.destroy
+# Retire the legacy placeholder. Archive rather than destroy so existing links
+# and bookmarks keep resolving instead of 404ing.
+Recipe.find_by(slug: "lighter-pancakes")&.update!(status: :archived)
 
 puts "Recipes loaded — #{Recipe.count} recipes, #{RecipeIngredient.count} ingredients."
 end # unless $RECIPES_SEED_HELPER_ONLY

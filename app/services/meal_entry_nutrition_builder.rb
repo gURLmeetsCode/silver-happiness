@@ -5,7 +5,7 @@ class MealEntryNutritionBuilder
     @entry = entry
     @recipe = recipe
     @servings = [ servings.to_i, 1 ].max
-    @extras = extras.is_a?(Hash) ? extras : {}
+    @extras = normalize_extras(extras)
   end
 
   def apply!
@@ -20,6 +20,16 @@ class MealEntryNutritionBuilder
   end
 
   private
+
+  # Extras arrive from the form as ActionController::Parameters, which is not a
+  # Hash — treating it as one silently dropped every extra the user added.
+  def normalize_extras(extras)
+    case extras
+    when ActionController::Parameters then extras.permit!.to_h
+    when Hash then extras
+    else {}
+    end
+  end
 
   def apply_from_recipe_base!
     per = @recipe.nutrition_per_serving

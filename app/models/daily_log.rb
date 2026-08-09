@@ -192,24 +192,6 @@ class DailyLog < ApplicationRecord
     "#{logged}/#{total} meals with water"
   end
 
-  private
-
-  def sync_activity_workout!(type, km, kcal)
-    if kcal.to_i.positive? || km.present?
-      workout = workouts.find_or_initialize_by(activity_type: type)
-      workout.calories_burned = kcal.to_i if kcal.to_i.positive?
-      workout.calories_burned = 0 if workout.calories_burned.nil?
-      workout.distance_km = km if km.present?
-      workout.save!
-    else
-      workouts.where(activity_type: type).destroy_all
-    end
-  end
-
-  def format_time(time)
-    time.strftime("%H:%M")
-  end
-
   def copy_meals_from!(other_log)
     transaction do
       meal_entries.destroy_all
@@ -227,5 +209,31 @@ class DailyLog < ApplicationRecord
         )
       end
     end
+  end
+
+  private
+
+  def sync_activity_workout!(type, km, kcal)
+    existing = workouts.where(activity_type: type).order(:id).to_a
+
+    if kcal.to_i.positive? || km.present?
+      # A day has at most one run and one walk; extras would double-count in
+      # calories_burned_breakdown.
+      workout = existing.shift || workouts.build(activity_type: type)
+      existing.each(&:destroy)
+
+      workout.calories_burned = kcal.to_i if kcal.to_i.positive?
+      workout.calories_burned = 0 if workout.calories_burned.nil?
+      workout.distance_km = km if km.present?
+      workout.save!
+    else
+      existing.each(&:destroy)
+    end
+
+    workouts.reset
+  end
+
+  def format_time(time)
+    time.strftime("%H:%M")
   end
 end

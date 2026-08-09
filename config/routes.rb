@@ -11,7 +11,7 @@ Rails.application.routes.draw do
 
   resources :workout_plans, only: [ :index, :show ]
 
-  resources :daily_logs do
+  resources :daily_logs, only: [ :index, :show, :edit, :update ] do
     member do
       post :copy_meals
       post :add_water
@@ -23,7 +23,7 @@ Rails.application.routes.draw do
       end
     end
     resources :workouts, only: [ :create, :destroy ]
-    resources :strength_sessions
+    resources :strength_sessions, except: [ :index ]
     resources :progress_photos, only: [ :create, :destroy ]
   end
 
@@ -41,7 +41,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :recipes do
+  resources :recipes, except: [ :destroy ] do
     collection do
       get :grocery
     end

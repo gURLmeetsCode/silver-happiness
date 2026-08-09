@@ -7,14 +7,12 @@ on:
 
 jobs:
   scan_ruby:
+    name: Brakeman
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: .ruby-version
           bundler-cache: true
@@ -23,14 +21,12 @@ jobs:
         run: bin/brakeman --no-pager
 
   scan_js:
+    name: Importmap audit
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: .ruby-version
           bundler-cache: true
@@ -39,13 +35,12 @@ jobs:
         run: bin/importmap audit
 
   lint:
+    name: Rubocop
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: .ruby-version
           bundler-cache: true
@@ -53,43 +48,103 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
-  test:
+  spec:
+    name: RSpec
     runs-on: ubuntu-latest
-
-    # services:
-    #  redis:
-    #    image: redis
-    #    ports:
-    #      - 6379:6379
-    #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential git libyaml-dev node-gyp pkg-config python-is-python3 google-chrome-stable
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config
 
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: .ruby-version
           bundler-cache: true
 
-      - name: Run tests
+      - name: Prepare test database
         env:
           RAILS_ENV: test
-          # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test test:system
+        run: bin/rails db:test:prepare
 
-      - name: Production smoke test
+      - name: Run specs
+        env:
+          RAILS_ENV: test
+        run: |
+          bundle exec rspec \
+            --format progress \
+            --format RspecJunitFormatter --out tmp/rspec/results.xml
+
+      # Turns each failing example into an inline annotation on the pull
+      # request diff, so a reviewer sees exactly what broke without opening logs.
+      - name: Annotate failing examples
+        if: always()
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: tmp/rspec/results.xml
+          check_name: RSpec results
+          include_passed: false
+          detailed_summary: true
+          fail_on_failure: true
+          require_tests: true
+
+      - name: Upload spec results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rspec-results
+          path: tmp/rspec/results.xml
+          if-no-files-found: error
+
+  smoke:
+    name: Production smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Prepare test database
+        env:
+          RAILS_ENV: test
+        run: bin/rails db:test:prepare
+
+      # Loads the production seed files (not db/seeds/test.rb, which is empty)
+      # so the smoke test runs against the same data the Pi will have.
+      - name: Load production seed data
+        env:
+          RAILS_ENV: test
+        run: bin/rails runner 'load Rails.root.join("db/seeds/production.rb")'
+
+      - name: Smoke test
         env:
           RAILS_ENV: test
         run: bin/rails runner script/production_smoke_test.rb
 
-      - name: Keep screenshots from failed system tests
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: screenshots
-          path: ${{ github.workspace }}/tmp/screenshots
-          if-no-files-found: ignore
+  # Single required status check. Point branch protection at "CI passed" so a
+  # new job cannot be added without also being enforced.
+  ci_passed:
+    name: CI passed
+    runs-on: ubuntu-latest
+    needs: [ scan_ruby, scan_js, lint, spec, smoke ]
+    if: always()
+    steps:
+      - name: Fail if any job failed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "### CI failed — changes are not mergeable" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Job | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| --- | ------ |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Brakeman | ${{ needs.scan_ruby.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Importmap audit | ${{ needs.scan_js.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Rubocop | ${{ needs.lint.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| RSpec | ${{ needs.spec.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Smoke test | ${{ needs.smoke.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+
+      - name: Report success
+        run: echo "All checks passed." >> "$GITHUB_STEP_SUMMARY"
