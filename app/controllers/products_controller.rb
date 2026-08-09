@@ -7,7 +7,7 @@ class ProductsController < ApplicationController
     @product = Product.new(product_params)
 
     if @product.save
-      redirect_to params[:return_to].presence || root_path, notice: "#{@product.name} saved to your products."
+      redirect_to safe_return_to(default: root_path), notice: "#{@product.name} saved to your products."
     else
       render :new, status: :unprocessable_entity
     end

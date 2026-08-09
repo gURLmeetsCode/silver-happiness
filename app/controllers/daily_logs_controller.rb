@@ -15,7 +15,7 @@ class DailyLogsController < ApplicationController
 
   def update
     if @daily_log.update(daily_log_params)
-      redirect_to safe_return_path || @daily_log, notice: "Check-in saved."
+      redirect_to safe_return_to(default: @daily_log), notice: "Check-in saved."
     else
       flash.now[:alert] = @daily_log.errors.full_messages.to_sentence
       render :edit, status: :unprocessable_entity
@@ -57,15 +57,6 @@ class DailyLogsController < ApplicationController
 
   def set_daily_log
     @daily_log = params[:id] == "today" ? DailyLog.today : DailyLog.find(params[:id])
-  end
-
-  # Only same-origin paths, so a crafted return_to cannot bounce us off-site.
-  def safe_return_path
-    path = params[:return_to].to_s
-    return nil unless path.start_with?("/")
-    return nil if path.start_with?("//")
-
-    path
   end
 
   def load_strength_context

@@ -35,6 +35,40 @@ RSpec.describe "Products", type: :request do
       expect(response).to redirect_to(daily_log_path(log))
     end
 
+    it "ignores an off-site return_to" do
+      post products_path, params: {
+        product: { name: "Tofu", calories_per_100g: 145, protein_per_100g: 14 },
+        return_to: "https://evil.example.com"
+      }
+
+      expect(response).to redirect_to(root_path)
+    end
+
+    it "ignores a protocol-relative return_to" do
+      post products_path, params: {
+        product: { name: "Tofu", calories_per_100g: 145, protein_per_100g: 14 },
+        return_to: "//evil.example.com"
+      }
+
+      expect(response).to redirect_to(root_path)
+    end
+  end
+
+  describe "the Cancel link on the new product form" do
+    it "points at return_to when it is a local path" do
+      log = create(:daily_log)
+
+      get new_product_path, params: { return_to: daily_log_path(log) }
+
+      expect(response.body).to include("href=\"#{daily_log_path(log)}\"")
+    end
+
+    it "falls back home for an off-site return_to" do
+      get new_product_path, params: { return_to: "https://evil.example.com" }
+
+      expect(response.body).not_to include("evil.example.com")
+    end
+
     it "re-renders with 422 when the name is missing" do
       post products_path, params: { product: { calories_per_100g: 100, protein_per_100g: 5 } }
 

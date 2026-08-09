@@ -27,7 +27,7 @@
       <div class="col-12 alert alert-danger"><%= @product.errors.full_messages.to_sentence %></div>
     <% end %>
 
-    <%= hidden_field_tag :return_to, params[:return_to] %>
+    <%= hidden_field_tag :return_to, safe_return_to %>
 
     <div class="col-md-8">
       <%= f.label :name, class: "form-label" do %>Name <span class="text-danger">*</span><% end %>
@@ -98,7 +98,7 @@
 
     <div class="col-12 d-flex gap-2">
       <%= f.submit "Save product", class: "btn btn-primary" %>
-      <%= link_to "Cancel", params[:return_to].presence || root_path, class: "btn btn-outline-secondary" %>
+      <%= link_to "Cancel", safe_return_to(default: root_path), class: "btn btn-outline-secondary" %>
     </div>
   <% end %>
 </div>

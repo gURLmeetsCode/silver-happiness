@@ -142,13 +142,14 @@ bundle install
 echo "==> Back up database"
 mkdir -p storage/backups
 BACKUP_FILE="storage/backups/production-$(date +%Y%m%d-%H%M%S).sqlite3"
-if ! command -v sqlite3 >/dev/null 2>&1; then
-  echo "FAILED: sqlite3 is not installed — refusing to migrate without a backup"
-  echo "Install it with: sudo apt-get install -y sqlite3"
+# Uses the app's own sqlite3 gem rather than the CLI, which isn't installed on
+# every Pi. VACUUM INTO is safe to run while the service is serving requests.
+if ! bin/rails runner "ActiveRecord::Base.connection.execute(\"VACUUM INTO '${BACKUP_FILE}'\")"; then
+  echo "FAILED: could not back up the database — refusing to migrate"
   exit 1
 fi
-if ! sqlite3 storage/production.sqlite3 ".backup ${BACKUP_FILE}"; then
-  echo "FAILED: could not back up the database — refusing to migrate"
+if [[ ! -s "${BACKUP_FILE}" ]]; then
+  echo "FAILED: backup file is missing or empty — refusing to migrate"
   exit 1
 fi
 echo "    saved ${BACKUP_FILE} ($(du -h "${BACKUP_FILE}" | cut -f1))"
