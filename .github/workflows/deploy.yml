@@ -6,10 +6,18 @@ on:
     types: [completed]
     branches: [main]
 
+# Two green commits in quick succession would otherwise deploy out of order.
+concurrency:
+  group: deploy-pi
+  cancel-in-progress: false
+
 jobs:
   deploy:
     name: Deploy to Raspberry Pi
     runs-on: self-hosted
+    # Without a timeout, a Pi that is offline or has no runner service leaves the
+    # job Queued indefinitely and the deploy looks like it is still working.
+    timeout-minutes: 20
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'main'
