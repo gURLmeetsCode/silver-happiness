@@ -4,7 +4,7 @@
 # Usage: RAILS_ENV=production bin/rails runner script/log_nora_pancakes_dinner.rb
 # Defaults to yesterday. Override: LOGGED_ON=2026-08-08 PANCAKES=7 SKYR_TBSP=3 STRAWBERRY_G=50
 
-logged_on = ENV.fetch("LOGGED_ON") { Date.current - 1 day }.to_s
+logged_on = ENV.fetch("LOGGED_ON") { Date.yesterday.to_s }
 pancakes = ENV.fetch("PANCAKES", "7").to_i
 skyr_tbsp = ENV.fetch("SKYR_TBSP", "3").to_d
 strawberry_g = ENV.fetch("STRAWBERRY_G", "50").to_d
