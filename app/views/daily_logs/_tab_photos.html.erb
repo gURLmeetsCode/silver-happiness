@@ -19,7 +19,10 @@
 
     <%= form_with model: [ daily_log, ProgressPhoto.new ], html: { multipart: true } do |f| %>
       <div class="upload-zone mb-3">
-        <%= f.file_field :image, accept: "image/*", capture: "environment", class: "form-control" %>
+        <%# No `capture` attribute: on iOS it forces the camera open and removes
+            "Photo Library" from the picker entirely. %>
+        <%= f.file_field :image, accept: "image/*", class: "form-control" %>
+        <div class="form-text">Choose from your library or take a new photo.</div>
       </div>
       <div class="row g-2 mb-3">
         <div class="col-md-6">

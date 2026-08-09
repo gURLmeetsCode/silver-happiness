@@ -9,8 +9,10 @@
   <div class="col-12">
     <div class="upload-zone">
       <%= f.label :image, "Take or choose photo", class: "form-label fw-semibold" %>
-      <%= f.file_field :image, accept: "image/*", capture: "user", class: "form-control form-control-lg", required: true %>
-      <div class="form-text">On iPhone this opens your camera or photo library.</div>
+      <%# No `capture` attribute: on iOS it forces the camera open and removes
+          "Photo Library" from the picker entirely. %>
+      <%= f.file_field :image, accept: "image/*", class: "form-control form-control-lg", required: true %>
+      <div class="form-text">Choose from your library or take a new photo.</div>
     </div>
   </div>
 
