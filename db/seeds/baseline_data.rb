@@ -248,6 +248,26 @@ puget_oil.update!(
   notes: "Label: 900 kcal · 100 g fat / 100 ml. 1 tbsp = 10 g = 90 kcal."
 )
 
+Product.find_or_create_by!(name: "All-purpose flour") do |p|
+  p.calories_per_100g = 364
+  p.protein_per_100g = 10
+  p.carbs_per_100g = 76
+  p.fat_per_100g = 1
+  p.default_serving_g = 23.5
+  p.serving_label = "1 medium pancake batter"
+  p.notes = "Nora Cooks vegan pancakes — ~23.5 g flour per pancake (1/3 cup batter)"
+end
+
+Product.find_or_create_by!(name: "Strawberries") do |p|
+  p.calories_per_100g = 32
+  p.protein_per_100g = 0.7
+  p.carbs_per_100g = 7.7
+  p.fat_per_100g = 0.3
+  p.default_serving_g = 50
+  p.serving_label = "several small"
+  p.notes = "Fresh strawberries — estimate ~50 g for a small handful"
+end
+
 def seed_template(slug, name, meal_type, items)
   template = MealTemplate.find_or_create_by!(slug: slug) do |t|
     t.name = name
@@ -305,6 +325,15 @@ wrap = Product.find_by!(name: "Old El Paso Wrap Extra Fins")
 baby_potatoes = Product.find_by!(name: "Baby potatoes")
 red_pepper = Product.find_by!(name: "Red pepper")
 nutritional_yeast = Product.find_by!(name: "Nutritional yeast")
+
+flour = Product.find_by!(name: "All-purpose flour")
+strawberries = Product.find_by!(name: "Strawberries")
+
+seed_template("noracooks-vegan-pancakes", "Nora Cooks vegan pancakes", :dinner, [
+  [ flour, 23.5, "1 medium pancake (batter)" ],
+  [ soja, 30, "soy milk in batter" ],
+  [ puget_oil, 3.5, "oil in batter" ]
+])
 
 seed_template("chipotle-yogurt-salad", "Chipotle tofu wrap", :lunch, [
   [ wrap, 32, "1 Old El Paso Extra Fins wrap" ],

@@ -7,8 +7,13 @@
   <div class="card-body">
     <h2 class="h5 mb-2"><%= entry ? "Adjust this meal" : "Log today with adjustments" %></h2>
     <p class="small text-muted mb-3">
-      Base recipe (1 serving): <%= nutrition[:calories] %> kcal · <%= nutrition[:protein].to_f.round(1) %> g protein.
-      Change servings for multiple wraps/portions, then add extras in tbsp or grams.
+      <% if recipe.slug == "noracooks-vegan-pancakes" %>
+        One batch shared between two — base (1 pancake): <%= nutrition[:calories] %> kcal · <%= nutrition[:protein].to_f.round(1) %> g protein.
+        Set Servings to <strong>your</strong> pancake count, then add skyr & strawberries below.
+      <% else %>
+        Base recipe (1 serving): <%= nutrition[:calories] %> kcal · <%= nutrition[:protein].to_f.round(1) %> g protein.
+        Change servings for multiple wraps/portions, then add extras in tbsp or grams.
+      <% end %>
     </p>
 
     <%= form_with url: form_url, method: form_method,
@@ -30,7 +35,7 @@
           <%= label_tag "servings", "Servings", class: "form-label" %>
           <%= number_field_tag :servings, meal_form.inferred_servings, min: 1, step: 1, class: "form-control",
                 data: { recipe_log_target: "servings", action: "input->recipe-log#recalculate" } %>
-          <div class="form-text">e.g. 3 for three wraps</div>
+          <div class="form-text"><%= recipe.slug == "noracooks-vegan-pancakes" ? "e.g. 7 for your share of the batch" : "e.g. 3 for three wraps" %></div>
         </div>
         <div class="col-md-8">
           <%= label_tag "meal_entry[name]", "Meal name", class: "form-label" %>

@@ -447,25 +447,37 @@ seed_recipe "tofu-scramble", {
   3. Serve with toast.
 STEPS
 
-seed_recipe "lighter-pancakes", {
-  name: "Lighter vegan pancakes (weekend treat)",
-  meal_type: :breakfast,
+seed_recipe "noracooks-vegan-pancakes", {
+  name: "Nora Cooks vegan pancakes",
+  meal_type: :dinner,
   regular_meal: false,
-  prep_time: "15 min",
-  serves: 2,
-  calories: 350,
+  meal_template_slug: "noracooks-vegan-pancakes",
+  prep_time: "10 min",
+  serves: 1,
   position: 13,
-  description: "Weekend treat ~2×/month. 3 small pancakes per person."
+  water_suggestion_ml: 250,
+  description: "Nora Cooks base batch — we make the smallest amount and split between two. Log YOUR share: Servings = how many pancakes you ate (e.g. 7). Add skyr & strawberries in extras.",
+  personal_notes: "Smallest batch shared with husband — I count my pancakes only (e.g. 7 tonight). Top with Sojasun Skyr and strawberries. Source: noracooks.com/vegan-pancakes"
 }, [
-  [ :carbs, "120 g", "flour (regular or oat)" ],
-  [ :pantry, "240 ml", "soy milk" ],
-  [ :pantry, "1 tbsp", "sugar in batter (not on top)" ],
-  [ :pantry, "1 tsp", "baking powder, pinch salt" ],
-  [ :fats, "1 tsp", "oil in pan" ],
-  [ :produce, nil, "berries or yogurt topping (skip extra sugar)" ]
+  [ :carbs, "23.5 g", "all-purpose flour (per pancake)", "All-purpose flour", 23.5 ],
+  [ :pantry, "30 ml", "soy milk (per pancake)", "Soja sans sucre", 30 ],
+  [ :pantry, "19 ml", "water (per pancake)", nil, nil ],
+  [ :fats, "3.5 g", "oil in batter (per pancake)", "Puget Huile d'olive vierge extra", 3.5 ],
+  [ :pantry, "⅛ tsp", "baking powder, pinch salt, ~3 g sugar (per pancake)", nil, nil ],
+  [ :protein, "optional", "Sojasun Skyr topping", "Skyr vegan", nil ],
+  [ :produce, "several small", "strawberries", "Strawberries", nil ]
 ], <<~STEPS
-  1. Mix batter. Cook silver-dollar pancakes (small = easier portion control).
-  2. 3 pancakes per person. Limit butter to 1 tsp each.
+  From Nora Cooks (noracooks.com/vegan-pancakes). We make one base batch and share it — don't use Nora's “serves 3” for logging.
+
+  1. Whisk 1½ cups flour, 1 tbsp baking powder, ½ tsp salt, 2 tbsp sugar.
+  2. Stir in 1 cup soy milk, ½ cup water, 2 tbsp oil until just combined (lumps OK).
+  3. Heat griddle over medium-high. Grease pan, pour ⅓ cup batter per pancake.
+  4. Cook until bubbles form, flip, cook ~1 min until golden. Split the stack between us.
+
+  To log your meal: Servings = pancakes you ate (e.g. 7) → add skyr (tbsp) and strawberries (g) in extras → Log this meal today.
 STEPS
+
+# Remove legacy placeholder if it still exists from an older seed run.
+Recipe.find_by(slug: "lighter-pancakes")&.destroy
 
 puts "Recipes loaded — #{Recipe.count} recipes, #{RecipeIngredient.count} ingredients."
