@@ -44,6 +44,43 @@ class Product < ApplicationRecord
     label
   end
 
+  ML_PER_UNIT = { "tsp" => 5.0, "tbsp" => 15.0, "cup" => 240.0, "ml" => 1.0 }.freeze
+
+  # Volume units a person actually says out loud, plus this product's own
+  # serving ("1 pavé (125 g)") so half a pack is 0.5 rather than 62.5 g.
+  def unit_options
+    options = []
+    options << [ serving_label.presence || "serving", "serving" ] if default_serving_g.to_f.positive?
+    options + [ [ "g", "g" ], [ "tsp", "tsp" ], [ "tbsp", "tbsp" ], [ "cup", "cup" ], [ "ml", "ml" ] ]
+  end
+
+  # Worked out from the serving label where possible: olive oil described as
+  # "1 tbsp (10 g)" is 10 g per 15 ml, so half a teaspoon is 3 g rather than the
+  # 5 g a water-density guess would give. Falls back to water.
+  def grams_per_ml
+    @grams_per_ml ||= begin
+      match = serving_label.to_s.match(/(\d+(?:[.,]\d+)?)\s*(tsp|teaspoons?|tbsp|tablespoons?|cups?|ml)\b/i)
+      derived = if match && default_serving_g.to_f.positive?
+        unit = match[2].downcase.sub(/s$/, "").sub("teaspoon", "tsp").sub("tablespoon", "tbsp")
+        millilitres = match[1].tr(",", ".").to_f * ML_PER_UNIT.fetch(unit, 0)
+        default_serving_g.to_f / millilitres if millilitres.positive?
+      end
+
+      derived&.positive? ? derived : 1.0
+    end
+  end
+
+  def grams_for(quantity, unit)
+    amount = quantity.to_f
+    return 0 unless amount.positive?
+
+    case unit.to_s
+    when "serving" then amount * default_quantity_g.to_f
+    when "g", "" then amount
+    else amount * ML_PER_UNIT.fetch(unit.to_s, 1.0) * grams_per_ml
+    end
+  end
+
   def nutrition_for(grams)
     factor = grams.to_d / 100
     {

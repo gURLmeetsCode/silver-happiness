@@ -9,6 +9,8 @@ class MealEntriesController < ApplicationController
 
     if params[:meal_template_id].present?
       build_from_template
+    elsif params[:items].present?
+      return redirect_to(meals_tab, alert: "Pick at least one item and an amount") unless build_from_items
     elsif params[:product_id].present?
       build_from_product
     else
@@ -85,6 +87,20 @@ class MealEntriesController < ApplicationController
     return unless params[:meal_entry].present?
 
     @entry.assign_attributes(meal_entry_params)
+  end
+
+  def meals_tab
+    daily_log_path(@daily_log, anchor: "meals")
+  end
+
+  # A meal assembled from several products, each with its own amount and unit.
+  def build_from_items
+    assembler = MealAssembler.new(params[:items])
+    return false unless assembler.any?
+
+    @entry.assign_attributes(meal_entry_params) if params[:meal_entry].present?
+    assembler.apply!(@entry)
+    true
   end
 
   def build_from_product

@@ -55,11 +55,12 @@ RSpec.describe "Data capture coverage", type: :request do
       expect(response.body).to include("meal_entry[notes]")
     end
 
-    it "has the add-from-product form" do
+    it "has the meal builder, with an amount and a unit per item" do
       get daily_log_path(today)
 
-      expect(response.body).to include('name="product_id"')
-      expect(response.body).to include('name="quantity_g"')
+      expect(response.body).to include("items[0][product_id]")
+      expect(response.body).to include("items[0][quantity]")
+      expect(response.body).to include("items[0][unit]")
     end
 
     it "has quick templates and quick products" do

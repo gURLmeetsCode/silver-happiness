@@ -260,6 +260,52 @@ body {
   line-height: 1.25;
 }
 
+/* --- Build a meal --- */
+
+.meal-item-row {
+  display: grid;
+  grid-template-columns: 1fr 4.5rem 5.5rem auto;
+  grid-template-areas:
+    "product product product remove"
+    "qty unit hint hint";
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (min-width: 768px) {
+  .meal-item-row {
+    grid-template-columns: minmax(0, 1fr) 5rem 6rem minmax(6rem, auto) auto;
+    grid-template-areas: "product qty unit hint remove";
+  }
+}
+
+.meal-item-row > select:first-child {
+  grid-area: product;
+  min-width: 0;
+}
+
+.meal-item-qty {
+  grid-area: qty;
+  text-align: center;
+}
+
+.meal-item-unit {
+  grid-area: unit;
+}
+
+.meal-item-hint {
+  grid-area: hint;
+  white-space: nowrap;
+}
+
+.meal-item-remove {
+  grid-area: remove;
+  justify-self: end;
+  padding: 0 0.25rem;
+}
+
 /* --- Recipe meal form --- */
 
 .ingredient-row {

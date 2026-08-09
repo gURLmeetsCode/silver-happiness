@@ -1,0 +1,36 @@
+<%# locals: products, index %>
+<div class="meal-item-row" data-meal-builder-target="row">
+  <select name="items[<%= index %>][product_id]" class="form-select form-select-sm"
+          aria-label="Item" data-meal-builder-target="product"
+          data-action="change->meal-builder#productChanged">
+    <option value="">Choose an item…</option>
+    <% products.each do |product| %>
+      <option value="<%= product.id %>"
+        data-calories="<%= product.calories_per_100g %>"
+        data-protein="<%= product.protein_per_100g %>"
+        data-carbs="<%= product.carbs_per_100g %>"
+        data-fat="<%= product.fat_per_100g %>"
+        data-serving-g="<%= product.default_quantity_g %>"
+        data-grams-per-ml="<%= product.grams_per_ml.round(3) %>"
+        data-units="<%= product.unit_options.to_json %>">
+        <%= product.name %><%= " (#{product.brand})" if product.brand.present? %>
+      </option>
+    <% end %>
+  </select>
+
+  <input type="text" inputmode="decimal" name="items[<%= index %>][quantity]"
+         class="form-control form-control-sm meal-item-qty" placeholder="½"
+         aria-label="Amount" data-meal-builder-target="quantity">
+
+  <select name="items[<%= index %>][unit]" class="form-select form-select-sm meal-item-unit"
+          aria-label="Unit" data-meal-builder-target="unit">
+    <option value="g">g</option>
+  </select>
+
+  <span class="meal-item-hint small text-muted" data-meal-builder-target="hint"></span>
+
+  <button type="button" class="btn btn-sm btn-link text-danger meal-item-remove"
+          data-action="meal-builder#removeRow" aria-label="Remove item">
+    <i class="bi bi-x-lg"></i>
+  </button>
+</div>

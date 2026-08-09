@@ -1,0 +1,60 @@
+<%# locals: daily_log, products %>
+<section class="card day-card mb-3">
+  <div class="card-body">
+    <h2 class="h5 mb-1">Build a meal</h2>
+    <p class="small text-muted mb-3">
+      Add what you actually ate — half a cup of this, a teaspoon of that. The numbers add themselves up.
+    </p>
+
+    <%= form_with url: daily_log_meal_entries_path(daily_log), method: :post,
+          data: {
+            controller: "meal-builder",
+            action: "change->meal-builder#recalculate input->meal-builder#recalculate"
+          } do %>
+
+      <template data-meal-builder-target="template">
+        <%= render "daily_logs/meal_item_row", products: products, index: "__INDEX__" %>
+      </template>
+
+      <div data-meal-builder-target="rows">
+        <% 3.times do |index| %>
+          <%= render "daily_logs/meal_item_row", products: products, index: index %>
+        <% end %>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <button type="button" class="btn btn-sm btn-outline-secondary"
+                data-action="meal-builder#addRow">
+          <i class="bi bi-plus-lg"></i> Add another item
+        </button>
+        <%= link_to new_product_path(return_to: daily_log_path(daily_log, anchor: "meals")),
+              class: "btn btn-sm btn-link" do %>
+          Missing something? Save it as a product
+        <% end %>
+      </div>
+
+      <div class="alert alert-light border d-flex justify-content-between align-items-center py-2 mb-3">
+        <span class="small text-muted">Meal total</span>
+        <strong data-meal-builder-target="total">Nothing added yet</strong>
+      </div>
+
+      <div class="row g-2">
+        <div class="col-md-7">
+          <%= label_tag "meal_entry[name]", "Name (optional)", class: "form-label small text-muted" %>
+          <%= text_field_tag "meal_entry[name]", nil, class: "form-control",
+                placeholder: "Left blank, we'll name it from the items",
+                data: { meal_builder_target: "name" } %>
+        </div>
+        <div class="col-md-5">
+          <%= label_tag "meal_entry[meal_type]", "Meal", class: "form-label small text-muted" %>
+          <%= select_tag "meal_entry[meal_type]",
+                options_for_select(MealEntry.meal_types.keys.map { |k| [ meal_type_label(k), k ] }, "dinner"),
+                class: "form-select" %>
+        </div>
+        <div class="col-12 mt-3">
+          <%= submit_tag "Add this meal", class: "btn btn-primary w-100 btn-lg" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</section>
