@@ -30,7 +30,7 @@ gem "bootsnap", require: false
 # than served through Active Storage variants. Variants would need the
 # image_processing gem, which depends on ruby-vips, and Rails 8 refuses to boot
 # against the libvips 8.10 that Raspbian Bullseye ships.
-gem "mini_magick", "~> 4.12"
+gem "mini_magick", "~> 5.3"
 
 gem "chartkick"
 gem "groupdate"

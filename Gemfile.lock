@@ -141,7 +141,8 @@ GEM
       net-smtp
     marcel (1.2.1)
     matrix (0.4.3)
-    mini_magick (4.13.2)
+    mini_magick (5.3.3)
+      logger
     mini_mime (1.1.5)
     mini_portile2 (2.8.9)
     minitest (6.0.6)
@@ -364,7 +365,7 @@ DEPENDENCIES
   factory_bot_rails
   groupdate
   importmap-rails
-  mini_magick (~> 4.12)
+  mini_magick (~> 5.3)
   propshaft
   puma (>= 5.0)
   rails (~> 8.0.5)
