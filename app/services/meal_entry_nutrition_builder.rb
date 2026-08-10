@@ -10,6 +10,8 @@ class MealEntryNutritionBuilder
   end
 
   def apply!
+    @recorded = []
+
     if @recipe
       apply_from_recipe_base!
     elsif @servings > 1
@@ -17,6 +19,7 @@ class MealEntryNutritionBuilder
     end
 
     apply_extras!
+    @entry.record_items!(@recorded) if @recorded.any?
     @entry
   end
 
@@ -68,7 +71,12 @@ class MealEntryNutritionBuilder
   # Falls back to the recipe's own figures when nothing was adjusted, so an
   # untouched recipe logs exactly as it always did.
   def nutrition_per_serving
-    return @recipe.nutrition_per_serving if @ingredient_overrides.empty?
+    divisor = @recipe.serves.to_i.positive? ? @recipe.serves : 1
+
+    if @ingredient_overrides.empty?
+      record_recipe_defaults!(divisor)
+      return @recipe.nutrition_per_serving
+    end
 
     totals = { calories: 0, protein: 0.0, carbs: 0.0, fat: 0.0 }
 
@@ -84,15 +92,27 @@ class MealEntryNutritionBuilder
       totals[:protein] += nutrition[:protein]
       totals[:carbs] += nutrition[:carbs]
       totals[:fat] += nutrition[:fat]
+      @recorded << { product_id: product.id, grams: grams.to_f * @servings / divisor }
     end
 
-    divisor = @recipe.serves.to_i.positive? ? @recipe.serves : 1
     {
       calories: (totals[:calories].to_f / divisor).round,
       protein: (totals[:protein] / divisor).round(1),
       carbs: (totals[:carbs] / divisor).round(1),
       fat: (totals[:fat] / divisor).round(1)
     }
+  end
+
+  def record_recipe_defaults!(divisor)
+    @recipe.recipe_ingredients.each do |ingredient|
+      next unless ingredient.product
+      next unless ingredient.quantity_g.to_f.positive?
+
+      @recorded << {
+        product_id: ingredient.product_id,
+        grams: ingredient.quantity_g.to_f * @servings / divisor
+      }
+    end
   end
 
   def scale_entry!(factor)
@@ -123,6 +143,7 @@ class MealEntryNutritionBuilder
       @entry.protein_g += nutrition[:protein]
       @entry.carbs_g = @entry.carbs_g.to_f + nutrition[:carbs]
       @entry.fat_g = @entry.fat_g.to_f + nutrition[:fat]
+      @recorded << { product_id: product.id, grams: grams }
 
       extra_notes << extra_label(product, extra, grams)
     end

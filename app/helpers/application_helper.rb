@@ -34,6 +34,20 @@ module ApplicationHelper
     tag.span(label, class: "badge text-bg-#{css}")
   end
 
+  # Deficit pace uses the same status symbols as calorie/weight, but the words
+  # mean something different: below_target here is "ahead of the loss plan".
+  def deficit_pace_badge(status)
+    return tag.span("—", class: "text-muted") if status == :unknown
+
+    labels = {
+      on_target: [ "On pace", "success" ],
+      above_target: [ "Behind pace", "warning" ],
+      below_target: [ "Ahead of pace", "info" ]
+    }
+    label, css = labels.fetch(status)
+    tag.span(label, class: "badge text-bg-#{css}")
+  end
+
   def weight_vs_goal_label(goal, weight)
     delta = goal.weight_delta(weight)
     return "No weight logged" if delta.nil?

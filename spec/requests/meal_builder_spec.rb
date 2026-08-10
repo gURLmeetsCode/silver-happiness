@@ -61,6 +61,22 @@ RSpec.describe "Building a meal from several items", type: :request do
     expect(daily_log.meal_entries.last.notes).to include("120 g")
   end
 
+  it "records what the meal was made of" do
+    post daily_log_meal_entries_path(daily_log), params: {
+      items: {
+        "0" => { product_id: zucchini.id, quantity: "0.5", unit: "cup" },
+        "1" => { product_id: tofu.id, quantity: "0.5", unit: "serving" }
+      },
+      meal_entry: { meal_type: "dinner" }
+    }
+
+    entry = daily_log.meal_entries.last
+    expect(entry.items.map { |i| [ i.product.name, i.grams.to_f ] }).to contain_exactly(
+      [ "Zucchini", 120.0 ],
+      [ "Tofu", 62.5 ]
+    )
+  end
+
   it "explains itself when nothing was filled in" do
     expect {
       post daily_log_meal_entries_path(daily_log), params: {

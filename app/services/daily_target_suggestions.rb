@@ -1,11 +1,21 @@
 # frozen_string_literal: true
 
-# Actionable tips when today's eaten macros miss calorie or protein targets.
+# Tips when today's eaten macros miss the calorie or protein targets. Calorie
+# tips name a real item you logged and the exact amount that would bring the day
+# closer; they are never invented from the meal's name.
 class DailyTargetSuggestions
   Suggestion = Data.define(:message, :savings_kcal, :adds_protein_g)
 
   CALORIE_THRESHOLD = 150
   PROTEIN_THRESHOLD = 5
+
+  # Leave the densest protein alone — cutting tofu to save calories is rarely
+  # what you meant. Prefer oils and dressings first.
+  PROTEIN_SHARE_FLOOR = 0.25
+  MIN_SAVINGS_KCAL = 20
+  # Never suggest cutting more than half of what was eaten; "skip it" is its own
+  # tip when the whole item is small enough to matter.
+  MAX_CUT_FRACTION = 0.5
 
   def initialize(daily_log, goal: Goal.current)
     @log = daily_log
@@ -25,9 +35,9 @@ class DailyTargetSuggestions
   end
 
   def subheadline
-    return "Quick adds to hit protein:" if protein_shortfall >= PROTEIN_THRESHOLD && calorie_overshoot < CALORIE_THRESHOLD
+    return "Things that would close the protein gap:" if protein_shortfall >= PROTEIN_THRESHOLD && calorie_overshoot < CALORIE_THRESHOLD
 
-    "Small swaps that would have brought you closer:" if calorie_overshoot >= CALORIE_THRESHOLD
+    "What you logged, trimmed:" if calorie_overshoot >= CALORIE_THRESHOLD
   end
 
   def suggestions
@@ -47,75 +57,66 @@ class DailyTargetSuggestions
   def calorie_tips
     return [] unless calorie_overshoot >= CALORIE_THRESHOLD
 
-    tips = []
-    ctx = meal_context
-
-    if ctx[:dressing] || ctx[:salad_meal]
-      tips << build_tip("Use 1 tbsp dressing instead of 2", 80)
-      tips << build_tip("Try lemon + 1 tsp oil instead of 2 tbsp dressing", 120)
-    end
-
-    if ctx[:puget_oil] || ctx[:olive_oil]
-      tips << build_tip("Use 1 tbsp Puget olive oil instead of 2", 90)
-    end
-
-    if ctx[:avocado]
-      tips << build_tip("Use ¼ avocado instead of ½ on your wrap", 60)
-    end
-
-    if ctx[:peanut_butter] && ctx[:snack]
-      tips << build_tip("Skip the peanut butter on your snack", 35)
-    end
-
-    if ctx[:pasta_dinner] && ctx[:puget_oil]
-      tips << build_tip("Skip the extra olive oil — 2 tbsp dressing is enough", 90)
-    end
-
-    if tips.empty?
-      tips << build_tip("Measure oils and dressing — each extra tbsp is ~80–90 kcal", 80)
-    end
-
+    tips = reducible_items.filter_map { |item| tip_for(item) }
+    tips = tips.sort_by { |tip| -tip.savings_kcal }.first(4)
     tips.map { |tip| annotate_target_hit(tip) }
+  end
+
+  # Every product-linked component of every meal today, densest-calorie first.
+  def reducible_items
+    @log.meal_entries.includes(items: :product).flat_map(&:items).select do |item|
+      item.calories >= MIN_SAVINGS_KCAL && item.protein_share < PROTEIN_SHARE_FLOOR
+    end
+  end
+
+  def tip_for(item)
+    product = item.product
+    meal_name = item.meal_entry.name
+
+    # Prefer cutting half: "use 15 g instead of 30 g of dressing on Power salad".
+    # Fall back to skipping the whole thing when half isn't enough to matter.
+    half_grams = (item.grams.to_f * MAX_CUT_FRACTION).round
+    half_kcal = product.nutrition_for(half_grams)[:calories]
+
+    if half_kcal >= MIN_SAVINGS_KCAL && half_grams.positive?
+      remaining = (item.grams.to_f - half_grams).round
+      build_tip(
+        "Use #{remaining} g of #{product.name} instead of #{item.grams.to_f.round} g on #{meal_name}",
+        half_kcal
+      )
+    elsif item.calories >= MIN_SAVINGS_KCAL
+      build_tip("Skip the #{product.name} on #{meal_name}", item.calories)
+    end
   end
 
   def protein_tips
     return [] unless protein_shortfall >= PROTEIN_THRESHOLD
 
-    [
+    protein_sources.filter_map do |product|
+      serving = product.default_quantity_g.to_f
+      next unless serving.positive?
+
+      nutrition = product.nutrition_for(serving)
+      next unless nutrition[:protein].to_f >= PROTEIN_THRESHOLD
+
       Suggestion.new(
-        message: "Add ½ scoop Vegan Protein 360",
+        message: "Add #{product.serving_label.presence || "#{serving.round} g"} of #{product.name}",
         savings_kcal: 0,
-        adds_protein_g: 14
-      ),
-      Suggestion.new(
-        message: "Add 125 g tofu (1 pavé)",
-        savings_kcal: 0,
-        adds_protein_g: 17.5
+        adds_protein_g: nutrition[:protein]
       )
-    ]
+    end.first(3)
   end
 
-  def meal_context
-    @meal_context ||= begin
-      ctx = {
-        dressing: false, salad_meal: false, puget_oil: false, olive_oil: false,
-        avocado: false, peanut_butter: false, snack: false, pasta_dinner: false
-      }
+  # Prefer products already flagged for one-tap logging; fall back to anything
+  # with a meaningful protein density so the tip list isn't empty on a fresh DB.
+  def protein_sources
+    preferred = Product.where(quick_log: true)
+      .where("protein_per_100g >= ?", 10)
+      .order(protein_per_100g: :desc)
+      .limit(5)
+    return preferred.to_a if preferred.any?
 
-      @log.meal_entries.each do |entry|
-        blob = "#{entry.name} #{entry.notes}".downcase
-        ctx[:salad_meal] = true if blob.match?(/salad|power salad/)
-        ctx[:dressing] = true if blob.match?(/dressing|balsamic/)
-        ctx[:puget_oil] = true if blob.match?(/puget|huile d'olive/)
-        ctx[:olive_oil] = true if blob.match?(/olive oil|huile/)
-        ctx[:avocado] = true if blob.match?(/avocado|wrap|chipotle/)
-        ctx[:peanut_butter] = true if blob.match?(/pb|cacahu|peanut|koro/)
-        ctx[:snack] = true if entry.meal_type_snack? && !entry.meal_type_beverage?
-        ctx[:pasta_dinner] = true if blob.match?(/pasta/)
-      end
-
-      ctx
-    end
+    Product.where("protein_per_100g >= ?", 10).order(protein_per_100g: :desc).limit(5).to_a
   end
 
   def build_tip(message, savings_kcal)

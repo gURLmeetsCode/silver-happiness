@@ -3,6 +3,7 @@ class MealEntry < ApplicationRecord
 
   belongs_to :daily_log
   belongs_to :meal_template, optional: true
+  has_many :items, -> { in_order }, class_name: "MealEntryItem", dependent: :destroy, inverse_of: :meal_entry
 
   # Per-ingredient amounts chosen when logging a recipe, keyed by
   # recipe_ingredient id: { "12" => 90.0 }. Zero means "left out". Stored so
@@ -18,6 +19,23 @@ class MealEntry < ApplicationRecord
 
   def water_logged?
     water_logged_ml.to_i.positive?
+  end
+
+  # Replaces whatever this meal was made of. Amounts are summed per product so a
+  # recipe that uses oil twice is one line rather than two.
+  def record_items!(rows)
+    totals = rows.each_with_object({}) do |row, sums|
+      product_id = row[:product_id] || row[:product]&.id
+      grams = row[:grams].to_f
+      next unless product_id && grams.positive?
+
+      sums[product_id] = sums.fetch(product_id, 0) + grams
+    end
+
+    items.destroy_all if persisted?
+    totals.each_with_index do |(product_id, grams), index|
+      items.build(product_id: product_id, grams: grams.round(2), position: index)
+    end
   end
 
   # Grams chosen for this ingredient, or nil when it was never adjusted.

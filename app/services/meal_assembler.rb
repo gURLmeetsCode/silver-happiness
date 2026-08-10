@@ -58,6 +58,7 @@ class MealAssembler
     entry.fat_g = sum[:fat].round(1)
     entry.name = entry.name.presence || suggested_name
     entry.notes = [ entry.notes, notes ].compact_blank.join(" · ")
+    entry.record_items!(components.map { |c| { product_id: c.product.id, grams: c.grams } })
     entry
   end
 

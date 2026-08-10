@@ -12,6 +12,47 @@
     <%= f.text_field :display_name, class: "form-control", placeholder: "e.g. Natasha" %>
   </div>
 
+  <div class="col-12 mt-2"><h2 class="h5">Body profile</h2></div>
+  <p class="col-12 text-muted small mb-0">
+    Used to estimate maintenance calories (Mifflin–St Jeor). For a petite woman around your size,
+    guidelines point to a <strong>250–500 kcal/day</strong> deficit — roughly 0.25–0.5 kg per week —
+    and not eating below 1,200 kcal without medical advice.
+  </p>
+  <div class="col-md-3">
+    <%= f.label :height_cm, "Height (cm)", class: "form-label" %>
+    <%= f.number_field :height_cm, step: 0.1, class: "form-control" %>
+  </div>
+  <div class="col-md-3">
+    <%= f.label :age_years, "Age", class: "form-label" %>
+    <%= f.number_field :age_years, class: "form-control", min: 16, max: 99 %>
+  </div>
+  <div class="col-md-3">
+    <%= f.label :sex, class: "form-label" %>
+    <%= f.select :sex, Goal::SEXES.map { |s| [ s.capitalize, s ] }, {}, class: "form-select" %>
+  </div>
+  <div class="col-md-3">
+    <%= f.label :activity_level, "Activity", class: "form-label" %>
+    <%= f.select :activity_level,
+          EnergyEstimate::ACTIVITY_LABELS.map { |value, label| [ label, value ] },
+          {}, class: "form-select" %>
+  </div>
+  <div class="col-md-4">
+    <%= f.label :target_deficit_kcal, "Daily deficit goal (kcal)", class: "form-label" %>
+    <%= f.number_field :target_deficit_kcal, class: "form-control", min: 100, max: 1000, step: 50,
+          placeholder: "400" %>
+    <div class="form-text">Leave blank to use the size-based default (~400).</div>
+  </div>
+  <% if @energy&.ready? %>
+    <div class="col-12">
+      <div class="alert alert-light border small mb-0">
+        <%= @energy.summary_line %>
+        Suggested intake ~<%= @energy.recommended_intake %> kcal/day.
+        Your current targets are <%= @goal.calories_rest_day %> rest /
+        <%= @goal.calories_training_day %> training.
+      </div>
+    </div>
+  <% end %>
+
   <div class="col-12 mt-2"><h2 class="h5">Weight</h2></div>
   <div class="col-md-4">
     <%= f.label :target_weight_kg, "Target weight (kg)", class: "form-label" %>

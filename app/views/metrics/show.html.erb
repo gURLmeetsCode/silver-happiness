@@ -128,6 +128,61 @@
       </div>
     </div>
 
+    <% if @week.deficit_ready? %>
+      <div class="border rounded p-3 bg-white mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+          <div>
+            <h3 class="h6 mb-1">Calorie deficit this week</h3>
+            <p class="small text-muted mb-0"><%= @week.energy.summary_line %></p>
+          </div>
+          <%= deficit_pace_badge(@week.deficit_pace_status) %>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-6 col-md-4">
+            <div class="small text-muted">Actual deficit so far</div>
+            <div class="fs-5 fw-semibold"><%= @week.week_deficit_kcal %> kcal</div>
+            <div class="small text-muted">
+              ≈ <%= @week.projected_week_loss_kg %> kg
+              <% if @week.projected_week_loss_kg.negative? %>gain<% else %>loss<% end %>
+            </div>
+          </div>
+          <div class="col-6 col-md-4">
+            <div class="small text-muted">Planned for <%= @week.logs.size %> day<%= @week.logs.size == 1 ? "" : "s" %></div>
+            <div class="fs-5 fw-semibold"><%= @week.energy.recommended_deficit * @week.logs.size %> kcal</div>
+            <div class="small text-muted">≈ <%= @week.planned_week_loss_kg %> kg loss</div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="small text-muted">Full-week pace</div>
+            <div class="fs-5 fw-semibold">~<%= @week.energy.expected_weekly_loss_kg %> kg</div>
+            <div class="small text-muted">if you hold a <%= @week.energy.recommended_deficit %> kcal/day deficit</div>
+          </div>
+        </div>
+
+        <h4 class="h6 text-muted">Cumulative deficit vs plan</h4>
+        <%= line_chart [
+              { name: "Actual deficit", data: @week.cumulative_deficit_by_day },
+              { name: "Planned pace", data: @week.planned_cumulative_deficit_by_day }
+            ], suffix: " kcal", library: { scales: { y: { beginAtZero: true } } } %>
+
+        <h4 class="h6 text-muted mt-4">Daily deficit (maintenance − eaten)</h4>
+        <%= column_chart [
+              { name: "Actual", data: @week.daily_deficit },
+              { name: "Goal", data: @week.planned_deficit_line }
+            ], suffix: " kcal", library: { scales: { x: { stacked: false }, y: { stacked: false } } } %>
+        <p class="small text-muted mb-0 mt-2">
+          Positive bars mean a deficit (on track to lose). Negative means a surplus that day.
+          Maintenance is estimated from your body profile, not from tracker burn — so exercise
+          calories already counted into “moderate activity” are not added again.
+        </p>
+      </div>
+    <% elsif @week.energy.ready? == false %>
+      <div class="alert alert-light border small mb-4">
+        Add height, age and activity under
+        <%= link_to "Goals", edit_goal_path %>
+        to see whether this week’s deficit is on pace for your target loss.
+      </div>
+    <% end %>
+
     <% if @week.logs.any? %>
       <h3 class="h6 text-muted">Calories eaten vs burned vs target</h3>
       <%= column_chart [

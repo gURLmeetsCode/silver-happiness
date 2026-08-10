@@ -79,6 +79,9 @@ class MealEntriesController < ApplicationController
       fat_g: template.total_fat,
       water_suggestion_ml: template.water_suggestion_ml
     )
+    @entry.record_items!(
+      template.meal_template_items.map { |item| { product_id: item.product_id, grams: item.quantity_g } }
+    )
 
     apply_meal_entry_overrides
   end
@@ -118,6 +121,7 @@ class MealEntriesController < ApplicationController
       fat_g: nutrition[:fat],
       notes: params[:notes]
     )
+    @entry.record_items!([ { product_id: @product.id, grams: quantity } ])
   end
 
   def apply_product_water!(entry)

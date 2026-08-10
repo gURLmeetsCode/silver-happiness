@@ -9,6 +9,11 @@ FactoryBot.define do
     calories_training_day { 1700 }
     calories_rest_day { 1600 }
     water_goal_ml { 2000 }
+    height_cm { 163 }
+    age_years { 37 }
+    sex { "female" }
+    activity_level { "moderate" }
+    target_deficit_kcal { 400 }
   end
 
   factory :grocery_check do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_09_131111) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_10_074944) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -73,6 +73,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_09_131111) do
     t.datetime "updated_at", null: false
     t.integer "water_goal_ml", default: 2000, null: false
     t.string "display_name"
+    t.decimal "height_cm", precision: 5, scale: 1
+    t.integer "age_years"
+    t.string "sex", default: "female", null: false
+    t.string "activity_level", default: "moderate", null: false
+    t.integer "target_deficit_kcal"
   end
 
   create_table "grocery_checks", force: :cascade do |t|
@@ -102,6 +107,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_09_131111) do
     t.text "ingredient_overrides"
     t.index ["daily_log_id"], name: "index_meal_entries_on_daily_log_id"
     t.index ["meal_template_id"], name: "index_meal_entries_on_meal_template_id"
+  end
+
+  create_table "meal_entry_items", force: :cascade do |t|
+    t.integer "meal_entry_id", null: false
+    t.integer "product_id", null: false
+    t.decimal "grams", precision: 8, scale: 2, null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["meal_entry_id"], name: "index_meal_entry_items_on_meal_entry_id"
+    t.index ["product_id"], name: "index_meal_entry_items_on_product_id"
   end
 
   create_table "meal_template_items", force: :cascade do |t|
@@ -275,6 +291,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_09_131111) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "meal_entries", "daily_logs"
   add_foreign_key "meal_entries", "meal_templates"
+  add_foreign_key "meal_entry_items", "meal_entries"
+  add_foreign_key "meal_entry_items", "products"
   add_foreign_key "meal_template_items", "meal_templates"
   add_foreign_key "meal_template_items", "products"
   add_foreign_key "progress_photos", "daily_logs"

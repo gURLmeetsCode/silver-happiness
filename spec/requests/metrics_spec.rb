@@ -21,6 +21,8 @@ RSpec.describe "Metrics", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("This week")
       expect(response.body).to include("Weight vs target")
+      expect(response.body).to include("Calorie deficit this week")
+      expect(response.body).to include("Cumulative deficit vs plan")
     end
   end
 end

@@ -93,4 +93,77 @@ class WeeklySummary
       :below_target
     end
   end
+
+  # Uses the latest logged weight when available so the estimate tracks the scale.
+  def energy
+    @energy ||= goal.energy_estimate(weight_kg: latest_weight)
+  end
+
+  def deficit_ready?
+    energy.ready? && logs.any?
+  end
+
+  def daily_deficit
+    return [] unless energy.ready?
+
+    logs.map { |log| [ chart_label(log.logged_on), energy.deficit_for(log.total_calories) ] }
+  end
+
+  def planned_deficit_line
+    return [] unless energy.ready?
+
+    logs.map { |log| [ chart_label(log.logged_on), energy.recommended_deficit ] }
+  end
+
+  # Running total of (maintenance − eaten) across the week so far.
+  def cumulative_deficit_by_day
+    return [] unless energy.ready?
+
+    running = 0
+    logs.map do |log|
+      running += energy.deficit_for(log.total_calories)
+      [ chart_label(log.logged_on), running ]
+    end
+  end
+
+  def planned_cumulative_deficit_by_day
+    return [] unless energy.ready?
+
+    logs.each_with_index.map do |log, index|
+      [ chart_label(log.logged_on), energy.recommended_deficit * (index + 1) ]
+    end
+  end
+
+  def week_deficit_kcal
+    return 0 unless energy.ready?
+
+    logs.sum { |log| energy.deficit_for(log.total_calories) }
+  end
+
+  def projected_week_loss_kg
+    energy.kg_from_kcal(week_deficit_kcal)
+  end
+
+  def planned_week_loss_kg
+    return nil unless energy.ready?
+
+    energy.kg_from_kcal(energy.recommended_deficit * [ logs.size, 1 ].max)
+  end
+
+  # Are we within ~0.1 kg of the planned pace for the days logged so far?
+  def deficit_pace_status
+    return :unknown unless deficit_ready?
+
+    planned = energy.recommended_deficit * logs.size
+    delta = week_deficit_kcal - planned
+    band = energy.recommended_deficit * 0.25
+
+    if delta.abs <= band
+      :on_target
+    elsif week_deficit_kcal > planned
+      :below_target # eating less than planned → ahead on loss
+    else
+      :above_target # eating more than planned → behind on loss
+    end
+  end
 end
