@@ -8,7 +8,7 @@
       <%= hidden_field_tag :return_to, daily_log_path(daily_log, anchor: "movement") %>
       <div class="col-6 col-md-3">
         <%= f.label :run_km, "Run (km)", class: "form-label small text-muted" %>
-        <%= f.number_field :run_km, step: 0.1, class: "form-control" %>
+        <%= f.number_field :run_km, step: :any, inputmode: "decimal", class: "form-control", placeholder: "5.24" %>
       </div>
       <div class="col-6 col-md-3">
         <%= f.label :run_calories, "Run kcal", class: "form-label small text-muted" %>
@@ -16,7 +16,7 @@
       </div>
       <div class="col-6 col-md-3">
         <%= f.label :walk_km, "Walk (km)", class: "form-label small text-muted" %>
-        <%= f.number_field :walk_km, step: 0.1, class: "form-control" %>
+        <%= f.number_field :walk_km, step: :any, inputmode: "decimal", class: "form-control", placeholder: "2.5" %>
       </div>
       <div class="col-6 col-md-3">
         <%= f.label :walk_calories, "Walk kcal", class: "form-label small text-muted" %>
@@ -65,7 +65,7 @@
       </div>
       <div class="col-md-3">
         <%= f.label :distance_km, "Distance (km)", class: "form-label small text-muted" %>
-        <%= f.number_field :distance_km, step: 0.1, class: "form-control", placeholder: "optional" %>
+        <%= f.number_field :distance_km, step: :any, inputmode: "decimal", class: "form-control", placeholder: "optional" %>
       </div>
       <div class="col-md-3">
         <%= f.label :calories_burned, "Calories", class: "form-label small text-muted" %>

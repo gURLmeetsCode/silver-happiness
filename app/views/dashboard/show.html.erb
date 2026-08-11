@@ -22,7 +22,7 @@
       <div class="col">
         <%= f.label :weight_kg, "This morning", class: "form-label small text-muted" %>
         <div class="input-group input-group-lg">
-          <%= f.number_field :weight_kg, step: 0.1, inputmode: "decimal",
+          <%= f.number_field :weight_kg, step: :any, inputmode: "decimal",
                 placeholder: "—", class: "form-control", "aria-label": "Weight in kilograms" %>
           <span class="input-group-text">kg</span>
         </div>

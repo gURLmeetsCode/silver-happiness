@@ -7,7 +7,7 @@
 
   <div class="col-md-4">
     <%= f.label :weight_kg, "Weight (kg)", class: "form-label" %>
-    <%= f.number_field :weight_kg, step: 0.01, min: 0, class: "form-control", placeholder: "e.g. 58.25" %>
+    <%= f.number_field :weight_kg, step: :any, min: 0, inputmode: "decimal", class: "form-control", placeholder: "e.g. 58.60" %>
   </div>
   <div class="col-md-4 d-flex align-items-end">
     <div class="form-check">
@@ -18,7 +18,7 @@
 
   <div class="col-md-3">
     <%= f.label :run_km, "Run (km)", class: "form-label" %>
-    <%= f.number_field :run_km, step: 0.1, class: "form-control" %>
+    <%= f.number_field :run_km, step: :any, inputmode: "decimal", class: "form-control", placeholder: "5.24" %>
   </div>
   <div class="col-md-3">
     <%= f.label :run_calories, "Run calories burned", class: "form-label" %>
@@ -26,7 +26,7 @@
   </div>
   <div class="col-md-3">
     <%= f.label :walk_km, "Walk (km)", class: "form-label" %>
-    <%= f.number_field :walk_km, step: 0.1, class: "form-control" %>
+    <%= f.number_field :walk_km, step: :any, inputmode: "decimal", class: "form-control" %>
   </div>
   <div class="col-md-3">
     <%= f.label :walk_calories, "Walk calories burned", class: "form-label" %>

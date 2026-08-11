@@ -9,14 +9,14 @@
         <% end %>
       </p>
     <% else %>
-      <p class="text-muted small mb-2">Log today's weigh-in (0.01 kg steps — e.g. 58.25).</p>
+      <p class="text-muted small mb-2">Log today's weigh-in (any decimals — e.g. 58.60).</p>
     <% end %>
 
     <%= form_with model: daily_log, class: "row g-2" do |f| %>
       <div class="col-7">
         <%= f.label :weight_kg, "Weight (kg)", class: "form-label small mb-1" %>
-        <%= f.number_field :weight_kg, step: 0.01, min: 0, class: "form-control",
-              placeholder: "58.25", value: daily_log.weight_kg %>
+        <%= f.number_field :weight_kg, step: :any, min: 0, inputmode: "decimal", class: "form-control",
+              placeholder: "58.60", value: daily_log.weight_kg %>
       </div>
       <div class="col-5 d-flex align-items-end">
         <%= f.submit "Save", class: "btn btn-primary w-100" %>

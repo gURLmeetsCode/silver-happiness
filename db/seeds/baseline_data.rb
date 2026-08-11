@@ -268,6 +268,22 @@ Product.find_or_create_by!(name: "Strawberries") do |p|
   p.notes = "Fresh strawberries — estimate ~50 g for a small handful"
 end
 
+# Frédéric Brangeon (La Chapelle-sur-Erdre) does not publish a label. Values are
+# CIQUAL "Croissant au beurre, artisanal" per 100 g, portion sized as one croissant.
+Product.find_or_create_by!(name: "Croissant au beurre")
+croissant = Product.find_by!(name: "Croissant au beurre")
+croissant.update!(
+  brand: "Boulangerie Frédéric Brangeon",
+  calories_per_100g: 424,
+  protein_per_100g: 7.1,
+  carbs_per_100g: 43.2,
+  fat_per_100g: 23.3,
+  default_serving_g: 55,
+  serving_label: "1 croissant (~55 g)",
+  notes: "CIQUAL artisanal butter croissant (Anses). Brangeon does not list macros — " \
+         "~233 kcal for a 55 g croissant."
+)
+
 def seed_template(slug, name, meal_type, items)
   template = MealTemplate.find_or_create_by!(slug: slug) do |t|
     t.name = name

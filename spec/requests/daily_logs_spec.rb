@@ -186,4 +186,27 @@ RSpec.describe "Daily logs", type: :request do
       expect(log.reload.water_ml).to eq(0)
     end
   end
+
+  describe "decimal distance and weight" do
+    it "accepts precise run distance and weight decimals" do
+      log = DailyLog.today
+
+      patch daily_log_path(log), params: {
+        daily_log: { run_km: "5.24", weight_kg: "58.60" },
+        return_to: daily_log_path(log, anchor: "movement")
+      }
+
+      log.reload
+      expect(log.run_km).to eq(5.24)
+      expect(log.weight_kg).to eq(58.60)
+    end
+
+    it "shows number fields that allow any decimal step" do
+      get daily_log_path(DailyLog.today)
+
+      expect(response.body).to include('name="daily_log[run_km]"')
+      expect(response.body).to include('step="any"')
+      expect(response.body).to include('name="daily_log[weight_kg]"')
+    end
+  end
 end
