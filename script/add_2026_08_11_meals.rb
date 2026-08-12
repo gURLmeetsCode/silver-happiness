@@ -55,10 +55,12 @@ PRODUCTS = [
     default_serving_g: 50, serving_label: "1 handful (~50 g)"
   },
   {
-    name: "Vegan cake-sale muffin with vegan feta",
+    name: "Cake salé",
     brand: nil,
-    calories_per_100g: 280, protein_per_100g: 6, carbs_per_100g: 32, fat_per_100g: 14,
-    default_serving_g: 125, serving_label: "1 muffin + feta (~125 g)"
+    calories_per_100g: 176, protein_per_100g: 6.0, carbs_per_100g: 18.1, fat_per_100g: 9.1,
+    default_serving_g: 85, serving_label: "1 cake salé (~85 g)",
+    notes: "Muffin-mold cake salé — smoked tofu, pepper, onion, olives, vegan cheese. " \
+           "No sun-dried tomatoes. ~150 kcal each."
   },
   {
     name: "Psyllium husk",
@@ -95,9 +97,9 @@ MEALS = [
     items: [ { product: "Tortilla chips", grams: 50 } ]
   },
   {
-    name: "Vegan cake-sale muffin + feta",
+    name: "Cake salé",
     meal_type: :dinner,
-    items: [ { product: "Vegan cake-sale muffin with vegan feta", grams: 125 } ]
+    items: [ { product: "Cake salé", grams: 85 } ]
   },
   {
     name: "Psyllium husk with water",
@@ -120,6 +122,19 @@ puts "==> Daily log #{DATE} id=#{log.id} existing meals=#{log.meal_entries.count
 if log.respond_to?(:compulsive_eating_day=) && !log.compulsive_eating_day?
   log.update!(compulsive_eating_day: true)
   puts "  marked compulsive_eating_day"
+end
+
+# Correct the old rough muffin log if present under a previous name.
+old_names = [ "Vegan cake-sale muffin + feta", "Savoury tofu pepper olive muffin" ]
+old_muffin = log.meal_entries.find_by(name: old_names)
+if old_muffin
+  product = Product.find_by!(name: "Cake salé")
+  old_muffin.name = "Cake salé"
+  MealAssembler.new(
+    [ { "product_id" => product.id, "quantity" => 85, "unit" => "g" } ]
+  ).apply!(old_muffin)
+  old_muffin.save!
+  puts "  corrected old muffin estimate → Cake salé #{old_muffin.calories} kcal"
 end
 
 added = 0

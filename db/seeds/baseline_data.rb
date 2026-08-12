@@ -320,10 +320,11 @@ croissant.update!(
     default_serving_g: 10, serving_label: "1 tbsp (~10 g)",
     notes: "~35 kcal per tbsp; mostly fibre."
   },
-  "Vegan cake-sale muffin with vegan feta" => {
-    calories_per_100g: 280, protein_per_100g: 6, carbs_per_100g: 32, fat_per_100g: 14,
-    default_serving_g: 125, serving_label: "1 muffin + feta (~125 g)",
-    notes: "Rough cake-sale estimate (~350 kcal). No label."
+  "Cake salé" => {
+    calories_per_100g: 176, protein_per_100g: 6.0, carbs_per_100g: 18.1, fat_per_100g: 9.1,
+    default_serving_g: 85, serving_label: "1 cake salé (~85 g)",
+    notes: "Muffin-mold cake salé (12): smoked tofu, pepper, onion, olives, vegan cheese. " \
+           "No sun-dried tomatoes. ~150 kcal each (recipe estimate)."
   },
   "Sweet potato" => {
     calories_per_100g: 86, protein_per_100g: 1.5, carbs_per_100g: 18.3, fat_per_100g: 0.2,
