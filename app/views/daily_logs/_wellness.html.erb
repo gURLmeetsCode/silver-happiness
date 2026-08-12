@@ -3,6 +3,32 @@
     <h2 class="h5 mb-1">Wellness check-in</h2>
     <p class="text-muted small mb-3">Sleep, period, how you’re feeling, and daily notes.</p>
 
+    <div class="d-grid mb-3">
+      <%= link_to new_daily_log_urge_check_in_path(daily_log, return_to: daily_log_path(daily_log, anchor: "body")),
+            class: "btn btn-outline-dark" do %>
+        <i class="bi bi-pause-circle me-1"></i> I’m about to spiral — pause first
+      <% end %>
+    </div>
+
+    <% if daily_log.urge_check_ins.any? %>
+      <div class="mb-3">
+        <h3 class="h6 text-muted text-uppercase">Urges today</h3>
+        <ul class="list-unstyled small mb-0">
+          <% daily_log.urge_check_ins.recent.each do |urge| %>
+            <li class="border-bottom py-2">
+              <strong><%= urge.created_at.in_time_zone.strftime("%-H:%M") %></strong>
+              · <%= urge.feeling_label %>
+              · <%= urge.delay_action_label %>
+              · <%= urge.outcome_label %>
+              <% if urge.note.present? %>
+                <div class="text-muted"><%= urge.note %></div>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
     <%= form_with model: daily_log, class: "row g-3" do |f| %>
       <%= render "sleep_fields", f: f %>
 
@@ -15,6 +41,26 @@
           <%= f.check_box :compulsive_eating_day, class: "form-check-input" %>
           <%= f.label :compulsive_eating_day, "Hard / compulsive eating day", class: "form-check-label" %>
           <div class="form-text">Marks the day so you can see the pattern later — no judgment, just a record.</div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <h3 class="h6 mb-2">Hard-day debrief <span class="text-muted fw-normal">(optional)</span></h3>
+        <p class="small text-muted mb-2">Fill this when a hard day happens — or later the same evening. Helps more than only ticking the box.</p>
+        <div class="mb-2">
+          <%= f.label :hard_day_trigger, "What set it off?", class: "form-label small" %>
+          <%= f.text_area :hard_day_trigger, rows: 2, class: "form-control",
+                placeholder: "e.g. stressed, skipped lunch, “already blown it”, bulk bags open…" %>
+        </div>
+        <div class="mb-2">
+          <%= f.label :hard_day_what_was_available, "What food was around?", class: "form-label small" %>
+          <%= f.text_area :hard_day_what_was_available, rows: 2, class: "form-control",
+                placeholder: "e.g. Yoonuts, nuts, leftover cake salé…" %>
+        </div>
+        <div>
+          <%= f.label :hard_day_next_time, "What might help next time?", class: "form-label small" %>
+          <%= f.text_area :hard_day_next_time, rows: 2, class: "form-control",
+                placeholder: "e.g. eat dinner first, portion into a bowl, urge pause button…" %>
         </div>
       </div>
 

@@ -3,6 +3,7 @@ class DailyLog < ApplicationRecord
   has_many :progress_photos, dependent: :destroy
   has_many :workouts, dependent: :destroy
   has_many :strength_sessions, dependent: :destroy
+  has_many :urge_check_ins, dependent: :destroy
 
   validates :logged_on, presence: true, uniqueness: true
 
@@ -165,7 +166,26 @@ class DailyLog < ApplicationRecord
     parts << "#{water_ml} ml water" if water_ml.positive?
     parts << sleep_summary if sleep_summary.present?
     parts << feeling_check_in.truncate(40) if feeling_check_in.present?
+    if urge_check_ins.any?
+      paused = urge_check_ins.count(&:paused?)
+      parts << "#{urge_check_ins.size} urge#{"s" if urge_check_ins.size != 1} (#{paused} paused)"
+    end
     parts.compact_blank.join(" · ")
+  end
+
+  def hard_day_debrief?
+    hard_day_trigger.present? || hard_day_what_was_available.present? || hard_day_next_time.present?
+  end
+
+  # Rough nudge for the urge flow — not medical advice, just today's logged protein.
+  def protein_status_suggestion
+    goal = Goal.current
+    protein = total_protein
+    return "unsure" if meal_entries.none?
+    return "yes" if protein >= goal.protein_min_g
+    return "no" if protein < (goal.protein_min_g * 0.6)
+
+    "unsure"
   end
 
   def energy_estimate

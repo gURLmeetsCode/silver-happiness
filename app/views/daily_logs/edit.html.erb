@@ -59,6 +59,22 @@
     </div>
   </div>
 
+  <div class="col-12">
+    <h2 class="h6">Hard-day debrief <span class="text-muted fw-normal">(optional)</span></h2>
+    <div class="mb-2">
+      <%= f.label :hard_day_trigger, "What set it off?", class: "form-label small" %>
+      <%= f.text_area :hard_day_trigger, rows: 2, class: "form-control" %>
+    </div>
+    <div class="mb-2">
+      <%= f.label :hard_day_what_was_available, "What food was around?", class: "form-label small" %>
+      <%= f.text_area :hard_day_what_was_available, rows: 2, class: "form-control" %>
+    </div>
+    <div>
+      <%= f.label :hard_day_next_time, "What might help next time?", class: "form-label small" %>
+      <%= f.text_area :hard_day_next_time, rows: 2, class: "form-control" %>
+    </div>
+  </div>
+
   <div class="col-md-4">
     <%= f.label :water_ml, "Water (ml)", class: "form-label" %>
     <%= f.number_field :water_ml, class: "form-control", min: 0, step: 50 %>

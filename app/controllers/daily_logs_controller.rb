@@ -82,7 +82,8 @@ class DailyLogsController < ApplicationController
     params.require(:daily_log).permit(
       :weight_kg, :weight_pre_run, :run_km, :run_calories, :walk_km, :walk_calories,
       :training_notes, :notes, :energy_notes,
-      :on_period, :compulsive_eating_day, :water_ml, :bed_time, :wake_time, :sleep_quality, :feeling_check_in
+      :on_period, :compulsive_eating_day, :water_ml, :bed_time, :wake_time, :sleep_quality, :feeling_check_in,
+      :hard_day_trigger, :hard_day_what_was_available, :hard_day_next_time
     )
   end
 end

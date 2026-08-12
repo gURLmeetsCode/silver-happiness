@@ -225,6 +225,25 @@ RSpec.describe "Daily logs", type: :request do
       expect(response.body).to include("Hard eating day")
     end
 
+    it "saves a hard-day debrief with the check-in" do
+      log = DailyLog.today
+
+      patch daily_log_path(log), params: {
+        daily_log: {
+          compulsive_eating_day: "1",
+          hard_day_trigger: "Bulk bags open after a stressful afternoon",
+          hard_day_what_was_available: "Yoonuts and nuts",
+          hard_day_next_time: "Portion into a bowl and use urge pause"
+        },
+        return_to: daily_log_path(log, anchor: "body")
+      }
+
+      log.reload
+      expect(log).to be_hard_day_debrief
+      expect(log.hard_day_trigger).to include("Bulk bags")
+      expect(log.hard_day_next_time).to include("urge pause")
+    end
+
     it "shows resting burn (BMR) as a caption when the body profile is set" do
       Goal.current.update!(height_cm: 163, age_years: 37, sex: "female", starting_weight_kg: 59.5)
       get daily_log_path(DailyLog.today)

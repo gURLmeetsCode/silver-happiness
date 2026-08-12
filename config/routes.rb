@@ -26,6 +26,7 @@ Rails.application.routes.draw do
     resources :workouts, only: [ :create, :destroy ]
     resources :strength_sessions, except: [ :index ]
     resources :progress_photos, only: [ :create, :destroy ]
+    resources :urge_check_ins, only: [ :new, :create ]
   end
 
   resources :products, only: [ :new, :create ] do

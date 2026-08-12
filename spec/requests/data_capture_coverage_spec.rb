@@ -34,7 +34,10 @@ RSpec.describe "Data capture coverage", type: :request do
       "bed_time" => "daily_log[bed_time]",
       "wake_time" => "daily_log[wake_time]",
       "sleep_quality" => "daily_log[sleep_quality]",
-      "feeling_check_in" => "daily_log[feeling_check_in]"
+      "feeling_check_in" => "daily_log[feeling_check_in]",
+      "hard_day_trigger" => "daily_log[hard_day_trigger]",
+      "hard_day_what_was_available" => "daily_log[hard_day_what_was_available]",
+      "hard_day_next_time" => "daily_log[hard_day_next_time]"
     }.each do |column, field|
       it "has an input for #{column}" do
         get daily_log_path(today)
@@ -94,6 +97,12 @@ RSpec.describe "Data capture coverage", type: :request do
 
       expect(response.body).to include(set_water_daily_log_path(today, amount_ml: 500))
     end
+    it "links to the urge pause flow" do
+      get daily_log_path(today)
+
+      expect(response.body).to include(new_daily_log_urge_check_in_path(today))
+      expect(response.body).to include("I’m about to spiral")
+    end
   end
 
   describe "the day log offers photo capture" do
@@ -136,7 +145,8 @@ RSpec.describe "Data capture coverage", type: :request do
       get edit_daily_log_path(today)
 
       %w[weight_kg run_km walk_km training_notes energy_notes notes on_period
-         compulsive_eating_day water_ml bed_time wake_time sleep_quality feeling_check_in].each do |column|
+         compulsive_eating_day water_ml bed_time wake_time sleep_quality feeling_check_in
+         hard_day_trigger hard_day_what_was_available hard_day_next_time].each do |column|
         expect(response.body).to include("daily_log[#{column}]"),
           "edit page lost the #{column} field"
       end

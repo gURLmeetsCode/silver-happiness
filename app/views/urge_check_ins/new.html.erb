@@ -1,0 +1,81 @@
+<% content_for :title, "Urge pause" %>
+
+<header class="mb-3">
+  <p class="text-muted small mb-1"><%= @daily_log.logged_on.strftime("%A, %B %-d") %></p>
+  <h1 class="h3 mb-1">Pause the spiral</h1>
+  <p class="text-muted mb-0">Ninety seconds. No judgment — just notice what’s going on, pick one tiny delay, then choose.</p>
+</header>
+
+<div class="card home-card mb-3">
+  <div class="card-body">
+    <p class="small text-muted mb-3">
+      Protein so far today:
+      <strong><%= @daily_log.total_protein.round(0) %> g</strong>
+      (goal <%= @goal.protein_min_g %>–<%= @goal.protein_max_g %> g)
+    </p>
+
+    <%= form_with model: [@daily_log, @urge_check_in] do |f| %>
+      <%= hidden_field_tag :return_to, params[:return_to].presence || daily_log_path(@daily_log, anchor: "body") %>
+
+      <fieldset class="mb-4">
+        <legend class="form-label fw-semibold">What are you feeling?</legend>
+        <div class="d-flex flex-column gap-2">
+          <% UrgeCheckIn::FEELINGS.each do |value, label| %>
+            <div class="form-check">
+              <%= f.radio_button :feeling, value, class: "form-check-input", required: true, id: "urge_feeling_#{value}" %>
+              <%= f.label :feeling, label, value: value, class: "form-check-label", for: "urge_feeling_#{value}" %>
+            </div>
+          <% end %>
+        </div>
+      </fieldset>
+
+      <fieldset class="mb-4">
+        <legend class="form-label fw-semibold">Protein today?</legend>
+        <div class="d-flex flex-column gap-2">
+          <% UrgeCheckIn::PROTEIN_STATUSES.each do |value, label| %>
+            <div class="form-check">
+              <%= f.radio_button :protein_status, value, class: "form-check-input", required: true, id: "urge_protein_#{value}" %>
+              <%= f.label :protein_status, label, value: value, class: "form-check-label", for: "urge_protein_#{value}" %>
+            </div>
+          <% end %>
+        </div>
+      </fieldset>
+
+      <fieldset class="mb-4">
+        <legend class="form-label fw-semibold">One tiny delay</legend>
+        <div class="d-flex flex-column gap-2">
+          <% UrgeCheckIn::DELAY_ACTIONS.each do |value, label| %>
+            <div class="form-check">
+              <%= f.radio_button :delay_action, value, class: "form-check-input", required: true, id: "urge_delay_#{value}" %>
+              <%= f.label :delay_action, label, value: value, class: "form-check-label", for: "urge_delay_#{value}" %>
+            </div>
+          <% end %>
+        </div>
+      </fieldset>
+
+      <fieldset class="mb-4">
+        <legend class="form-label fw-semibold">How did it go?</legend>
+        <div class="d-flex flex-column gap-2">
+          <% UrgeCheckIn::OUTCOMES.each do |value, label| %>
+            <div class="form-check">
+              <%= f.radio_button :outcome, value, class: "form-check-input", required: true, id: "urge_outcome_#{value}" %>
+              <%= f.label :outcome, label, value: value, class: "form-check-label", for: "urge_outcome_#{value}" %>
+            </div>
+          <% end %>
+        </div>
+      </fieldset>
+
+      <div class="mb-4">
+        <%= f.label :note, "Optional note", class: "form-label" %>
+        <%= f.text_area :note, rows: 2, class: "form-control",
+              placeholder: "What was available? What might help next time?" %>
+      </div>
+
+      <div class="d-grid gap-2 d-sm-flex">
+        <%= f.submit "Save urge check-in", class: "btn btn-primary btn-lg" %>
+        <%= link_to "Cancel", safe_return_to(default: daily_log_path(@daily_log, anchor: "body")),
+              class: "btn btn-outline-secondary btn-lg" %>
+      </div>
+    <% end %>
+  </div>
+</div>

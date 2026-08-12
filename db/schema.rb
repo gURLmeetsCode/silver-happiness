@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_12_110000) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_12_170000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -59,6 +59,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_12_110000) do
     t.integer "sleep_quality"
     t.text "feeling_check_in"
     t.boolean "compulsive_eating_day", default: false, null: false
+    t.text "hard_day_trigger"
+    t.text "hard_day_what_was_available"
+    t.text "hard_day_next_time"
     t.index ["logged_on"], name: "index_daily_logs_on_logged_on", unique: true
   end
 
@@ -249,6 +252,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_12_110000) do
     t.index ["workout_plan_id"], name: "index_strength_sessions_on_workout_plan_id"
   end
 
+  create_table "urge_check_ins", force: :cascade do |t|
+    t.integer "daily_log_id", null: false
+    t.string "feeling", null: false
+    t.string "protein_status", null: false
+    t.string "delay_action", null: false
+    t.string "outcome", null: false
+    t.text "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["daily_log_id", "created_at"], name: "index_urge_check_ins_on_daily_log_id_and_created_at"
+    t.index ["daily_log_id"], name: "index_urge_check_ins_on_daily_log_id"
+  end
+
   create_table "workout_plan_exercises", force: :cascade do |t|
     t.integer "workout_plan_id", null: false
     t.string "name", null: false
@@ -303,6 +319,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_12_110000) do
   add_foreign_key "strength_exercise_logs", "strength_sessions"
   add_foreign_key "strength_sessions", "daily_logs"
   add_foreign_key "strength_sessions", "workout_plans"
+  add_foreign_key "urge_check_ins", "daily_logs"
   add_foreign_key "workout_plan_exercises", "workout_plans"
   add_foreign_key "workouts", "daily_logs"
 end

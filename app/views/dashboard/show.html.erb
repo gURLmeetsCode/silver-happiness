@@ -103,7 +103,7 @@
 <% end %>
 
 <h2 class="h6 text-uppercase text-muted mb-2">Log something</h2>
-<div class="home-actions mb-4">
+<div class="home-actions mb-3">
   <%= link_to daily_log_path(@today, anchor: "meals"), class: "home-action" do %>
     <i class="bi bi-egg-fried"></i>
     <span class="home-action-label">Meal</span>
@@ -128,6 +128,13 @@
     <span class="home-action-hint">Snap how you look</span>
   <% end %>
 </div>
+
+<%= link_to new_daily_log_urge_check_in_path(@today, return_to: root_path),
+      class: "btn btn-outline-dark w-100 mb-4 py-3" do %>
+  <i class="bi bi-pause-circle me-1"></i>
+  <strong>I’m about to spiral</strong>
+  <span class="d-block small text-muted fw-normal mt-1">Pause 90 seconds before the binge</span>
+<% end %>
 
 <div class="d-grid gap-2 d-sm-flex">
   <%= link_to metrics_path, class: "btn btn-dark btn-lg flex-fill" do %>
