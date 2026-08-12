@@ -55,6 +55,24 @@ RSpec.describe "Home", type: :request do
       expect(response.body).not_to include("This week")
       expect(response.body).not_to include("Calories eaten vs burned vs target")
     end
+
+    it "shows daily outfit inspo when outfit photos exist" do
+      create(:outfit_photo, caption: "Mirror moment", category: :feeling_cute)
+
+      get root_path
+
+      expect(response.body).to include("Daily inspo")
+      expect(response.body).to include("Mirror moment")
+      expect(response.body).to include("Feeling cute")
+      expect(response.body).to include(outfit_photos_path)
+      expect(response.body).to include("<img")
+    end
+
+    it "omits daily inspo when there are no outfit photos" do
+      get root_path
+
+      expect(response.body).not_to include("Daily inspo")
+    end
   end
 
   describe "GET /dashboard" do

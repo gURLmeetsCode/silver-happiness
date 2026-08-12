@@ -13,6 +13,25 @@ class OutfitPhoto < ApplicationRecord
 
   scope :recent, -> { order(logged_on: :desc, created_at: :desc) }
   scope :by_category, ->(category) { where(category: category) if category.present? }
+  scope :with_image, -> { joins(:image_attachment) }
+
+  # Same look all day; rotates when the calendar day changes (and when you add photos).
+  def self.daily_inspo_for(date = Date.current)
+    ids = with_image.order(:id).pluck(:id)
+    return nil if ids.empty?
+
+    find(ids[date.yday % ids.size])
+  end
+
+  # Second polaroid peek — the next photo in the same daily rotation.
+  def self.daily_inspo_alternate(featured, date = Date.current)
+    return nil if featured.nil?
+
+    ids = with_image.order(:id).pluck(:id)
+    return nil if ids.size < 2
+
+    find(ids[(date.yday + 1) % ids.size])
+  end
 
   CATEGORY_LABELS = {
     "workout" => "Workout fit",
