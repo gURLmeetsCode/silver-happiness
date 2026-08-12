@@ -324,6 +324,16 @@ croissant.update!(
     calories_per_100g: 280, protein_per_100g: 6, carbs_per_100g: 32, fat_per_100g: 14,
     default_serving_g: 125, serving_label: "1 muffin + feta (~125 g)",
     notes: "Rough cake-sale estimate (~350 kcal). No label."
+  },
+  "Sweet potato" => {
+    calories_per_100g: 86, protein_per_100g: 1.5, carbs_per_100g: 18.3, fat_per_100g: 0.2,
+    default_serving_g: 200, serving_label: "1 whole medium (~200 g)",
+    notes: "CIQUAL patate douce, raw. Log raw weight before roasting."
+  },
+  "Yellow potato" => {
+    calories_per_100g: 81, protein_per_100g: 1.9, carbs_per_100g: 16.7, fat_per_100g: 0.2,
+    default_serving_g: 150, serving_label: "1 medium/small (~150 g)",
+    notes: "CIQUAL pomme de terre peeled raw. Yellow/plain. Log raw weight before roasting."
   }
 }.each do |name, attrs|
   product = Product.find_or_initialize_by(name: name)
@@ -412,6 +422,18 @@ seed_template("tofu-scramble-potatoes", "Tofu scramble + baby potatoes", :breakf
   [ red_pepper, 80, "1 red pepper" ],
   [ avocado, 56, "¼–½ avocado (~56 g)" ],
   [ nutritional_yeast, 10, "2 tbsp nutritional yeast (optional)" ]
+])
+
+sweet_potato = Product.find_by!(name: "Sweet potato")
+yellow_potato = Product.find_by!(name: "Yellow potato")
+
+# Batch roast: 1 whole sweet potato + 4 medium/small yellow potatoes, cut into
+# triangles, tossed with Puget oil + seasoning (seasoning ≈ 0 kcal).
+# Template is the FULL tray — scale down when logging your plate share.
+seed_template("roasted-sweet-yellow-potatoes", "Roasted sweet + yellow potatoes (batch)", :dinner, [
+  [ sweet_potato, 200, "1 whole sweet potato (~200 g raw)" ],
+  [ yellow_potato, 600, "4 medium/small yellow potatoes (~150 g each, raw)" ],
+  [ puget_oil, 10, "1 tbsp Puget olive oil (adjust if you used more/less)" ]
 ])
 
 barilla_pasta = Product.find_by!(name: "Barilla Fusilli Protein+")
