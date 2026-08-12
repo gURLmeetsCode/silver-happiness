@@ -1,4 +1,5 @@
 <%# locals: daily_log, goal %>
+<% energy = daily_log.energy_estimate %>
 <div class="summary-strip mb-3">
   <div class="summary-cell">
     <span class="summary-label">Eaten</span>
@@ -31,6 +32,13 @@
     <span class="summary-hint"><%= daily_log.weight_kg.present? ? "kg" : "not logged" %></span>
   </div>
 </div>
+
+<% if energy.ready? %>
+  <p class="small text-muted mb-3 resting-burn-caption">
+    Just staying alive uses ~<%= energy.bmr %> kcal/day
+    <span class="text-muted">(BMR · Mifflin–St Jeor estimate from your height, age and weight — not a lab measurement).</span>
+  </p>
+<% end %>
 
 <% if daily_log.calories_burned_breakdown.any? %>
   <p class="small text-muted mb-3">

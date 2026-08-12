@@ -209,4 +209,28 @@ RSpec.describe "Daily logs", type: :request do
       expect(response.body).to include('name="daily_log[weight_kg]"')
     end
   end
+
+  describe "day markers and resting burn" do
+    it "can mark a hard / compulsive eating day" do
+      log = DailyLog.today
+
+      patch daily_log_path(log), params: {
+        daily_log: { compulsive_eating_day: "1" },
+        return_to: daily_log_path(log, anchor: "body")
+      }
+
+      expect(log.reload).to be_compulsive_eating_day
+
+      get daily_log_path(log)
+      expect(response.body).to include("Hard eating day")
+    end
+
+    it "shows resting burn (BMR) as a caption when the body profile is set" do
+      Goal.current.update!(height_cm: 163, age_years: 37, sex: "female", starting_weight_kg: 59.5)
+      get daily_log_path(DailyLog.today)
+
+      expect(response.body).to include("Just staying alive uses")
+      expect(response.body).to include("BMR")
+    end
+  end
 end

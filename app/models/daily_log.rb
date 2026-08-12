@@ -160,11 +160,16 @@ class DailyLog < ApplicationRecord
 
   def wellness_summary
     parts = []
+    parts << "Hard eating day" if compulsive_eating_day?
     parts << "Period" if on_period?
     parts << "#{water_ml} ml water" if water_ml.positive?
     parts << sleep_summary if sleep_summary.present?
     parts << feeling_check_in.truncate(40) if feeling_check_in.present?
     parts.compact_blank.join(" · ")
+  end
+
+  def energy_estimate
+    Goal.current.energy_estimate(weight_kg: weight_kg)
   end
 
   def add_water!(amount_ml = 250)

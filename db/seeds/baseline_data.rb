@@ -284,6 +284,53 @@ croissant.update!(
          "~233 kcal for a 55 g croissant."
 )
 
+{
+  "Yoonuts Muesli croustillant 4 fruits rouges" => {
+    brand: "Yoonuts", calories_per_100g: 437, protein_per_100g: 10, carbs_per_100g: 59, fat_per_100g: 16,
+    default_serving_g: 100, serving_label: "1 cup (~100 g)",
+    notes: "Label: 437 kcal / 100 g. Cup ≈ 100 g for croustillant."
+  },
+  "Yoonuts Muesli croustillant 4 noix" => {
+    brand: "Yoonuts", calories_per_100g: 469, protein_per_100g: 11, carbs_per_100g: 55, fat_per_100g: 21,
+    default_serving_g: 100, serving_label: "1 cup (~100 g)",
+    notes: "Label: 469 kcal / 100 g."
+  },
+  "Brazil nuts" => {
+    calories_per_100g: 659, protein_per_100g: 14.3, carbs_per_100g: 12.3, fat_per_100g: 67.1,
+    default_serving_g: 133, serving_label: "1 cup whole (~133 g)",
+    notes: "USDA. A full cup is an extreme selenium dose."
+  },
+  "Almonds" => {
+    calories_per_100g: 579, protein_per_100g: 21.2, carbs_per_100g: 21.6, fat_per_100g: 49.9,
+    default_serving_g: 72, serving_label: "0.5 cup whole (~72 g)",
+    notes: "Whole almonds; 0.5 cup ≈ 72 g."
+  },
+  "Nectarine" => {
+    calories_per_100g: 44, protein_per_100g: 1.2, carbs_per_100g: 8.9, fat_per_100g: 0.3,
+    default_serving_g: 140, serving_label: "1 medium (~140 g)",
+    notes: "CIQUAL nectarine/brugnon raw."
+  },
+  "Tortilla chips" => {
+    calories_per_100g: 488, protein_per_100g: 7.0, carbs_per_100g: 63.0, fat_per_100g: 23.0,
+    default_serving_g: 50, serving_label: "1 handful (~50 g)",
+    notes: "Typical corn tortilla chips average."
+  },
+  "Psyllium husk" => {
+    calories_per_100g: 350, protein_per_100g: 0, carbs_per_100g: 80, fat_per_100g: 0,
+    default_serving_g: 10, serving_label: "1 tbsp (~10 g)",
+    notes: "~35 kcal per tbsp; mostly fibre."
+  },
+  "Vegan cake-sale muffin with vegan feta" => {
+    calories_per_100g: 280, protein_per_100g: 6, carbs_per_100g: 32, fat_per_100g: 14,
+    default_serving_g: 125, serving_label: "1 muffin + feta (~125 g)",
+    notes: "Rough cake-sale estimate (~350 kcal). No label."
+  }
+}.each do |name, attrs|
+  product = Product.find_or_initialize_by(name: name)
+  product.assign_attributes(attrs)
+  product.save!
+end
+
 def seed_template(slug, name, meal_type, items)
   template = MealTemplate.find_or_create_by!(slug: slug) do |t|
     t.name = name

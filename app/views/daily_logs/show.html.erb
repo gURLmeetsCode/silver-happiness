@@ -6,6 +6,9 @@
     <div>
       <p class="day-header-eyebrow mb-1">Daily log</p>
       <h1 class="day-header-title mb-0"><%= @daily_log.logged_on.strftime("%A, %B %-d") %></h1>
+      <% if @daily_log.compulsive_eating_day? %>
+        <span class="badge text-bg-secondary mt-2">Hard eating day</span>
+      <% end %>
     </div>
     <div class="d-flex gap-2">
       <%= link_to "All days", daily_logs_path, class: "btn btn-outline-secondary btn-sm" %>

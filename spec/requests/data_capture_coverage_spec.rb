@@ -30,6 +30,7 @@ RSpec.describe "Data capture coverage", type: :request do
       "energy_notes" => "daily_log[energy_notes]",
       "notes" => "daily_log[notes]",
       "on_period" => "daily_log[on_period]",
+      "compulsive_eating_day" => "daily_log[compulsive_eating_day]",
       "bed_time" => "daily_log[bed_time]",
       "wake_time" => "daily_log[wake_time]",
       "sleep_quality" => "daily_log[sleep_quality]",
@@ -135,7 +136,7 @@ RSpec.describe "Data capture coverage", type: :request do
       get edit_daily_log_path(today)
 
       %w[weight_kg run_km walk_km training_notes energy_notes notes on_period
-         water_ml bed_time wake_time sleep_quality feeling_check_in].each do |column|
+         compulsive_eating_day water_ml bed_time wake_time sleep_quality feeling_check_in].each do |column|
         expect(response.body).to include("daily_log[#{column}]"),
           "edit page lost the #{column} field"
       end

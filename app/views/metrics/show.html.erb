@@ -51,6 +51,9 @@
             · <%= @today.calories_burned_breakdown.map { |p| "#{p[:label]} #{p[:kcal]}" }.join(" · ") %>
           <% end %>
         </div>
+        <% if (energy = @goal.energy_estimate(weight_kg: @today.weight_kg)).ready? %>
+          <div class="small text-muted mt-1">At rest ~<%= energy.bmr %> kcal/day (BMR)</div>
+        <% end %>
       </div>
     </div>
   </div>
