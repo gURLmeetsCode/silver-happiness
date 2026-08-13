@@ -5,8 +5,8 @@
 # What she ate:
 #   - Iced Americano (35 ml espresso), black
 #   - Bowl du moment (pasta bowl) — full
-#   - Houmous side — full dip (menu: "Houmous à partager… Ou pas!")
-#   - Bread with houmous — most of it (~¾; shared with husband)
+#   - Houmous — ~½ cup total for the table, shared ≈½ each (~¼ cup / ~60 g)
+#   - Bread — one slice cut into 6–7 triangles; she had most (~¾ slice)
 #   - Fondant au chocolat — half (shared equally)
 #
 # Restaurant publishes no labels; macros are estimates.
@@ -21,7 +21,8 @@ DATE = Date.new(2026, 8, 13)
 
 # Prior script name — rewrite that entry if present so re-running corrects the day.
 OLD_MEAL_NAMES = [
-  "L'Éthiquête lunch — bowl + fondant + iced Americano"
+  "L'Éthiquête lunch — bowl + fondant + iced Americano",
+  "L'Éthiquête lunch — bowl, houmous, bread, ½ fondant, Americano"
 ].freeze
 
 PRODUCTS = [
@@ -56,11 +57,11 @@ PRODUCTS = [
     protein_per_100g: 8.2,
     carbs_per_100g: 8.0,
     fat_per_100g: 22.0,
+    # ½ cup hummus ≈ 120 g for the whole plate; product serving = that full ½ cup.
     default_serving_g: 120,
-    serving_label: "1 side dip (~120 g)",
-    notes: "Menu: « Houmous à partager… Ou pas! » (~4,50 €). No label. " \
-           "Restaurant/CIQUAL-range houmous ~250–300 kcal/100 g (oil + tahini); " \
-           "using 270 kcal/100 g, ~8 g protein. Starter dip ~120 g → ~324 kcal."
+    serving_label: "½ cup houmous (~120 g, shared plate)",
+    notes: "Menu: « Houmous à partager… Ou pas! ». Plate was ~½ cup total (~120 g), shared. " \
+           "~270 kcal/100 g (restaurant/CIQUAL oilier range)."
   },
   {
     name: "Pain (with houmous side)",
@@ -69,10 +70,10 @@ PRODUCTS = [
     protein_per_100g: 9.0,
     carbs_per_100g: 53.0,
     fat_per_100g: 2.5,
-    default_serving_g: 80,
-    serving_label: "bread served with houmous (~80 g)",
-    notes: "Estimate for the bread basket/slice(s) with the houmous side. " \
-           "Typical restaurant serving ~80 g baguette-style bread."
+    # One slice cut into 6–7 triangles — not a bread basket.
+    default_serving_g: 35,
+    serving_label: "1 slice cut into triangles (~35 g)",
+    notes: "One slice of bread, cut into 6–7 triangles. ~35 g whole slice."
   },
   {
     name: "L'Éthiquête fondant au chocolat",
@@ -93,8 +94,9 @@ MEAL = {
   items: [
     { product: "Iced Americano (35 ml espresso)", quantity: 1, unit: "serving" },
     { product: "L'Éthiquête bowl du moment (pasta)", quantity: 1, unit: "serving" },
-    { product: "L'Éthiquête houmous (side)", quantity: 1, unit: "serving" },
-    # Most of the bread shared with husband → ~¾ of the plate bread.
+    # ½ cup total shared → her share ≈ ½ of that = ¼ cup ≈ 0.5 serving.
+    { product: "L'Éthiquête houmous (side)", quantity: 0.5, unit: "serving" },
+    # One slice in triangles; she had most → ~¾ slice.
     { product: "Pain (with houmous side)", quantity: 0.75, unit: "serving" },
     # Cake shared equally.
     { product: "L'Éthiquête fondant au chocolat", quantity: 0.5, unit: "serving" }
@@ -125,7 +127,8 @@ entry.name = MEAL[:name]
 entry.meal_type = MEAL[:meal_type]
 MealAssembler.new(rows).apply!(entry)
 entry.notes = [
-  "L'Éthiquête estimates. Houmous = full side; bread ≈ ¾ (shared); fondant = ½ (shared)."
+  "L'Éthiquête estimates. Houmous ≈ ½ of a ½-cup plate (shared); " \
+  "bread ≈ ¾ of one sliced triangle slice; fondant = ½."
 ].compact_blank.join(" · ")
 entry.save!
 
