@@ -335,6 +335,24 @@ croissant.update!(
     calories_per_100g: 81, protein_per_100g: 1.9, carbs_per_100g: 16.7, fat_per_100g: 0.2,
     default_serving_g: 150, serving_label: "1 medium/small (~150 g)",
     notes: "CIQUAL pomme de terre peeled raw. Yellow/plain. Log raw weight before roasting."
+  },
+  "L'Éthiquête bowl du moment (pasta)" => {
+    brand: "L'Éthiquête Nantes",
+    calories_per_100g: 170, protein_per_100g: 8.0, carbs_per_100g: 18.0, fat_per_100g: 6.4,
+    default_serving_g: 500, serving_label: "1 bowl (~500 g)",
+    notes: "Estimate. Chickpea pasta bowl with veg, beans, seeds, vinaigrette, tofu rosso."
+  },
+  "L'Éthiquête houmous (side)" => {
+    brand: "L'Éthiquête Nantes",
+    calories_per_100g: 270, protein_per_100g: 8.2, carbs_per_100g: 8.0, fat_per_100g: 22.0,
+    default_serving_g: 120, serving_label: "½ cup houmous (~120 g, shared plate)",
+    notes: "Shared houmous side estimate."
+  },
+  "L'Éthiquête fondant au chocolat" => {
+    brand: "L'Éthiquête Nantes",
+    calories_per_100g: 370, protein_per_100g: 5.0, carbs_per_100g: 42.0, fat_per_100g: 20.0,
+    default_serving_g: 100, serving_label: "1 portion (~100 g)",
+    notes: "Vegan chocolate fondant estimate."
   }
 }.each do |name, attrs|
   product = Product.find_or_initialize_by(name: name)
@@ -445,6 +463,28 @@ seed_template("pasta-salad-tofu-dinner", "Pasta salad + tofu", :dinner, [
   [ tofu, 125, "125 g tofu nature (1 pavé)" ],
   [ homemade_dressing, 30, "2 tbsp homemade dressing" ]
 ])
+
+zucchini = Product.find_by!(name: "Zucchini")
+seed_template("zucchini-tofu-batch", "Zucchini + tofu (batch)", :dinner, [
+  [ zucchini, 400, "yellow + green zucchini (~400 g)" ],
+  [ tofu, 300, "tofu cubes (~300 g / ~2½ pavés)" ],
+  [ puget_oil, 10, "1 tbsp olive oil" ]
+])
+
+bowl_ethiquete = Product.find_by(name: "L'Éthiquête bowl du moment (pasta)")
+houmous_ethiquete = Product.find_by(name: "L'Éthiquête houmous (side)")
+fondant_ethiquete = Product.find_by(name: "L'Éthiquête fondant au chocolat")
+if bowl_ethiquete && houmous_ethiquete && fondant_ethiquete
+  seed_template("ethiquete-bowl", "L'Éthiquête bowl du moment", :lunch, [
+    [ bowl_ethiquete, 500, "1 full bowl" ]
+  ])
+  seed_template("ethiquete-houmous", "L'Éthiquête houmous (side)", :snack, [
+    [ houmous_ethiquete, 120, "½ cup plate (~120 g)" ]
+  ])
+  seed_template("ethiquete-fondant", "L'Éthiquête fondant au chocolat", :snack, [
+    [ fondant_ethiquete, 100, "1 full portion" ]
+  ])
+end
 
 # --- Personal history (Aug 6–7, 2026) ---
 #

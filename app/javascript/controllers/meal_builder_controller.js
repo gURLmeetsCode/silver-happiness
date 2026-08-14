@@ -46,7 +46,20 @@ export default class extends Controller {
 
   productChanged(event) {
     const row = event.target.closest("[data-meal-builder-target='row']")
-    if (row) this.refreshUnits(row)
+    if (!row) return
+
+    const product = row.querySelector("[data-meal-builder-target='product']")
+    const quantity = row.querySelector("[data-meal-builder-target='quantity']")
+    const option = product?.selectedOptions?.[0]
+    this.refreshUnits(row)
+
+    // Batches default to a plate share; products keep their usual serving size.
+    if (option?.dataset?.kind === "template" && quantity && !quantity.value) {
+      quantity.value = "0.25"
+    } else if (option?.value && option.dataset.kind !== "template" && quantity && !quantity.value) {
+      quantity.value = option.dataset.servingG || "100"
+    }
+
     this.recalculate()
   }
 
@@ -108,6 +121,11 @@ export default class extends Controller {
   }
 
   gramsFor(option, quantity, unit) {
+    if (option?.dataset?.kind === "template") {
+      // Templates use "serving" as a fraction of the full batch. Hint shows a
+      // synthetic "grams" scale so the live total still feels tangible.
+      return quantity * 100
+    }
     if (unit === "serving") return quantity * (parseFloat(option.dataset.servingG) || 100)
     if (unit === "g" || !unit) return quantity
 
@@ -137,17 +155,33 @@ export default class extends Controller {
         return
       }
 
-      const grams = this.gramsFor(option, amount, unit?.value)
-      const factor = grams / 100
-      const calories = (parseFloat(option.dataset.calories) || 0) * factor
+      const kind = option.dataset.kind || "product"
+      let calories, protein, carbs, fat, hintText
+
+      if (kind === "template") {
+        // Option datasets are totals for 1× the full batch.
+        calories = (parseFloat(option.dataset.calories) || 0) * amount
+        protein = (parseFloat(option.dataset.protein) || 0) * amount
+        carbs = (parseFloat(option.dataset.carbs) || 0) * amount
+        fat = (parseFloat(option.dataset.fat) || 0) * amount
+        hintText = `${amount}× batch · ${Math.round(calories)} kcal`
+      } else {
+        const grams = this.gramsFor(option, amount, unit?.value)
+        const factor = grams / 100
+        calories = (parseFloat(option.dataset.calories) || 0) * factor
+        protein = (parseFloat(option.dataset.protein) || 0) * factor
+        carbs = (parseFloat(option.dataset.carbs) || 0) * factor
+        fat = (parseFloat(option.dataset.fat) || 0) * factor
+        hintText = `${Math.round(grams)} g · ${Math.round(calories)} kcal`
+      }
 
       totals.calories += calories
-      totals.protein += (parseFloat(option.dataset.protein) || 0) * factor
-      totals.carbs += (parseFloat(option.dataset.carbs) || 0) * factor
-      totals.fat += (parseFloat(option.dataset.fat) || 0) * factor
-      names.push(option.textContent.trim())
+      totals.protein += protein
+      totals.carbs += carbs
+      totals.fat += fat
+      names.push(option.textContent.trim().replace(/\s*\(\d+ kcal full\)\s*$/, ""))
 
-      if (hint) hint.textContent = `${Math.round(grams)} g · ${Math.round(calories)} kcal`
+      if (hint) hint.textContent = hintText
     })
 
     if (this.hasTotalTarget) {

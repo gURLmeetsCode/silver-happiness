@@ -62,7 +62,7 @@ RSpec.describe "Data capture coverage", type: :request do
     it "has the meal builder, with an amount and a unit per item" do
       get daily_log_path(today)
 
-      expect(response.body).to include("items[0][product_id]")
+      expect(response.body).to include("items[0][picker]")
       expect(response.body).to include("items[0][quantity]")
       expect(response.body).to include("items[0][unit]")
     end

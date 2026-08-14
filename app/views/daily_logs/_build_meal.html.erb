@@ -1,9 +1,11 @@
-<%# locals: daily_log, products %>
+<%# locals: daily_log, products, meal_templates %>
+<% meal_templates ||= [] %>
 <section class="card day-card mb-3">
   <div class="card-body">
     <h2 class="h5 mb-1">Build a meal</h2>
     <p class="small text-muted mb-3">
-      Add what you actually ate — half a cup of this, a teaspoon of that. The numbers add themselves up.
+      Mix products <strong>and</strong> saved batches — e.g. ¼ roasted potatoes + ½ zucchini &amp; tofu batch.
+      For a batch, amount is how much of the full tray (½, ¼, 1…).
     </p>
 
     <%= form_with url: daily_log_meal_entries_path(daily_log), method: :post,
@@ -13,12 +15,12 @@
           } do %>
 
       <template data-meal-builder-target="template">
-        <%= render "daily_logs/meal_item_row", products: products, index: "__INDEX__" %>
+        <%= render "daily_logs/meal_item_row", products: products, meal_templates: meal_templates, index: "__INDEX__" %>
       </template>
 
       <div data-meal-builder-target="rows">
         <% 3.times do |index| %>
-          <%= render "daily_logs/meal_item_row", products: products, index: index %>
+          <%= render "daily_logs/meal_item_row", products: products, meal_templates: meal_templates, index: index %>
         <% end %>
       </div>
 
@@ -29,7 +31,10 @@
         </button>
         <%= link_to new_product_path(return_to: daily_log_path(daily_log, anchor: "meals")),
               class: "btn btn-sm btn-link" do %>
-          Missing something? Save it as a product
+          Missing a product?
+        <% end %>
+        <%= link_to recipes_path, class: "btn btn-sm btn-link" do %>
+          See recipes
         <% end %>
       </div>
 

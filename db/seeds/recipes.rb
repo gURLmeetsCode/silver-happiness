@@ -486,6 +486,84 @@ seed_recipe "noracooks-vegan-pancakes", {
   To log your meal: Servings = pancakes you ate (e.g. 7) → add skyr (tbsp) and strawberries (g) in extras → Log this meal today.
 STEPS
 
+seed_recipe "roasted-sweet-yellow-potatoes", {
+  name: "Roasted sweet + yellow potatoes (batch)",
+  meal_type: :prep,
+  regular_meal: true,
+  meal_template_slug: "roasted-sweet-yellow-potatoes",
+  prep_time: "45 min",
+  serves: 1,
+  position: 20,
+  water_suggestion_ml: 250,
+  description: "Full tray: 1 sweet potato + 4 yellow potatoes, roasted with oil. " \
+               "Log a plate share in Build a meal (¼, ½…) alone or with zucchini + tofu."
+}, [
+  [ :carbs, "200 g", "1 whole sweet potato", "Sweet potato", 200 ],
+  [ :carbs, "600 g", "4 yellow potatoes", "Yellow potato", 600 ],
+  [ :fats, "10 g", "1 tbsp olive oil", "Puget Huile d'olive vierge extra", 10 ]
+], <<~STEPS
+  1. Cut 1 medium sweet potato (~200 g) and 4 medium/small yellow potatoes (~600 g) into triangles.
+  2. Toss with ~1 tbsp olive oil and seasoning.
+  3. Roast until browned and tender.
+  4. In Build a meal, pick this batch and enter how much of the tray you ate (½, ¼…).
+STEPS
+
+seed_recipe "zucchini-tofu-batch", {
+  name: "Zucchini + tofu (batch)",
+  meal_type: :prep,
+  regular_meal: true,
+  meal_template_slug: "zucchini-tofu-batch",
+  prep_time: "30 min",
+  serves: 1,
+  position: 21,
+  water_suggestion_ml: 250,
+  description: "Yellow + green zucchini with tofu. Mix leftovers with roasted potatoes in Build a meal."
+}, [
+  [ :produce, "400 g", "yellow + green zucchini", "Zucchini", 400 ],
+  [ :protein, "300 g", "tofu cubes", "Tofu", 300 ],
+  [ :fats, "10 g", "1 tbsp olive oil", "Puget Huile d'olive vierge extra", 10 ]
+], <<~STEPS
+  1. Slice ~400 g yellow + green zucchini; cube ~300 g tofu.
+  2. Toss with oil and seasoning; roast or sauté until tender.
+  3. Store. Log a tray share in Build a meal (alone or with roasted potatoes).
+STEPS
+
+seed_recipe "ethiquete-bowl", {
+  name: "L'Éthiquête bowl du moment",
+  meal_type: :lunch,
+  regular_meal: false,
+  meal_template_slug: "ethiquete-bowl",
+  serves: 1,
+  position: 30,
+  description: "Nantes restaurant bowl estimate. ~850 kcal full."
+}, [
+  [ :carbs, "500 g", "1 full bowl", "L'Éthiquête bowl du moment (pasta)", 500 ]
+], "Order the bowl. Log 1× full, or scale if shared."
+
+seed_recipe "ethiquete-houmous", {
+  name: "L'Éthiquête houmous",
+  meal_type: :snack,
+  regular_meal: false,
+  meal_template_slug: "ethiquete-houmous",
+  serves: 1,
+  position: 31,
+  description: "Shared houmous side. Full plate ≈ ½ cup (~120 g)."
+}, [
+  [ :protein, "120 g", "½ cup plate", "L'Éthiquête houmous (side)", 120 ]
+], "Log 1× for the whole side, 0.5× when shared."
+
+seed_recipe "ethiquete-fondant", {
+  name: "L'Éthiquête fondant au chocolat",
+  meal_type: :snack,
+  regular_meal: false,
+  meal_template_slug: "ethiquete-fondant",
+  serves: 1,
+  position: 32,
+  description: "Vegan chocolate fondant estimate (~370 kcal full)."
+}, [
+  [ :pantry, "100 g", "1 portion", "L'Éthiquête fondant au chocolat", 100 ]
+], "Log 1× full, 0.5× when shared."
+
 # Retire the legacy placeholder. Archive rather than destroy so existing links
 # and bookmarks keep resolving instead of 404ing.
 Recipe.find_by(slug: "lighter-pancakes")&.update!(status: :archived)

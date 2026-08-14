@@ -29,7 +29,9 @@ module GroceryHelper
     {
       "baked-tofu" => "Bake 2 blocks tofu",
       "quinoa-batch" => "Cook pot of quinoa",
-      "balsamic-dressing" => "Mix balsamic dressing"
+      "balsamic-dressing" => "Mix balsamic dressing",
+      "roasted-sweet-yellow-potatoes" => "Roast sweet + yellow potato tray",
+      "zucchini-tofu-batch" => "Cook zucchini + tofu batch"
     }.each do |slug, label|
       next unless batch_prep[slug]
 

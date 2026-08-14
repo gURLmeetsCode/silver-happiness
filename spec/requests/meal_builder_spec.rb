@@ -91,11 +91,36 @@ RSpec.describe "Building a meal from several items", type: :request do
 
   it "offers the builder on the day page" do
     zucchini
+    create(:meal_template, name: "Roasted potatoes (batch)")
 
     get daily_log_path(daily_log)
 
     expect(response.body).to include("Build a meal")
-    expect(response.body).to include("items[0][product_id]")
+    expect(response.body).to include("items[0][picker]")
     expect(response.body).to include("items[0][unit]")
+    expect(response.body).to include("Saved batches / meals")
+    expect(response.body).to include("Roasted potatoes (batch)")
+  end
+
+  it "saves a meal built from scaled batches" do
+    template = create(:meal_template, name: "Zucchini + tofu (batch)")
+    create(:meal_template_item, meal_template: template, product: zucchini, quantity_g: 400)
+    create(:meal_template_item, meal_template: template, product: tofu, quantity_g: 300)
+
+    expect {
+      post daily_log_meal_entries_path(daily_log), params: {
+        items: {
+          "0" => { picker: "template_#{template.id}", quantity: "0.5", unit: "serving" }
+        },
+        meal_entry: { meal_type: "dinner" }
+      }
+    }.to change(daily_log.meal_entries, :count).by(1)
+
+    entry = daily_log.meal_entries.last
+    expect(entry.name).to eq("Zucchini + tofu (batch)")
+    expect(entry.items.map { |i| [ i.product.name, i.grams.to_f ] }).to contain_exactly(
+      [ "Zucchini", 200.0 ],
+      [ "Tofu", 150.0 ]
+    )
   end
 end

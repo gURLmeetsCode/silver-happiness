@@ -60,6 +60,9 @@
     <% end %>
 
     <h3 class="h6 text-uppercase text-muted mb-2">Quick templates</h3>
+    <p class="small text-muted mb-2">
+      Full tray / full recipe in one tap. To mix batches (¼ potatoes + zucchini tofu), use <strong>Build a meal</strong> below.
+    </p>
     <div class="d-grid gap-2">
       <% @meal_templates.each do |template| %>
         <% if (recipe = template.recipe) %>
@@ -83,7 +86,7 @@
   </div>
 </section>
 
-<%= render "daily_logs/build_meal", daily_log: daily_log, products: @products %>
+<%= render "daily_logs/build_meal", daily_log: daily_log, products: @products, meal_templates: @meal_templates %>
 
 <section class="card day-card mb-3">
   <div class="card-body">

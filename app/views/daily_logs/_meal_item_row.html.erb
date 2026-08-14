@@ -1,21 +1,42 @@
-<%# locals: products, index %>
+<%# locals: products, meal_templates, index %>
+<% meal_templates ||= [] %>
 <div class="meal-item-row" data-meal-builder-target="row">
-  <select name="items[<%= index %>][product_id]" class="form-select form-select-sm"
+  <select name="items[<%= index %>][picker]" class="form-select form-select-sm"
           aria-label="Item" data-meal-builder-target="product"
           data-action="change->meal-builder#productChanged">
-    <option value="">Choose an item…</option>
-    <% products.each do |product| %>
-      <option value="<%= product.id %>"
-        data-calories="<%= product.calories_per_100g %>"
-        data-protein="<%= product.protein_per_100g %>"
-        data-carbs="<%= product.carbs_per_100g %>"
-        data-fat="<%= product.fat_per_100g %>"
-        data-serving-g="<%= product.default_quantity_g %>"
-        data-grams-per-ml="<%= product.grams_per_ml.round(3) %>"
-        data-units="<%= product.unit_options.to_json %>">
-        <%= product.name %><%= " (#{product.brand})" if product.brand.present? %>
-      </option>
+    <option value="">Choose an item or batch…</option>
+    <% if meal_templates.any? %>
+      <optgroup label="Saved batches / meals">
+        <% meal_templates.each do |template| %>
+          <option value="template_<%= template.id %>"
+            data-kind="template"
+            data-calories="<%= template.total_calories %>"
+            data-protein="<%= template.total_protein %>"
+            data-carbs="<%= template.total_carbs %>"
+            data-fat="<%= template.total_fat %>"
+            data-serving-g="1"
+            data-grams-per-ml="1"
+            data-units="<%= [[ "× batch (1 = full recipe)", "serving" ]].to_json %>">
+            <%= template.name %> (<%= template.total_calories %> kcal full)
+          </option>
+        <% end %>
+      </optgroup>
     <% end %>
+    <optgroup label="Products">
+      <% products.each do |product| %>
+        <option value="product_<%= product.id %>"
+          data-kind="product"
+          data-calories="<%= product.calories_per_100g %>"
+          data-protein="<%= product.protein_per_100g %>"
+          data-carbs="<%= product.carbs_per_100g %>"
+          data-fat="<%= product.fat_per_100g %>"
+          data-serving-g="<%= product.default_quantity_g %>"
+          data-grams-per-ml="<%= product.grams_per_ml.round(3) %>"
+          data-units="<%= product.unit_options.to_json %>">
+          <%= product.name %><%= " (#{product.brand})" if product.brand.present? %>
+        </option>
+      <% end %>
+    </optgroup>
   </select>
 
   <input type="text" inputmode="decimal" name="items[<%= index %>][quantity]"

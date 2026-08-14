@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 
-# Builds one meal out of several things you ate: half a cup of pasta, half a
-# courgette, half a teaspoon of oil. Each row is a saved product with an amount
-# in whatever unit suits it, and the totals are added up for you.
+# Builds one meal out of several things you ate: half a cup of pasta, a quarter
+# of a roasted-potato batch, a side of tofu. Rows are either a product with an
+# amount/unit, or a saved meal template scaled as "× batch".
 class MealAssembler
-  Component = Struct.new(:product, :quantity, :unit, :grams, :nutrition, keyword_init: true) do
+  Component = Struct.new(:product, :quantity, :unit, :grams, :nutrition, :source_name, keyword_init: true) do
     def label
-      "#{formatted_quantity} #{unit_label} #{product.name} (#{grams.round} g)"
+      if source_name.present? && unit == "serving"
+        "#{formatted_quantity}× #{source_name} → #{product.name} (#{grams.round} g)"
+      else
+        "#{formatted_quantity} #{unit_label} #{product.name} (#{grams.round} g)"
+      end
     end
 
     def formatted_quantity
@@ -37,13 +41,11 @@ class MealAssembler
     end
   end
 
-  # "Protein pasta, Zucchini + 2 more" — enough to recognise the meal in a list
-  # without having to name it yourself.
   def suggested_name
-    names = components.map { |component| component.product.name }
-    return names.first if names.one?
+    labels = components.filter_map { |c| c.source_name.presence || c.product.name }.uniq
+    return labels.first if labels.one?
 
-    "#{names.first(2).join(', ')}#{" + #{names.size - 2} more" if names.size > 2}"
+    "#{labels.first(2).join(', ')}#{" + #{labels.size - 2} more" if labels.size > 2}"
   end
 
   def notes
@@ -65,27 +67,65 @@ class MealAssembler
   private
 
   def build_components(items)
-    rows_in(items).filter_map do |row|
-      row = normalize(row)
-      product = Product.find_by(id: row["product_id"])
-      next unless product
+    rows_in(items).flat_map { |row| components_for(normalize(row)) }
+  end
 
-      quantity = row["quantity"].to_s.tr(",", ".").to_f
-      next unless quantity.positive?
+  def components_for(row)
+    quantity = parse_quantity(row["quantity"])
+    return [] unless quantity.positive?
 
-      unit = row["unit"].presence || "g"
-      grams = product.grams_for(quantity, unit)
-      next unless grams.positive?
+    template_id = row["meal_template_id"].presence || template_id_from_picker(row["picker"])
+    if template_id
+      return expand_template(template_id, quantity)
+    end
 
+    product_id = row["product_id"].presence || product_id_from_picker(row["picker"])
+    product = Product.find_by(id: product_id)
+    return [] unless product
+
+    unit = row["unit"].presence || "g"
+    grams = product.grams_for(quantity, unit)
+    return [] unless grams.positive?
+
+    [
       Component.new(
         product: product, quantity: quantity, unit: unit,
         grams: grams, nutrition: product.nutrition_for(grams)
       )
+    ]
+  end
+
+  def expand_template(template_id, scale)
+    template = MealTemplate.includes(meal_template_items: :product).find_by(id: template_id)
+    return [] unless template
+
+    template.meal_template_items.filter_map do |item|
+      grams = item.quantity_g.to_f * scale
+      next unless grams.positive? && item.product
+
+      Component.new(
+        product: item.product,
+        quantity: scale,
+        unit: "serving",
+        grams: grams,
+        nutrition: item.product.nutrition_for(grams),
+        source_name: template.name
+      )
     end
   end
 
-  # Rows arrive keyed by index ("0", "1", …) from the form, but an array is
-  # just as valid a way to say the same thing.
+  def template_id_from_picker(picker)
+    picker.to_s[/\Atemplate_(\d+)\z/, 1]
+  end
+
+  def product_id_from_picker(picker)
+    picker.to_s[/\Aproduct_(\d+)\z/, 1]
+  end
+
+  def parse_quantity(raw)
+    raw.to_s.tr(",", ".").to_f
+  end
+
   def rows_in(items)
     case items
     when ActionController::Parameters then items.permit!.to_h.values

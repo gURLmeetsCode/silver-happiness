@@ -69,6 +69,48 @@ RSpec.describe MealAssembler do
     end
   end
 
+  describe "picker rows (products and scaled batches)" do
+    it "accepts product_ID picker values" do
+      assembler = described_class.new({
+        "0" => { "picker" => "product_#{tofu.id}", "quantity" => "1", "unit" => "serving" }
+      })
+
+      expect(assembler.components.first.grams).to eq(125)
+    end
+
+    it "expands a meal template as a scaled batch" do
+      template = create(:meal_template, name: "Roasted potatoes (batch)", slug: "test-roast-batch")
+      create(:meal_template_item, meal_template: template, product: zucchini, quantity_g: 400)
+      create(:meal_template_item, meal_template: template, product: tofu, quantity_g: 200)
+
+      assembler = described_class.new({
+        "0" => { "picker" => "template_#{template.id}", "quantity" => "0.25", "unit" => "serving" }
+      })
+
+      expect(assembler.components.map { |c| [ c.product.name, c.grams ] }).to contain_exactly(
+        [ "Zucchini", 100.0 ],
+        [ "Tofu", 50.0 ]
+      )
+      expect(assembler.suggested_name).to eq("Roasted potatoes (batch)")
+      expect(assembler.notes).to include("0.25× Roasted potatoes (batch)")
+    end
+
+    it "mixes a batch with a product in one meal" do
+      template = create(:meal_template, name: "Zucchini tofu batch")
+      create(:meal_template_item, meal_template: template, product: zucchini, quantity_g: 400)
+      create(:meal_template_item, meal_template: template, product: tofu, quantity_g: 300)
+
+      assembler = described_class.new({
+        "0" => { "picker" => "template_#{template.id}", "quantity" => "0.5", "unit" => "serving" },
+        "1" => { "picker" => "product_#{olive_oil.id}", "quantity" => "1", "unit" => "tsp" }
+      })
+
+      expect(assembler).to be_any
+      expect(assembler.suggested_name).to include("Zucchini tofu batch")
+      expect(assembler.totals[:calories]).to be > 0
+    end
+  end
+
   describe "rows that should be ignored" do
     it "skips a row with no product" do
       assembler = described_class.new({ "0" => { "product_id" => "", "quantity" => "2", "unit" => "cup" } })

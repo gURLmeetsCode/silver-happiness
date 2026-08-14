@@ -99,7 +99,10 @@ class RecipesController < ApplicationController
     @checked_keys = GroceryCheck.checked_keys_for(@shopping_period)
     @grouped = Recipe.grocery_list.group_by(&:grocery_category)
     @staples = YAML.load_file(Rails.root.join("config/grocery_staples.yml"))
-    @batch_prep = Recipe.where(slug: %w[baked-tofu quinoa-batch balsamic-dressing]).index_by(&:slug)
+    @batch_prep = Recipe.where(slug: %w[
+      baked-tofu quinoa-batch balsamic-dressing
+      roasted-sweet-yellow-potatoes zucchini-tofu-batch
+    ]).index_by(&:slug)
     @batch_prep_items = batch_prep_grocery_items(@batch_prep)
     @total_items = grocery_total_count(@staples, @grouped, @batch_prep_items)
     @checked_count = @checked_keys.size
