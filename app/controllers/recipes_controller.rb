@@ -129,7 +129,7 @@ class RecipesController < ApplicationController
   end
 
   def recently_eaten_recipes
-    RecentMealShortcuts.call.filter_map(&:recipe).uniq
+    RecentMealShortcuts.call.shortcuts.filter_map(&:recipe).uniq
   end
 
   def personal_params

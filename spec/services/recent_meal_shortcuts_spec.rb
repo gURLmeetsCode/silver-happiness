@@ -22,45 +22,60 @@ RSpec.describe RecentMealShortcuts do
     entry
   end
 
-  it "returns unique meals from the last week, newest first" do
-    older = log_meal(date: today - 2.days, name: "Power salad", calories: 380)
-    newer = log_meal(date: today - 1.day, name: "Cinema snack", calories: 686)
-    log_meal(date: today - 10.days, name: "Too old")
+  it "at lunchtime only offers recent lunches" do
+    log_meal(date: today - 1.day, name: "Power salad", meal_type: :lunch)
+    log_meal(date: today - 1.day, name: "Oats", meal_type: :breakfast)
+    log_meal(date: today - 1.day, name: "Pasta dinner", meal_type: :dinner)
 
-    shortcuts = described_class.call(as_of: today)
+    result = described_class.call(as_of: today, at: Time.zone.parse("#{today} 12:30"))
 
-    expect(shortcuts.map(&:name)).to eq([ "Cinema snack", "Power salad" ])
-    expect(shortcuts.first.source_entry).to eq(newer)
-    expect(shortcuts.second.source_entry).to eq(older)
+    expect(result.slot_label).to eq("Lunch")
+    expect(result.shortcuts.map(&:name)).to eq([ "Power salad" ])
   end
 
-  it "dedupes by meal template and keeps the latest" do
-    template = create(:meal_template, :with_items, name: "Power salad")
-    log_meal(date: today - 3.days, name: "Power salad", template: template, calories: 350)
-    latest = log_meal(date: today - 1.day, name: "Power salad (tweaked)", template: template, calories: 420)
+  it "at dinner time offers dinners and snacks, not breakfast" do
+    log_meal(date: today - 1.day, name: "Oats", meal_type: :breakfast)
+    log_meal(date: today - 1.day, name: "Brownies", meal_type: :snack, calories: 700)
+    log_meal(date: today - 2.days, name: "Tofu dinner", meal_type: :dinner)
 
-    shortcuts = described_class.call(as_of: today)
+    result = described_class.call(as_of: today, at: Time.zone.parse("#{today} 18:30"))
 
-    expect(shortcuts.size).to eq(1)
-    expect(shortcuts.first.source_entry).to eq(latest)
-    expect(shortcuts.first.calories).to eq(420)
+    expect(result.slot_label).to eq("Dinner")
+    expect(result.shortcuts.map(&:name)).to eq([ "Brownies", "Tofu dinner" ])
+    expect(result.shortcuts.map(&:name)).not_to include("Oats")
+  end
+
+  it "prefers recipe-backed meals over plain copies" do
+    template = create(:meal_template, :with_items)
+    create(:recipe, meal_template: template, name: "Chipotle wrap")
+    log_meal(date: today - 1.day, name: "Random lunch", meal_type: :lunch, calories: 500)
+    log_meal(date: today - 2.days, name: "Chipotle wrap", meal_type: :lunch, template: template, calories: 440)
+
+    result = described_class.call(as_of: today, at: Time.zone.parse("#{today} 12:00"))
+
+    expect(result.shortcuts.first.name).to eq("Chipotle wrap")
+    expect(result.shortcuts.first).to be_recipe
+  end
+
+  it "does not time-filter when viewing another day’s log" do
+    log_meal(date: today - 1.day, name: "Oats", meal_type: :breakfast)
+    log_meal(date: today - 1.day, name: "Dinner", meal_type: :dinner)
+
+    result = described_class.call(
+      as_of: today - 1.day,
+      at: Time.zone.parse("#{today} 12:00")
+    )
+
+    expect(result.slot_label).to eq("This week")
+    expect(result.shortcuts.map(&:name)).to include("Oats", "Dinner")
   end
 
   it "skips beverages" do
     log_meal(date: today - 1.day, name: "Americano", meal_type: :beverage, calories: 5)
     log_meal(date: today - 1.day, name: "Lunch bowl", meal_type: :lunch)
 
-    expect(described_class.call(as_of: today).map(&:name)).to eq([ "Lunch bowl" ])
-  end
-
-  it "attaches the recipe when the template has one" do
-    template = create(:meal_template, :with_items)
-    recipe = create(:recipe, meal_template: template, name: "Chipotle wrap")
-    log_meal(date: today - 1.day, name: "Chipotle wrap", template: template)
-
-    shortcut = described_class.call(as_of: today).first
-    expect(shortcut.recipe).to eq(recipe)
-    expect(shortcut).to be_recipe
+    result = described_class.call(as_of: today, at: Time.zone.parse("#{today} 12:00"))
+    expect(result.shortcuts.map(&:name)).to eq([ "Lunch bowl" ])
   end
 
   it "hides a single-ingredient meal when a built meal already includes that product" do
@@ -82,6 +97,18 @@ RSpec.describe RecentMealShortcuts do
     alone.record_items!([ { product_id: psyllium.id, grams: 10 } ])
     alone.save!
 
-    expect(described_class.call(as_of: today).map(&:name)).to eq([ "Fiber greens" ])
+    result = described_class.call(as_of: today, at: Time.zone.parse("#{today} 08:00"))
+    expect(result.shortcuts.map(&:name)).to eq([ "Fiber greens" ])
+  end
+
+  it "dedupes by meal template and keeps the latest" do
+    template = create(:meal_template, :with_items, name: "Power salad")
+    log_meal(date: today - 3.days, name: "Power salad", meal_type: :lunch, template: template, calories: 350)
+    latest = log_meal(date: today - 1.day, name: "Power salad (tweaked)", meal_type: :lunch, template: template, calories: 420)
+
+    result = described_class.call(as_of: today, at: Time.zone.parse("#{today} 12:00"))
+
+    expect(result.shortcuts.size).to eq(1)
+    expect(result.shortcuts.first.source_entry).to eq(latest)
   end
 end
