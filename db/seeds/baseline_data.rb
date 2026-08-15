@@ -427,6 +427,27 @@ seed_template("noracooks-vegan-pancakes", "Nora Cooks vegan pancakes", :dinner, 
   [ puget_oil, 3.5, "oil in batter" ]
 ])
 
+# Oil-free Nora brownies + walnuts — per brownie (batch of 16). Products may be
+# created by the migration; skip if they are not in this seed run yet.
+brownie_products = {
+  "Ground flaxseed" => 1.75,
+  "Unsweetened applesauce" => 7.625,
+  "Granulated sugar" => 12.5,
+  "Brown sugar" => 13.75,
+  "All-purpose flour" => 7.8125,
+  "Unsweetened cocoa powder" => 5.375,
+  "Dark chocolate chips (vegan)" => 10.5,
+  "Walnuts" => 4.6875
+}.transform_keys { |name| Product.find_by(name: name) }
+if brownie_products.keys.all?
+  seed_template(
+    "noracooks-oil-free-walnut-brownies",
+    "Nora Cooks oil-free walnut brownies",
+    :snack,
+    brownie_products.map { |product, grams| [ product, grams, "#{grams.round(2)} g (1 brownie)" ] }
+  )
+end
+
 seed_template("chipotle-yogurt-salad", "Chipotle tofu wrap", :lunch, [
   [ wrap, 32, "1 Old El Paso Extra Fins wrap" ],
   [ tofu, 125, "125 g tofu nature (1 pavé)" ],

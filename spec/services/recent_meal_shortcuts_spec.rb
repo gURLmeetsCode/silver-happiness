@@ -62,4 +62,26 @@ RSpec.describe RecentMealShortcuts do
     expect(shortcut.recipe).to eq(recipe)
     expect(shortcut).to be_recipe
   end
+
+  it "hides a single-ingredient meal when a built meal already includes that product" do
+    greens = create(:product, name: "Strong greens")
+    psyllium = create(:product, name: "Psyllium husk")
+
+    log = DailyLog.find_or_create_by!(logged_on: today - 1.day)
+    fiber = log.meal_entries.create!(
+      name: "Fiber greens", meal_type: :breakfast,
+      calories: 50, protein_g: 2, carbs_g: 10, fat_g: 0
+    )
+    fiber.record_items!([ { product_id: greens.id, grams: 80 }, { product_id: psyllium.id, grams: 10 } ])
+    fiber.save!
+
+    alone = log.meal_entries.create!(
+      name: "Psyllium husk (morning)", meal_type: :breakfast,
+      calories: 35, protein_g: 0, carbs_g: 8, fat_g: 0
+    )
+    alone.record_items!([ { product_id: psyllium.id, grams: 10 } ])
+    alone.save!
+
+    expect(described_class.call(as_of: today).map(&:name)).to eq([ "Fiber greens" ])
+  end
 end

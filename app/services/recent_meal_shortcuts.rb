@@ -2,6 +2,8 @@
 
 # Meals you actually ate lately — the only shortcuts worth a one-tap re-log.
 # Looks back a week, keeps one row per recipe/template (or meal name), newest first.
+# Skips a lone ingredient (e.g. "Psyllium husk morning") when you already logged
+# a built meal that includes that same product (e.g. fiber greens + psyllium).
 class RecentMealShortcuts
   DAYS = 7
   LIMIT = 10
@@ -32,10 +34,14 @@ class RecentMealShortcuts
   end
 
   def call
+    entries = recent_entries.to_a
+    covered_by_builds = product_ids_in_built_meals(entries)
     seen = {}
     shortcuts = []
 
-    recent_entries.each do |entry|
+    entries.each do |entry|
+      next if redundant_single_ingredient?(entry, covered_by_builds)
+
       key = dedupe_key(entry)
       next if seen[key]
 
@@ -62,10 +68,23 @@ class RecentMealShortcuts
     from = @as_of - @days.days
     MealEntry
       .joins(:daily_log)
-      .includes(meal_template: :recipe)
+      .includes(:items, meal_template: :recipe)
       .where(daily_logs: { logged_on: from..@as_of })
       .where.not(meal_type: :beverage)
       .order("daily_logs.logged_on DESC, meal_entries.created_at DESC")
+  end
+
+  def product_ids_in_built_meals(entries)
+    entries
+      .select { |entry| entry.items.size >= 2 }
+      .flat_map { |entry| entry.items.map(&:product_id) }
+      .to_set
+  end
+
+  def redundant_single_ingredient?(entry, covered_product_ids)
+    return false unless entry.items.size == 1
+
+    covered_product_ids.include?(entry.items.first.product_id)
   end
 
   def dedupe_key(entry)

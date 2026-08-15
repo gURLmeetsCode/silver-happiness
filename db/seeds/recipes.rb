@@ -486,6 +486,42 @@ seed_recipe "noracooks-vegan-pancakes", {
   To log your meal: Servings = pancakes you ate (e.g. 7) → add skyr (tbsp) and strawberries (g) in extras → Log this meal today.
 STEPS
 
+seed_recipe "noracooks-oil-free-walnut-brownies", {
+  name: "Nora Cooks oil-free walnut brownies",
+  meal_type: :snack,
+  regular_meal: false,
+  meal_template_slug: "noracooks-oil-free-walnut-brownies",
+  prep_time: "55 min",
+  serves: 1,
+  position: 14,
+  water_suggestion_ml: 250,
+  description: "Nora Cooks Best Ever Vegan Brownies, oil-free (applesauce for butter) + ¾ cup walnuts. " \
+               "Batch = 16. Log servings = brownies you ate (e.g. 5). Source: noracooks.com/vegan-brownies-recipe",
+  personal_notes: "Oil-free swap per Nora’s note. Walnuts ~¾ cup chopped in the batch."
+}, [
+  [ :pantry, "1.75 g", "ground flax (per brownie)", "Ground flaxseed", 1.75 ],
+  [ :pantry, "7.6 g", "unsweetened applesauce (per brownie)", "Unsweetened applesauce", 7.625 ],
+  [ :pantry, "12.5 g", "granulated sugar (per brownie)", "Granulated sugar", 12.5 ],
+  [ :pantry, "13.8 g", "brown sugar (per brownie)", "Brown sugar", 13.75 ],
+  [ :carbs, "7.8 g", "flour (per brownie)", "All-purpose flour", 7.8125 ],
+  [ :pantry, "5.4 g", "cocoa (per brownie)", "Unsweetened cocoa powder", 5.375 ],
+  [ :pantry, "10.5 g", "vegan chocolate chips (per brownie)", "Dark chocolate chips (vegan)", 10.5 ],
+  [ :fats, "4.7 g", "walnuts (per brownie)", "Walnuts", 4.6875 ],
+  [ :pantry, nil, "vanilla, salt, baking powder (batch)", nil, nil ]
+], <<~STEPS
+  From Nora Cooks (noracooks.com/vegan-brownies-recipe) — oil-free + walnuts.
+
+  Batch (16 brownies):
+  1. Flax eggs: 4 tbsp ground flax + ½ cup water; thicken.
+  2. Oven 175°C / 350°F. Line 7×11" pan with parchment.
+  3. Whisk ½ cup unsweetened applesauce with 1 cup sugar + 1 cup packed brown sugar. Add flax eggs + 1 tbsp vanilla.
+  4. Sift in 1 cup flour + 1 cup cocoa; add ½ tsp salt + 1 tsp baking powder. Stir until just combined.
+  5. Fold in half of 1 cup vegan chocolate chips + ¾ cup chopped walnuts. Spread in pan; top with remaining chips.
+  6. Bake 35–40 min. Cool before cutting into 16.
+
+  To log: Servings = brownies you ate (e.g. 5).
+STEPS
+
 seed_recipe "roasted-sweet-yellow-potatoes", {
   name: "Roasted sweet + yellow potatoes (batch)",
   meal_type: :prep,
