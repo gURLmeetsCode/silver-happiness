@@ -23,6 +23,7 @@ class RecipesController < ApplicationController
     @archived_count = Recipe.status_archived.count
     @archived_recipes = base.status_archived if @show_archived
     @recipes = filtered
+    @recently_eaten = recently_eaten_recipes
   end
 
   def show
@@ -125,6 +126,10 @@ class RecipesController < ApplicationController
 
   def load_products
     @products = Product.order(:name)
+  end
+
+  def recently_eaten_recipes
+    RecentMealShortcuts.call.filter_map(&:recipe).uniq
   end
 
   def personal_params

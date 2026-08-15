@@ -1,0 +1,36 @@
+<%# locals: daily_log, shortcuts %>
+<% shortcuts ||= [] %>
+<section id="meals-quick" class="card day-card mb-3">
+  <div class="card-body">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+      <h2 class="h5 mb-0">Recent meals</h2>
+      <%= link_to "All recipes", recipes_path, class: "btn btn-sm btn-link" %>
+    </div>
+    <p class="small text-muted mb-3">
+      What you ate in the last week — one tap to log again, or adjust portions first.
+    </p>
+
+    <% if shortcuts.any? %>
+      <div class="d-grid gap-2">
+        <% shortcuts.each do |shortcut| %>
+          <div class="d-flex flex-column flex-sm-row gap-2 align-items-stretch">
+            <%= button_to shortcut.label,
+                  daily_log_meal_entries_path(daily_log, source_meal_entry_id: shortcut.source_entry.id),
+                  method: :post,
+                  class: "btn btn-primary text-start flex-grow-1 quick-meal-btn" %>
+            <% if shortcut.recipe? %>
+              <%= link_to "Adjust",
+                    recipe_path(shortcut.recipe),
+                    class: "btn btn-outline-primary btn-sm align-self-sm-center" %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-muted mb-2 mb-sm-0">
+        Nothing logged yet this week.
+        <%= link_to "Browse recipes", recipes_path %> or build a meal below — what you eat will show up here.
+      </p>
+    <% end %>
+  </div>
+</section>

@@ -17,6 +17,26 @@ RSpec.describe "Meal entries", type: :request do
       expect(log.meal_entries.last.name).to eq("Toast")
     end
 
+    it "creates an entry by copying a past meal" do
+      tofu = create(:product, name: "Tofu", calories_per_100g: 145, protein_per_100g: 16)
+      source_log = create(:daily_log, logged_on: Date.current - 2.days)
+      source = source_log.meal_entries.create!(
+        name: "Zucchini bowl", meal_type: :dinner,
+        calories: 350, protein_g: 28, carbs_g: 20, fat_g: 12
+      )
+      source.record_items!([ { product_id: tofu.id, grams: 150 } ])
+      source.save!
+
+      expect {
+        post daily_log_meal_entries_path(log), params: { source_meal_entry_id: source.id }
+      }.to change(log.meal_entries, :count).by(1)
+
+      entry = log.meal_entries.last
+      expect(entry.name).to eq("Zucchini bowl")
+      expect(entry.calories).to eq(350)
+      expect(entry.items.map { |i| [ i.product_id, i.grams.to_f ] }).to eq([ [ tofu.id, 150.0 ] ])
+    end
+
     it "creates an entry from a meal template" do
       template = create(:meal_template, :with_items)
 

@@ -67,7 +67,8 @@ class DailyLogsController < ApplicationController
     @goal = Goal.current
     @meal_templates = MealTemplate.includes(:recipe).order(:meal_type, :name)
     @products = Product.order(:name)
-    @quick_products = Product.quick_log
+    @quick_beverages = Product.quick_log_beverages
+    @recent_meals = RecentMealShortcuts.call(as_of: @daily_log.logged_on)
     @custom_meal = MealEntry.new
     @workout = Workout.new
     @target_suggestions = DailyTargetSuggestions.new(@daily_log)

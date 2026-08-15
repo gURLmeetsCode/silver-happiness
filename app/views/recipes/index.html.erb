@@ -37,6 +37,18 @@
     <% end %>
   </div>
 <% else %>
+  <% if @recently_eaten.any? %>
+    <h2 class="h5 mb-3">Recently eaten</h2>
+    <p class="small text-muted mb-3">From the last week — open one to log again or adjust portions.</p>
+    <div class="row g-3 mb-4">
+      <% @recently_eaten.each do |recipe| %>
+        <div class="col-md-6 col-lg-4">
+          <%= render "recipe_card", recipe: recipe %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
   <% if @active_regular.any? %>
     <h2 class="h5 mb-3">Your regular meals</h2>
     <div class="row g-3 mb-4">

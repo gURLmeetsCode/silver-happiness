@@ -7,7 +7,9 @@ class MealEntriesController < ApplicationController
     @entry = @daily_log.meal_entries.build
     @recipe = recipe_for_log
 
-    if params[:meal_template_id].present?
+    if params[:source_meal_entry_id].present?
+      return redirect_to(meals_tab, alert: "That past meal could not be found.") unless build_from_source_entry
+    elsif params[:meal_template_id].present?
       build_from_template
     elsif params[:items].present?
       return redirect_to(meals_tab, alert: "Pick at least one item and an amount") unless build_from_items
@@ -65,6 +67,29 @@ class MealEntriesController < ApplicationController
 
   def set_entry
     @entry = @daily_log.meal_entries.find(params[:id])
+  end
+
+  # Re-log a meal you already ate this week — same amounts, same tweaks.
+  def build_from_source_entry
+    source = MealEntry.find_by(id: params[:source_meal_entry_id])
+    return false unless source
+
+    @entry.assign_attributes(
+      meal_template: source.meal_template,
+      name: source.name,
+      meal_type: source.meal_type,
+      calories: source.calories,
+      protein_g: source.protein_g,
+      carbs_g: source.carbs_g,
+      fat_g: source.fat_g,
+      water_suggestion_ml: source.water_suggestion_ml,
+      ingredient_overrides: source.ingredient_overrides
+    )
+    @entry.record_items!(
+      source.items.map { |item| { product_id: item.product_id, grams: item.grams } }
+    )
+    apply_meal_entry_overrides
+    true
   end
 
   def build_from_template

@@ -1,12 +1,14 @@
 <%# locals: daily_log, goal %>
 <%= render "water", daily_log: daily_log, goal: goal %>
 
-<%= render "quick_products", daily_log: daily_log, quick_products: @quick_products %>
+<%= render "quick_products", daily_log: daily_log, quick_beverages: @quick_beverages %>
+
+<%= render "recent_meals", daily_log: daily_log, shortcuts: @recent_meals %>
 
 <section id="meals" class="card day-card mb-3">
   <div class="card-body">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-      <h2 class="h5 mb-0">Meals</h2>
+      <h2 class="h5 mb-0">Meals today</h2>
       <% if (yesterday = DailyLog.find_by(logged_on: daily_log.logged_on - 1.day)) %>
         <%= button_to "Copy yesterday", copy_meals_daily_log_path(daily_log, source_id: yesterday.id),
               method: :post, class: "btn btn-sm btn-outline-secondary" %>
@@ -14,7 +16,7 @@
     </div>
 
     <% if daily_log.meal_entries.any? %>
-      <ul class="list-group list-group-flush mb-3">
+      <ul class="list-group list-group-flush mb-0">
         <% daily_log.meal_entries.each do |entry| %>
           <li class="list-group-item px-0">
             <div class="d-flex justify-content-between align-items-start gap-2">
@@ -56,33 +58,8 @@
         <% end %>
       </ul>
     <% else %>
-      <p class="text-muted mb-3">No meals yet.</p>
+      <p class="text-muted mb-0">No meals yet today.</p>
     <% end %>
-
-    <h3 class="h6 text-uppercase text-muted mb-2">Quick templates</h3>
-    <p class="small text-muted mb-2">
-      Full tray / full recipe in one tap. To mix batches (¼ potatoes + zucchini tofu), use <strong>Build a meal</strong> below.
-    </p>
-    <div class="d-grid gap-2">
-      <% @meal_templates.each do |template| %>
-        <% if (recipe = template.recipe) %>
-          <div class="d-flex flex-column flex-sm-row gap-2">
-            <%= link_to "Log #{template.name} (#{template.total_calories} kcal · adjust portions)",
-                  recipe_path(recipe),
-                  class: "btn btn-primary text-start flex-grow-1" %>
-            <%= button_to "1× quick",
-                  daily_log_meal_entries_path(daily_log, meal_template_id: template.id),
-                  method: :post,
-                  class: "btn btn-light border btn-sm" %>
-          </div>
-        <% else %>
-          <%= button_to "#{template.name} (#{template.total_calories} kcal · #{template.total_protein} g protein)",
-                daily_log_meal_entries_path(daily_log, meal_template_id: template.id),
-                method: :post,
-                class: "btn btn-light border text-start quick-meal-btn" %>
-        <% end %>
-      <% end %>
-    </div>
   </div>
 </section>
 
