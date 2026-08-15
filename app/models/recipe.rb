@@ -98,6 +98,7 @@ class Recipe < ApplicationRecord
   def sync_from_meal_template!
     return unless meal_template
 
+    keep_ids = []
     meal_template.meal_template_items.each_with_index do |item, i|
       ing = recipe_ingredients.find_or_initialize_by(product: item.product)
       ing.assign_attributes(
@@ -108,7 +109,9 @@ class Recipe < ApplicationRecord
         position: i
       )
       ing.save!
+      keep_ids << ing.id
     end
+    recipe_ingredients.where.not(id: keep_ids).destroy_all
     sync_macros_from_ingredients!
   end
 

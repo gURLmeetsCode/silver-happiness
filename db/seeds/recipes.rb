@@ -487,7 +487,7 @@ seed_recipe "noracooks-vegan-pancakes", {
 STEPS
 
 seed_recipe "noracooks-oil-free-walnut-brownies", {
-  name: "Nora Cooks oil-free walnut brownies",
+  name: "Nora Cooks oil-free walnut brownies (cupcakes)",
   meal_type: :snack,
   regular_meal: false,
   meal_template_slug: "noracooks-oil-free-walnut-brownies",
@@ -495,31 +495,35 @@ seed_recipe "noracooks-oil-free-walnut-brownies", {
   serves: 1,
   position: 14,
   water_suggestion_ml: 250,
-  description: "Nora Cooks Best Ever Vegan Brownies, oil-free (applesauce for butter) + ¾ cup walnuts. " \
-               "Batch = 16. Log servings = brownies you ate (e.g. 5). Source: noracooks.com/vegan-brownies-recipe",
-  personal_notes: "Oil-free swap per Nora’s note. Walnuts ~¾ cup chopped in the batch."
+  description: "Nora Cooks Best Ever Vegan Brownies, oil-free (applesauce for butter), " \
+               "chia instead of flax, walnuts, no chocolate chips. " \
+               "Baked as 15 cupcakes in ⅛-cup molds. Log servings = cupcakes eaten. " \
+               "Source: noracooks.com/vegan-brownies-recipe",
+  personal_notes: "As made: chia eggs (not flax), no chocolate chips, ⅛-cup cupcake molds → 15."
 }, [
-  [ :pantry, "1.75 g", "ground flax (per brownie)", "Ground flaxseed", 1.75 ],
-  [ :pantry, "7.6 g", "unsweetened applesauce (per brownie)", "Unsweetened applesauce", 7.625 ],
-  [ :pantry, "12.5 g", "granulated sugar (per brownie)", "Granulated sugar", 12.5 ],
-  [ :pantry, "13.8 g", "brown sugar (per brownie)", "Brown sugar", 13.75 ],
-  [ :carbs, "7.8 g", "flour (per brownie)", "All-purpose flour", 7.8125 ],
-  [ :pantry, "5.4 g", "cocoa (per brownie)", "Unsweetened cocoa powder", 5.375 ],
-  [ :pantry, "10.5 g", "vegan chocolate chips (per brownie)", "Dark chocolate chips (vegan)", 10.5 ],
-  [ :fats, "4.7 g", "walnuts (per brownie)", "Walnuts", 4.6875 ],
+  [ :pantry, "4 g", "chia (per cupcake)", "Chia seeds", 4.0 ],
+  [ :pantry, "8.1 g", "unsweetened applesauce (per cupcake)", "Unsweetened applesauce", 8.133 ],
+  [ :pantry, "13.3 g", "granulated sugar (per cupcake)", "Granulated sugar", 13.333 ],
+  [ :pantry, "14.7 g", "brown sugar (per cupcake)", "Brown sugar", 14.667 ],
+  [ :carbs, "8.3 g", "flour (per cupcake)", "All-purpose flour", 8.333 ],
+  [ :pantry, "5.7 g", "cocoa (per cupcake)", "Unsweetened cocoa powder", 5.733 ],
+  [ :fats, "5 g", "walnuts (per cupcake)", "Walnuts", 5.0 ],
   [ :pantry, nil, "vanilla, salt, baking powder (batch)", nil, nil ]
 ], <<~STEPS
-  From Nora Cooks (noracooks.com/vegan-brownies-recipe) — oil-free + walnuts.
+  Nora Cooks oil-free brownies — as made (chia, no chips, cupcake molds).
 
-  Batch (16 brownies):
-  1. Flax eggs: 4 tbsp ground flax + ½ cup water; thicken.
-  2. Oven 175°C / 350°F. Line 7×11" pan with parchment.
-  3. Whisk ½ cup unsweetened applesauce with 1 cup sugar + 1 cup packed brown sugar. Add flax eggs + 1 tbsp vanilla.
-  4. Sift in 1 cup flour + 1 cup cocoa; add ½ tsp salt + 1 tsp baking powder. Stir until just combined.
-  5. Fold in half of 1 cup vegan chocolate chips + ¾ cup chopped walnuts. Spread in pan; top with remaining chips.
-  6. Bake 35–40 min. Cool before cutting into 16.
+  Batch (15 cupcakes, ⅛-cup molds):
+  1. Chia eggs: 4 tbsp chia seeds + ½ cup water; thicken.
+  2. Oven 175°C / 350°F. Line or grease ⅛-cup cupcake molds.
+  3. Whisk ½ cup unsweetened applesauce with 1 cup sugar + 1 cup packed brown sugar.
+     Add chia eggs + 1 tbsp vanilla.
+  4. Sift in 1 cup flour + 1 cup unsweetened cocoa; add ½ tsp salt + 1 tsp baking powder.
+     Stir until just combined.
+  5. Fold in ¾ cup chopped walnuts only (no chocolate chips).
+  6. Fill molds; bake until set (check earlier than a full pan — start around 18–25 min).
+     Cool before removing.
 
-  To log: Servings = brownies you ate (e.g. 5).
+  To log: Servings = cupcakes you ate (e.g. 3).
 STEPS
 
 seed_recipe "roasted-sweet-yellow-potatoes", {
