@@ -57,6 +57,17 @@ RSpec.describe RecentMealShortcuts do
     expect(result.shortcuts.first).to be_recipe
   end
 
+  it "does not expose an archived recipe on the shortcut" do
+    template = create(:meal_template, :with_items)
+    create(:recipe, :archived, meal_template: template, name: "Old wrap")
+    log_meal(date: today - 1.day, name: "Old wrap", meal_type: :lunch, template: template)
+
+    result = described_class.call(as_of: today, at: Time.zone.parse("#{today} 12:00"))
+
+    expect(result.shortcuts.first.recipe).to be_nil
+    expect(result.shortcuts.first).not_to be_recipe
+  end
+
   it "does not time-filter when viewing another day’s log" do
     log_meal(date: today - 1.day, name: "Oats", meal_type: :breakfast)
     log_meal(date: today - 1.day, name: "Dinner", meal_type: :dinner)

@@ -70,6 +70,9 @@ class RecentMealShortcuts
 
       seen[key] = true
       template = entry.meal_template
+      recipe = template&.recipe
+      recipe = nil if recipe&.status_archived?
+
       shortcuts << Shortcut.new(
         name: entry.name,
         meal_type: entry.meal_type,
@@ -77,7 +80,7 @@ class RecentMealShortcuts
         protein_g: entry.protein_g,
         source_entry: entry,
         meal_template: template,
-        recipe: template&.recipe
+        recipe: recipe
       )
       break if shortcuts.size >= @limit
     end
@@ -97,9 +100,10 @@ class RecentMealShortcuts
   end
 
   def ranked(entries)
-    # Recipe-backed first (editable portions), then newest.
+    # Active recipe-backed first (editable portions), then newest.
     entries.sort_by do |entry|
-      recipe_rank = entry.meal_template&.recipe ? 0 : 1
+      recipe = entry.meal_template&.recipe
+      recipe_rank = (recipe.present? && !recipe.status_archived?) ? 0 : 1
       [ recipe_rank, -entry.daily_log.logged_on.to_time.to_i, -entry.created_at.to_i ]
     end
   end

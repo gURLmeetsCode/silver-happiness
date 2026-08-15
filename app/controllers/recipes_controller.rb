@@ -129,7 +129,11 @@ class RecipesController < ApplicationController
   end
 
   def recently_eaten_recipes
-    RecentMealShortcuts.call.shortcuts.filter_map(&:recipe).uniq
+    # Only active recipes — archived ones must not reappear here.
+    RecentMealShortcuts.call.shortcuts
+      .filter_map(&:recipe)
+      .select(&:status_active?)
+      .uniq
   end
 
   def personal_params

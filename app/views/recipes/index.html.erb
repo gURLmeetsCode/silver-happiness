@@ -49,10 +49,13 @@
     </div>
   <% end %>
 
-  <% if @active_regular.any? %>
+  <% recently_ids = @recently_eaten.map(&:id).to_set %>
+
+  <% regulars = @active_regular.reject { |r| recently_ids.include?(r.id) } %>
+  <% if regulars.any? %>
     <h2 class="h5 mb-3">Your regular meals</h2>
     <div class="row g-3 mb-4">
-      <% @active_regular.each do |recipe| %>
+      <% regulars.each do |recipe| %>
         <div class="col-md-6 col-lg-4">
           <%= render "recipe_card", recipe: recipe %>
         </div>
@@ -72,10 +75,11 @@
     </div>
   <% end %>
 
-  <% if @suggested_recipes.any? %>
+  <% suggested = @suggested_recipes.reject { |r| recently_ids.include?(r.id) } %>
+  <% if suggested.any? %>
     <h2 class="h5 mb-3">Suggested & swaps</h2>
     <div class="row g-3 mb-4">
-      <% @suggested_recipes.each do |recipe| %>
+      <% suggested.each do |recipe| %>
         <div class="col-md-6 col-lg-4">
           <%= render "recipe_card", recipe: recipe %>
         </div>
