@@ -91,14 +91,16 @@ RSpec.describe "Building a meal from several items", type: :request do
 
   it "offers the builder on the day page" do
     zucchini
-    create(:meal_template, name: "Roasted potatoes (batch)")
+    template = create(:meal_template, name: "Roasted potatoes (batch)")
+    create(:meal_template_item, meal_template: template, product: zucchini, quantity_g: 400)
 
     get daily_log_path(daily_log)
 
     expect(response.body).to include("Build a meal")
     expect(response.body).to include("items[0][picker]")
     expect(response.body).to include("items[0][unit]")
-    expect(response.body).to include("Saved batches / meals")
+    expect(response.body).to include("Batch trays")
+    expect(response.body).to include("Products")
     expect(response.body).to include("Roasted potatoes (batch)")
   end
 

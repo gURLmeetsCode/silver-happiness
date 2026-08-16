@@ -129,5 +129,17 @@ RSpec.describe MealAssembler do
 
       expect(assembler.components.first.grams).to eq(62.5)
     end
+
+    it "accepts vulgar fractions like ½" do
+      assembler = described_class.new({ "0" => { "product_id" => tofu.id, "quantity" => "½", "unit" => "serving" } })
+
+      expect(assembler.components.first.grams).to eq(62.5)
+    end
+
+    it "accepts written fractions like 1/4" do
+      assembler = described_class.new({ "0" => { "product_id" => tofu.id, "quantity" => "1/4", "unit" => "serving" } })
+
+      expect(assembler.components.first.grams).to eq(31.25)
+    end
   end
 end

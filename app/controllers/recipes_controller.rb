@@ -39,7 +39,8 @@ class RecipesController < ApplicationController
     @recipe = Recipe.new(recipe_params.merge(user_created: true, status: :active))
 
     if @recipe.save
-      redirect_to @recipe, notice: "Recipe saved."
+      @recipe.ensure_meal_template!
+      redirect_to @recipe, notice: "Recipe saved — it’s available in Build a meal."
     else
       @recipe.recipe_ingredients.build while @recipe.recipe_ingredients.size < 5
       render :new, status: :unprocessable_entity
@@ -59,6 +60,7 @@ class RecipesController < ApplicationController
     permitted = @recipe.editable? ? recipe_params : personal_params
 
     if @recipe.update(permitted)
+      @recipe.ensure_meal_template! if @recipe.editable?
       redirect_to @recipe, notice: @recipe.editable? ? "Recipe updated." : "My tweaks saved."
     elsif @recipe.editable?
       @recipe.recipe_ingredients.build while @recipe.recipe_ingredients.size < 3

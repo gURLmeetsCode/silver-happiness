@@ -35,6 +35,17 @@ class Product < ApplicationRecord
     end
   end
 
+  def suggested_grocery_category
+    case name
+    when /tofu|skyr|yogurt|protein|bean|lentil|hummus|houmous|chickpea/i then "protein"
+    when /oat|quinoa|rice|pasta|bread|flour/i then "carbs"
+    when /cacahuète|peanut|oil|avocat|walnut|almond|tahini/i then "fats"
+    when /chia|soja|soy|vinegar|sauce|mustard|cocoa|sugar/i then "pantry"
+    when /tomato|zucchini|lettuce|spinach|pepper|onion|garlic|fruit|berry/i then "produce"
+    else "other"
+    end
+  end
+
   def quick_log_label
     nutrition = nutrition_for(default_quantity_g)
     parts = [ name ]

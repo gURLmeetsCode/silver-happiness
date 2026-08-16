@@ -31,15 +31,21 @@ class MealEntriesController < ApplicationController
   end
 
   def edit
+    prepare_builder_rows!
   end
 
   def update
-    @entry.assign_attributes(meal_entry_params)
-    finalize_recipe_nutrition! if @recipe
+    if params[:items].present?
+      return render_builder_edit_failure("Pick at least one item and an amount") unless rebuild_from_items
+    else
+      @entry.assign_attributes(meal_entry_params)
+      finalize_recipe_nutrition! if @recipe
+    end
 
     if @entry.save
       redirect_to @daily_log, notice: "#{@entry.name} updated."
     else
+      prepare_builder_rows!
       render :edit, status: :unprocessable_entity
     end
   end
@@ -169,7 +175,41 @@ class MealEntriesController < ApplicationController
 
   def load_recipe_form_context
     @recipe = @entry.meal_template&.recipe
-    @products = Product.order(:name) if @recipe
+    @products = Product.order(:name)
+    @meal_templates = MealTemplate
+      .includes(:recipe, :meal_template_items)
+      .joins(:meal_template_items)
+      .distinct
+      .order(:name)
+      .reject { |template| template.recipe&.status_archived? }
+  end
+
+  def prepare_builder_rows!
+    return if @recipe
+
+    @builder_rows = @entry.items.includes(:product).map do |item|
+      {
+        picker: "product_#{item.product_id}",
+        quantity: item.grams.to_f == item.grams.to_i ? item.grams.to_i.to_s : item.grams.to_s,
+        unit: "g"
+      }
+    end
+    @builder_rows = [ { picker: nil, quantity: nil, unit: "g" } ] if @builder_rows.empty?
+  end
+
+  def rebuild_from_items
+    assembler = MealAssembler.new(params[:items])
+    return false unless assembler.any?
+
+    @entry.assign_attributes(meal_entry_params) if params[:meal_entry].present?
+    assembler.apply!(@entry, replace_notes: true)
+    true
+  end
+
+  def render_builder_edit_failure(message)
+    prepare_builder_rows!
+    flash.now[:alert] = message
+    render :edit, status: :unprocessable_entity
   end
 
   def recipe_for_log

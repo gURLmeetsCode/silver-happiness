@@ -33,4 +33,19 @@ class MealTemplate < ApplicationRecord
     cups = (water_suggestion_ml / 250.0).round(1)
     cups == 1 ? "1 cup" : "#{cups} cups"
   end
+
+  def batch_style?
+    recipe&.batch_style? || name.match?(/\b(batch|tray|full batch)\b/i)
+  end
+
+  def picker_unit_label
+    batch_style? ? "× full batch (1 = whole tray)" : "× serving (1 = whole recipe)"
+  end
+
+  def picker_group
+    return :batches if batch_style?
+    return :recipes if recipe.present?
+
+    :saved
+  end
 end

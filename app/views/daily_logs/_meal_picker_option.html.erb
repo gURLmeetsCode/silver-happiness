@@ -1,0 +1,14 @@
+<%# locals: template, selected %>
+<option value="template_<%= template.id %>"
+  <%= "selected" if selected == "template_#{template.id}" %>
+  data-kind="template"
+  data-batch="<%= template.batch_style? %>"
+  data-calories="<%= template.total_calories %>"
+  data-protein="<%= template.total_protein %>"
+  data-carbs="<%= template.total_carbs %>"
+  data-fat="<%= template.total_fat %>"
+  data-serving-g="1"
+  data-grams-per-ml="1"
+  data-units="<%= [[ template.picker_unit_label, "serving" ]].to_json %>">
+  <%= template.name %> (<%= template.total_calories %> kcal full)
+</option>

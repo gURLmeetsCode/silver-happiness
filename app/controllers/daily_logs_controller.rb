@@ -42,13 +42,19 @@ class DailyLogsController < ApplicationController
 
   def copy_meals
     source = DailyLog.find(params[:source_id])
-    added = @daily_log.copy_meals_from!(source)
+    ids = Array(params[:meal_entry_ids]).reject(&:blank?)
+    if ids.empty?
+      redirect_to @daily_log, alert: "Pick at least one meal to copy."
+      return
+    end
+
+    added = @daily_log.copy_meals_from!(source, meal_entry_ids: ids)
     from = source.logged_on.strftime("%b %-d")
 
     notice = if added.zero?
-      "Nothing new to copy — every meal from #{from} is already logged."
+      "Nothing new to copy — those meals from #{from} are already logged."
     else
-      "Added #{added} #{'meal'.pluralize(added)} from #{from}. Your existing meals were kept."
+      "Added #{added} #{'meal'.pluralize(added)} from #{from}."
     end
 
     redirect_to @daily_log, notice: notice
@@ -79,7 +85,7 @@ class DailyLogsController < ApplicationController
 
   def load_show_page
     @goal = Goal.current
-    @meal_templates = MealTemplate.includes(:recipe).order(:meal_type, :name)
+    @meal_templates = meal_templates_for_builder
     @products = Product.order(:name)
     @quick_beverages = Product.quick_log_beverages
     @recent_meals = RecentMealShortcuts.call(as_of: @daily_log.logged_on)
@@ -91,6 +97,16 @@ class DailyLogsController < ApplicationController
     @workout_plans = WorkoutPlan.ordered
     @supplemental_plans = @workout_plans.supplemental
     @runna_plans = @workout_plans.kind_runna_reference
+    @yesterday_log = DailyLog.find_by(logged_on: @daily_log.logged_on - 1.day)
+  end
+
+  def meal_templates_for_builder
+    MealTemplate
+      .includes(:recipe, :meal_template_items)
+      .joins(:meal_template_items)
+      .distinct
+      .order(:name)
+      .reject { |template| template.recipe&.status_archived? }
   end
 
   def daily_log_params

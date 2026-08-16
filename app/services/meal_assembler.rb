@@ -2,8 +2,13 @@
 
 # Builds one meal out of several things you ate: half a cup of pasta, a quarter
 # of a roasted-potato batch, a side of tofu. Rows are either a product with an
-# amount/unit, or a saved meal template scaled as "× batch".
+# amount/unit, or a saved meal template scaled as "× batch/serving".
 class MealAssembler
+  VULGAR_FRACTIONS = {
+    "½" => 0.5, "⅓" => 1.0 / 3, "⅔" => 2.0 / 3, "¼" => 0.25, "¾" => 0.75,
+    "⅕" => 0.2, "⅖" => 0.4, "⅗" => 0.6, "⅘" => 0.8, "⅙" => 1.0 / 6, "⅛" => 0.125
+  }.freeze
+
   Component = Struct.new(:product, :quantity, :unit, :grams, :nutrition, :source_name, keyword_init: true) do
     def label
       if source_name.present? && unit == "serving"
@@ -52,14 +57,18 @@ class MealAssembler
     components.map(&:label).join(" · ")
   end
 
-  def apply!(entry)
+  def apply!(entry, replace_notes: false)
     sum = totals
     entry.calories = sum[:calories].round
     entry.protein_g = sum[:protein].round(1)
     entry.carbs_g = sum[:carbs].round(1)
     entry.fat_g = sum[:fat].round(1)
     entry.name = entry.name.presence || suggested_name
-    entry.notes = [ entry.notes, notes ].compact_blank.join(" · ")
+    entry.notes = if replace_notes || entry.notes.blank?
+      notes
+    else
+      [ entry.notes, notes ].compact_blank.join(" · ")
+    end
     entry.record_items!(components.map { |c| { product_id: c.product.id, grams: c.grams } })
     entry
   end
@@ -122,8 +131,34 @@ class MealAssembler
     picker.to_s[/\Aproduct_(\d+)\z/, 1]
   end
 
+  # Match the meal-builder JS: "½", "1/2", "1 1/2", "0.5".
   def parse_quantity(raw)
-    raw.to_s.tr(",", ".").to_f
+    text = raw.to_s.strip.tr(",", ".")
+    return 0 if text.blank?
+
+    total = 0.0
+    matched = false
+    VULGAR_FRACTIONS.each do |glyph, value|
+      next unless text.include?(glyph)
+
+      total += value
+      matched = true
+    end
+
+    stripped = text.gsub(/[#{VULGAR_FRACTIONS.keys.join}]/, " ").strip
+
+    if (mixed = stripped.match(/\A(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)\z/))
+      return total + mixed[1].to_f + (mixed[2].to_f / mixed[3].to_f)
+    end
+
+    if (fraction = stripped.match(/\A(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)\z/))
+      return total + (fraction[1].to_f / fraction[2].to_f)
+    end
+
+    decimal = stripped.to_f
+    return total + decimal if decimal.positive? || stripped.match?(/\A0+(\.0+)?\z/)
+
+    matched ? total : 0.0
   end
 
   def rows_in(items)

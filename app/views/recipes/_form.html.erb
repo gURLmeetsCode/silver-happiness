@@ -1,15 +1,19 @@
-<%= form_with model: recipe, class: "row g-3" do |f| %>
+<%= form_with model: recipe, class: "row g-3",
+      data: {
+        controller: "recipe-form",
+        action: "change->recipe-form#recalculate input->recipe-form#recalculate"
+      } do |f| %>
   <% if recipe.errors.any? %>
     <div class="col-12 alert alert-danger"><%= recipe.errors.full_messages.to_sentence %></div>
   <% end %>
 
   <div class="col-md-8">
     <%= f.label :name, class: "form-label" %>
-    <%= f.text_field :name, class: "form-control", required: true, placeholder: "e.g. Quick tofu bowl" %>
+    <%= f.text_field :name, class: "form-control", required: true, placeholder: "e.g. Oil-free hummus" %>
   </div>
   <div class="col-md-4">
     <%= f.label :meal_type, class: "form-label" %>
-    <%= f.select :meal_type, Recipe.meal_types.keys.map { |k| [Recipe::MEAL_TYPE_LABELS[k], k] }, {}, class: "form-select" %>
+    <%= f.select :meal_type, Recipe.meal_types.keys.map { |k| [ Recipe::MEAL_TYPE_LABELS[k], k ] }, {}, class: "form-select" %>
   </div>
 
   <div class="col-12">
@@ -23,60 +27,112 @@
   </div>
   <div class="col-md-3">
     <%= f.label :serves, class: "form-label" %>
-    <%= f.number_field :serves, class: "form-control", min: 1, value: recipe.serves || 1 %>
+    <%= f.number_field :serves, class: "form-control", min: 1, value: recipe.serves || 1,
+          data: { recipe_form_target: "serves", action: "input->recipe-form#recalculate" } %>
   </div>
-  <div class="col-md-3">
-    <%= f.label :calories, "Calories (approx)", class: "form-label" %>
-    <%= f.number_field :calories, class: "form-control", min: 0 %>
-  </div>
-  <div class="col-md-3">
-    <%= f.label :protein_g, "Protein (g)", class: "form-label" %>
-    <%= f.number_field :protein_g, class: "form-control", min: 0 %>
-  </div>
-
   <div class="col-md-3">
     <%= f.label :water_suggestion_ml, "Water with meal (ml)", class: "form-label" %>
     <%= f.number_field :water_suggestion_ml, class: "form-control", min: 0, step: 50, value: recipe.water_suggestion_ml || 250 %>
     <div class="form-text">Default 250 ml = 1 cup</div>
   </div>
+  <div class="col-md-3 d-flex align-items-end">
+    <div class="form-check mb-2">
+      <%= f.check_box :regular_meal, class: "form-check-input" %>
+      <%= f.label :regular_meal, "On grocery list", class: "form-check-label" %>
+    </div>
+  </div>
 
   <div class="col-12">
-      <%= f.label :regular_meal, "Regular meal (include on grocery list when active)", class: "form-check-label" %>
+    <div class="alert alert-light border mb-0">
+      <div class="fw-semibold mb-1">Nutrition (auto from products)</div>
+      <p class="small text-muted mb-2" data-recipe-form-target="macrosHint">
+        Link products + grams below to calculate nutrition automatically.
+      </p>
+      <div class="row g-2">
+        <div class="col-6 col-md-3">
+          <%= f.label :calories, "kcal / serving", class: "form-label small text-muted" %>
+          <%= f.number_field :calories, class: "form-control", min: 0, readonly: true,
+                data: { recipe_form_target: "calories" } %>
+        </div>
+        <div class="col-6 col-md-3">
+          <%= f.label :protein_g, "Protein g / serving", class: "form-label small text-muted" %>
+          <%= f.number_field :protein_g, class: "form-control", min: 0, readonly: true,
+                data: { recipe_form_target: "protein" } %>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="col-12">
     <h2 class="h6 mb-2">Ingredients</h2>
-    <p class="small text-muted">Link saved products for auto-calculated calories. Leave product blank for generic items (salad veg, spices).</p>
+    <p class="small text-muted">
+      Search and pick a saved product — nutrition comes from that product automatically.
+      Leave product blank only for untracked extras (spices, salad veg).
+    </p>
     <div id="ingredients">
       <%= f.fields_for :recipe_ingredients do |ing| %>
-        <div class="row g-2 mb-2 align-items-end border-bottom pb-2">
-          <div class="col-md-4">
-            <%= ing.label :product_id, "Your product", class: "form-label small" %>
-            <%= ing.collection_select :product_id, @products, :id, :name,
-                  { include_blank: "Generic ingredient" }, class: "form-select form-select-sm" %>
+        <div class="row g-2 mb-2 align-items-end border-bottom pb-2"
+             data-recipe-form-target="row">
+          <div class="col-md-5" data-controller="searchable-select">
+            <%= ing.label :product_id, "Product", class: "form-label small" %>
+            <%= ing.select :product_id,
+                  options_for_select(
+                    [[ "Generic / untracked", "" ]] + @products.map { |p|
+                      [
+                        p.brand.present? ? "#{p.name} (#{p.brand})" : p.name,
+                        p.id,
+                        {
+                          data: {
+                            calories: p.calories_per_100g,
+                            protein: p.protein_per_100g,
+                            carbs: p.carbs_per_100g,
+                            fat: p.fat_per_100g,
+                            serving_g: p.default_quantity_g,
+                            name: p.name,
+                            category: p.suggested_grocery_category
+                          }
+                        }
+                      ]
+                    },
+                    ing.object.product_id
+                  ),
+                  {},
+                  class: "form-select form-select-sm",
+                  data: {
+                    searchable_select_target: "select",
+                    search_placeholder: "Search products…",
+                    recipe_form_target: "product",
+                    action: "change->recipe-form#productChanged change->recipe-form#recalculate"
+                  },
+                  aria: { label: "Product" } %>
           </div>
           <div class="col-md-2">
             <%= ing.label :quantity_g, "Grams", class: "form-label small" %>
-            <%= ing.number_field :quantity_g, step: 0.1, class: "form-control form-control-sm", placeholder: "g" %>
+            <%= ing.number_field :quantity_g, step: 0.1, class: "form-control form-control-sm", placeholder: "g",
+                  data: { recipe_form_target: "grams", action: "input->recipe-form#recalculate" } %>
           </div>
           <div class="col-md-2">
             <%= ing.label :amount, "Label", class: "form-label small" %>
-            <%= ing.text_field :amount, class: "form-control form-control-sm", placeholder: "e.g. 150 g" %>
+            <%= ing.text_field :amount, class: "form-control form-control-sm", placeholder: "e.g. 150 g",
+                  data: { recipe_form_target: "amount" } %>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
             <%= ing.label :name, "Name if generic", class: "form-label small" %>
-            <%= ing.text_field :name, class: "form-control form-control-sm", placeholder: "e.g. cherry tomatoes" %>
+            <%= ing.text_field :name, class: "form-control form-control-sm", placeholder: "e.g. lemon",
+                  data: { recipe_form_target: "name" } %>
           </div>
           <div class="col-md-1">
             <%= ing.select :grocery_category,
-                  RecipeIngredient.grocery_categories.keys.map { |k| [RecipeIngredient::CATEGORY_LABELS[k], k] },
-                  {}, class: "form-select form-select-sm" %>
+                  RecipeIngredient.grocery_categories.keys.map { |k| [ RecipeIngredient::CATEGORY_LABELS[k], k ] },
+                  {},
+                  class: "form-select form-select-sm",
+                  data: { recipe_form_target: "category" } %>
           </div>
           <div class="col-12">
+            <span class="small text-muted" data-recipe-form-target="rowHint"></span>
             <% if ing.object.persisted? %>
               <%= ing.hidden_field :id %>
-              <div class="form-check form-check-inline">
+              <div class="form-check form-check-inline ms-2">
                 <%= ing.check_box :_destroy, class: "form-check-input" %>
                 <%= ing.label :_destroy, "Remove", class: "form-check-label small" %>
               </div>

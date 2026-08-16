@@ -106,7 +106,24 @@ RSpec.describe "Daily logs", type: :request do
   end
 
   describe "POST /daily_logs/:id/copy_meals" do
-    it "copies meals from the source day" do
+    it "copies selected meals from the source day including ingredients" do
+      source = create(:daily_log, logged_on: Date.current - 1.day)
+      product = create(:product, name: "Chickpeas")
+      entry = create(:meal_entry, daily_log: source, name: "Oil-free hummus")
+      create(:meal_entry_item, meal_entry: entry, product: product, grams: 80)
+      target = create(:daily_log, logged_on: Date.current)
+
+      post copy_meals_daily_log_path(target), params: {
+        source_id: source.id,
+        meal_entry_ids: [ entry.id ]
+      }
+
+      expect(response).to redirect_to(daily_log_path(target))
+      copied = target.reload.meal_entries.find_by!(name: "Oil-free hummus")
+      expect(copied.items.map { |i| [ i.product.name, i.grams.to_f ] }).to eq([ [ "Chickpeas", 80.0 ] ])
+    end
+
+    it "requires at least one meal to be selected" do
       source = create(:daily_log, logged_on: Date.current - 1.day)
       create(:meal_entry, daily_log: source, name: "Oats")
       target = create(:daily_log, logged_on: Date.current)
@@ -114,19 +131,23 @@ RSpec.describe "Daily logs", type: :request do
       post copy_meals_daily_log_path(target), params: { source_id: source.id }
 
       expect(response).to redirect_to(daily_log_path(target))
-      expect(target.reload.meal_entries.map(&:name)).to eq([ "Oats" ])
+      expect(flash[:alert]).to match(/Pick at least one meal/)
+      expect(target.reload.meal_entries).to be_empty
     end
 
     # Copying used to wipe the day first, which would silently delete meals
     # already logged before the button was pressed.
     it "keeps meals already logged on the target day" do
       source = create(:daily_log, logged_on: Date.current - 1.day)
-      create(:meal_entry, daily_log: source, name: "Oats", meal_type: :breakfast)
+      oats = create(:meal_entry, daily_log: source, name: "Oats", meal_type: :breakfast)
       target = create(:daily_log, logged_on: Date.current)
       mine = create(:meal_entry, daily_log: target, name: "My own lunch",
                     meal_type: :lunch, calories: 640)
 
-      post copy_meals_daily_log_path(target), params: { source_id: source.id }
+      post copy_meals_daily_log_path(target), params: {
+        source_id: source.id,
+        meal_entry_ids: [ oats.id ]
+      }
 
       expect(target.reload.meal_entries.map(&:name)).to contain_exactly("My own lunch", "Oats")
       expect(mine.reload.calories).to eq(640)
@@ -134,12 +155,15 @@ RSpec.describe "Daily logs", type: :request do
 
     it "does not duplicate a meal that is already there" do
       source = create(:daily_log, logged_on: Date.current - 1.day)
-      create(:meal_entry, daily_log: source, name: "Oats", meal_type: :breakfast)
+      oats = create(:meal_entry, daily_log: source, name: "Oats", meal_type: :breakfast)
       target = create(:daily_log, logged_on: Date.current)
       create(:meal_entry, daily_log: target, name: "Oats", meal_type: :breakfast)
 
       expect {
-        post copy_meals_daily_log_path(target), params: { source_id: source.id }
+        post copy_meals_daily_log_path(target), params: {
+          source_id: source.id,
+          meal_entry_ids: [ oats.id ]
+        }
       }.not_to change { target.reload.meal_entries.count }
 
       expect(flash[:notice]).to match(/Nothing new to copy/)
@@ -147,17 +171,23 @@ RSpec.describe "Daily logs", type: :request do
 
     it "reports how many meals were added" do
       source = create(:daily_log, logged_on: Date.current - 1.day)
-      create(:meal_entry, daily_log: source, name: "Oats", meal_type: :breakfast)
-      create(:meal_entry, daily_log: source, name: "Salad", meal_type: :lunch)
+      oats = create(:meal_entry, daily_log: source, name: "Oats", meal_type: :breakfast)
+      salad = create(:meal_entry, daily_log: source, name: "Salad", meal_type: :lunch)
       target = create(:daily_log, logged_on: Date.current)
 
-      post copy_meals_daily_log_path(target), params: { source_id: source.id }
+      post copy_meals_daily_log_path(target), params: {
+        source_id: source.id,
+        meal_entry_ids: [ oats.id, salad.id ]
+      }
 
       expect(flash[:notice]).to match(/Added 2 meals/)
     end
 
     it "returns 404 when the source day does not exist" do
-      post copy_meals_daily_log_path(create(:daily_log)), params: { source_id: 999_999 }
+      post copy_meals_daily_log_path(create(:daily_log)), params: {
+        source_id: 999_999,
+        meal_entry_ids: [ 1 ]
+      }
 
       expect(response).to have_http_status(:not_found)
     end

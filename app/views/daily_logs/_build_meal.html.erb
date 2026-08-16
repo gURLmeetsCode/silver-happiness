@@ -4,8 +4,9 @@
   <div class="card-body">
     <h2 class="h5 mb-1">Build a meal</h2>
     <p class="small text-muted mb-3">
-      Mix products <strong>and</strong> saved batches — e.g. ¼ roasted potatoes + ½ zucchini &amp; tofu batch.
-      For a batch, amount is how much of the full tray (½, ¼, 1…).
+      Pick a <strong>recipe</strong>, a share of a <strong>batch tray</strong>, and/or individual
+      <strong>products</strong>. For recipes and trays, amount is how much of the whole thing
+      (1 = all of it, ½ = half, ¼ = a plate share).
     </p>
 
     <%= form_with url: daily_log_meal_entries_path(daily_log), method: :post,
@@ -19,7 +20,7 @@
       </template>
 
       <div data-meal-builder-target="rows">
-        <% 3.times do |index| %>
+        <% 2.times do |index| %>
           <%= render "daily_logs/meal_item_row", products: products, meal_templates: meal_templates, index: index %>
         <% end %>
       </div>
@@ -33,8 +34,8 @@
               class: "btn btn-sm btn-link" do %>
           Missing a product?
         <% end %>
-        <%= link_to recipes_path, class: "btn btn-sm btn-link" do %>
-          See recipes
+        <%= link_to new_recipe_path, class: "btn btn-sm btn-link" do %>
+          New recipe
         <% end %>
       </div>
 

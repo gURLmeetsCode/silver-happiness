@@ -115,6 +115,38 @@ class Recipe < ApplicationRecord
     sync_macros_from_ingredients!
   end
 
+  # Build-a-meal only lists MealTemplates. Keep a linked template in sync so
+  # user recipes (e.g. oil-free hummus) show up next to products.
+  def ensure_meal_template!
+    tracked = tracked_ingredients
+    return meal_template if tracked.empty?
+
+    template = meal_template || MealTemplate.find_or_initialize_by(slug: slug)
+    template.assign_attributes(
+      name: name,
+      meal_type: template_meal_type,
+      description: description.to_s.truncate(500),
+      water_suggestion_ml: water_suggestion_ml
+    )
+    template.save!
+
+    template.meal_template_items.destroy_all
+    tracked.each do |ing|
+      template.meal_template_items.create!(
+        product: ing.product,
+        quantity_g: ing.quantity_g,
+        label: ing.amount.presence || "#{ing.quantity_g.to_i} g"
+      )
+    end
+
+    update_column(:meal_template_id, template.id) if meal_template_id != template.id
+    template
+  end
+
+  def batch_style?
+    meal_type_prep? || name.match?(/\b(batch|tray|full batch)\b/i)
+  end
+
   def reaction_label
     case reaction
     when "up" then "Love it"
@@ -165,11 +197,16 @@ class Recipe < ApplicationRecord
 
   def grocery_category_for_product(product)
     case product.name
-    when /tofu|skyr|yogurt|protein|bean|lentil/i then :protein
+    when /tofu|skyr|yogurt|protein|bean|lentil|hummus|houmous/i then :protein
     when /oat|quinoa|rice|pasta|bread/i then :carbs
     when /cacahuète|peanut|oil|avocat/i then :fats
     when /chia|soja|soy|vinegar|sauce|mustard/i then :pantry
     else :other
     end
+  end
+
+  # MealTemplate has no :prep type — batch prep recipes log as dinner trays.
+  def template_meal_type
+    meal_type_prep? ? "dinner" : meal_type
   end
 end

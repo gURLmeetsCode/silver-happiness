@@ -12,89 +12,106 @@
   </div>
 </div>
 
-<div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
-  <div class="btn-group flex-wrap" role="group">
-    <%= link_to "All", recipes_path(show_archived: params[:show_archived]), class: "btn btn-sm #{params[:filter].blank? ? 'btn-dark' : 'btn-outline-dark'}" %>
-    <% Recipe.meal_types.each_key do |type| %>
-      <%= link_to Recipe::MEAL_TYPE_LABELS[type] || type.humanize,
-            recipes_path(filter: type, show_archived: params[:show_archived]),
-            class: "btn btn-sm #{params[:filter] == type ? 'btn-dark' : 'btn-outline-dark'}" %>
+<div data-controller="list-filter">
+  <div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
+    <div class="flex-grow-1" style="min-width: 12rem; max-width: 22rem">
+      <label class="visually-hidden" for="recipe-search">Search recipes</label>
+      <input id="recipe-search" type="search" class="form-control form-control-sm"
+             placeholder="Search recipes…"
+             data-list-filter-target="input"
+             data-action="input->list-filter#filter">
+    </div>
+    <div class="btn-group flex-wrap" role="group">
+      <%= link_to "All", recipes_path(show_archived: params[:show_archived]), class: "btn btn-sm #{params[:filter].blank? ? 'btn-dark' : 'btn-outline-dark'}" %>
+      <% Recipe.meal_types.each_key do |type| %>
+        <%= link_to Recipe::MEAL_TYPE_LABELS[type] || type.humanize,
+              recipes_path(filter: type, show_archived: params[:show_archived]),
+              class: "btn btn-sm #{params[:filter] == type ? 'btn-dark' : 'btn-outline-dark'}" %>
+      <% end %>
+    </div>
+    <% if @archived_count.positive? || params[:show_archived] == "1" %>
+      <%= link_to params[:show_archived] == "1" ? "Hide archived" : "Show archived",
+            recipes_path(filter: params[:filter], show_archived: params[:show_archived] == "1" ? nil : "1"),
+            class: "btn btn-sm btn-outline-secondary" %>
     <% end %>
   </div>
-  <% if @archived_count.positive? || params[:show_archived] == "1" %>
-    <%= link_to params[:show_archived] == "1" ? "Hide archived" : "Show archived",
-          recipes_path(filter: params[:filter], show_archived: params[:show_archived] == "1" ? nil : "1"),
-          class: "btn btn-sm btn-outline-secondary" %>
-  <% end %>
-</div>
 
-<% if params[:filter].present? %>
-  <div class="row g-3">
-    <% @recipes.each do |recipe| %>
-      <div class="col-md-6 col-lg-4">
-        <%= render "recipe_card", recipe: recipe %>
+  <p class="small text-muted mb-3 d-none" data-list-filter-target="empty">No recipes match that search.</p>
+
+  <% if params[:filter].present? %>
+    <div class="row g-3">
+      <% @recipes.each do |recipe| %>
+        <div class="col-md-6 col-lg-4" data-list-filter-target="card"
+             data-search-text="<%= [ recipe.name, recipe.description, recipe.meal_type_label, recipe.macros_label ].compact.join(' ') %>">
+          <%= render "recipe_card", recipe: recipe %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <% if @recently_eaten.any? %>
+      <h2 class="h5 mb-3">Recently eaten</h2>
+      <p class="small text-muted mb-3">From the last week — open one to log again or adjust portions.</p>
+      <div class="row g-3 mb-4">
+        <% @recently_eaten.each do |recipe| %>
+          <div class="col-md-6 col-lg-4" data-list-filter-target="card"
+               data-search-text="<%= [ recipe.name, recipe.description, recipe.meal_type_label, recipe.macros_label ].compact.join(' ') %>">
+            <%= render "recipe_card", recipe: recipe %>
+          </div>
+        <% end %>
       </div>
     <% end %>
-  </div>
-<% else %>
-  <% if @recently_eaten.any? %>
-    <h2 class="h5 mb-3">Recently eaten</h2>
-    <p class="small text-muted mb-3">From the last week — open one to log again or adjust portions.</p>
-    <div class="row g-3 mb-4">
-      <% @recently_eaten.each do |recipe| %>
-        <div class="col-md-6 col-lg-4">
-          <%= render "recipe_card", recipe: recipe %>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
 
-  <% recently_ids = @recently_eaten.map(&:id).to_set %>
+    <% recently_ids = @recently_eaten.map(&:id).to_set %>
 
-  <% regulars = @active_regular.reject { |r| recently_ids.include?(r.id) } %>
-  <% if regulars.any? %>
-    <h2 class="h5 mb-3">Your regular meals</h2>
-    <div class="row g-3 mb-4">
-      <% regulars.each do |recipe| %>
-        <div class="col-md-6 col-lg-4">
-          <%= render "recipe_card", recipe: recipe %>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
+    <% regulars = @active_regular.reject { |r| recently_ids.include?(r.id) } %>
+    <% if regulars.any? %>
+      <h2 class="h5 mb-3">Your regular meals</h2>
+      <div class="row g-3 mb-4">
+        <% regulars.each do |recipe| %>
+          <div class="col-md-6 col-lg-4" data-list-filter-target="card"
+               data-search-text="<%= [ recipe.name, recipe.description, recipe.meal_type_label, recipe.macros_label ].compact.join(' ') %>">
+            <%= render "recipe_card", recipe: recipe %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
 
-  <% if @tired_recipes.any? %>
-    <h2 class="h5 mb-3 text-muted">Tired of these</h2>
-    <p class="small text-muted">Still saved — just off your regular rotation and grocery list.</p>
-    <div class="row g-3 mb-4">
-      <% @tired_recipes.each do |recipe| %>
-        <div class="col-md-6 col-lg-4">
-          <%= render "recipe_card", recipe: recipe %>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
+    <% if @tired_recipes.any? %>
+      <h2 class="h5 mb-3 text-muted">Tired of these</h2>
+      <p class="small text-muted">Still saved — just off your regular rotation and grocery list.</p>
+      <div class="row g-3 mb-4">
+        <% @tired_recipes.each do |recipe| %>
+          <div class="col-md-6 col-lg-4" data-list-filter-target="card"
+               data-search-text="<%= [ recipe.name, recipe.description, recipe.meal_type_label, recipe.macros_label ].compact.join(' ') %>">
+            <%= render "recipe_card", recipe: recipe %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
 
-  <% suggested = @suggested_recipes.reject { |r| recently_ids.include?(r.id) } %>
-  <% if suggested.any? %>
-    <h2 class="h5 mb-3">Suggested & swaps</h2>
-    <div class="row g-3 mb-4">
-      <% suggested.each do |recipe| %>
-        <div class="col-md-6 col-lg-4">
-          <%= render "recipe_card", recipe: recipe %>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
+    <% suggested = @suggested_recipes.reject { |r| recently_ids.include?(r.id) } %>
+    <% if suggested.any? %>
+      <h2 class="h5 mb-3">Suggested & swaps</h2>
+      <div class="row g-3 mb-4">
+        <% suggested.each do |recipe| %>
+          <div class="col-md-6 col-lg-4" data-list-filter-target="card"
+               data-search-text="<%= [ recipe.name, recipe.description, recipe.meal_type_label, recipe.macros_label ].compact.join(' ') %>">
+            <%= render "recipe_card", recipe: recipe %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
 
-  <% if @archived_recipes&.any? %>
-    <h2 class="h5 mb-3 text-muted">Archived</h2>
-    <div class="row g-3">
-      <% @archived_recipes.each do |recipe| %>
-        <div class="col-md-6 col-lg-4">
-          <%= render "recipe_card", recipe: recipe %>
-        </div>
-      <% end %>
-    </div>
+    <% if @archived_recipes&.any? %>
+      <h2 class="h5 mb-3 text-muted">Archived</h2>
+      <div class="row g-3">
+        <% @archived_recipes.each do |recipe| %>
+          <div class="col-md-6 col-lg-4" data-list-filter-target="card"
+               data-search-text="<%= [ recipe.name, recipe.description, recipe.meal_type_label, recipe.macros_label ].compact.join(' ') %>">
+            <%= render "recipe_card", recipe: recipe %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
   <% end %>
-<% end %>
+</div>

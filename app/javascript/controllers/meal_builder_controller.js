@@ -39,7 +39,10 @@ export default class extends Controller {
   clearRow(row) {
     const product = row.querySelector("[data-meal-builder-target='product']")
     const quantity = row.querySelector("[data-meal-builder-target='quantity']")
-    if (product) product.value = ""
+    if (product) {
+      product.value = ""
+      product.dispatchEvent(new Event("change", { bubbles: true }))
+    }
     if (quantity) quantity.value = ""
     this.refreshUnits(row)
   }
@@ -53,9 +56,9 @@ export default class extends Controller {
     const option = product?.selectedOptions?.[0]
     this.refreshUnits(row)
 
-    // Batches default to a plate share; products keep their usual serving size.
+    // Batches default to a plate share; recipes/products default to one serving.
     if (option?.dataset?.kind === "template" && quantity && !quantity.value) {
-      quantity.value = "0.25"
+      quantity.value = option.dataset.batch === "true" ? "0.25" : "1"
     } else if (option?.value && option.dataset.kind !== "template" && quantity && !quantity.value) {
       quantity.value = option.dataset.servingG || "100"
     }
@@ -159,12 +162,13 @@ export default class extends Controller {
       let calories, protein, carbs, fat, hintText
 
       if (kind === "template") {
-        // Option datasets are totals for 1× the full batch.
+        // Option datasets are totals for 1× the full recipe/batch.
         calories = (parseFloat(option.dataset.calories) || 0) * amount
         protein = (parseFloat(option.dataset.protein) || 0) * amount
         carbs = (parseFloat(option.dataset.carbs) || 0) * amount
         fat = (parseFloat(option.dataset.fat) || 0) * amount
-        hintText = `${amount}× batch · ${Math.round(calories)} kcal`
+        const scaleLabel = option.dataset.batch === "true" ? "batch" : "recipe"
+        hintText = `${amount}× ${scaleLabel} · ${Math.round(calories)} kcal`
       } else {
         const grams = this.gramsFor(option, amount, unit?.value)
         const factor = grams / 100

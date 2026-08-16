@@ -78,11 +78,13 @@ RSpec.describe "Recipes", type: :request do
   end
 
   describe "GET /recipes/new" do
-    it "renders the new recipe form" do
-      get new_recipe_path
+  it "renders the new recipe form with auto nutrition" do
+    get new_recipe_path
 
-      expect(response).to have_http_status(:ok)
-    end
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Nutrition (auto from products)")
+    expect(response.body).to include("Search products")
+  end
   end
 
   describe "POST /recipes" do

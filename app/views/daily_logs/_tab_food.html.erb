@@ -9,11 +9,35 @@
   <div class="card-body">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
       <h2 class="h5 mb-0">Meals today</h2>
-      <% if (yesterday = DailyLog.find_by(logged_on: daily_log.logged_on - 1.day)) %>
-        <%= button_to "Copy yesterday", copy_meals_daily_log_path(daily_log, source_id: yesterday.id),
-              method: :post, class: "btn btn-sm btn-outline-secondary" %>
-      <% end %>
     </div>
+
+    <% if @yesterday_log&.meal_entries&.any? %>
+      <details class="border rounded px-3 py-2 mb-3 bg-light">
+        <summary class="fw-semibold" style="cursor: pointer">Copy from yesterday</summary>
+        <p class="small text-muted mt-2 mb-2">
+          Pick which meals to bring over from <%= @yesterday_log.logged_on.strftime("%a %b %-d") %>.
+          Ingredients come with them so you can edit amounts after.
+        </p>
+        <%= form_with url: copy_meals_daily_log_path(daily_log), method: :post do %>
+          <%= hidden_field_tag :source_id, @yesterday_log.id %>
+          <div class="d-flex flex-column gap-2 mb-3">
+            <% @yesterday_log.meal_entries.each do |entry| %>
+              <div class="form-check">
+                <%= check_box_tag "meal_entry_ids[]", entry.id, false,
+                      id: "copy_meal_#{entry.id}", class: "form-check-input" %>
+                <%= label_tag "copy_meal_#{entry.id}", class: "form-check-label" do %>
+                  <span class="fw-semibold"><%= entry.name %></span>
+                  <span class="text-muted small">
+                    · <%= meal_type_label(entry.meal_type) %> · <%= entry.calories %> kcal
+                  </span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+          <%= submit_tag "Copy selected", class: "btn btn-sm btn-outline-primary" %>
+        <% end %>
+      </details>
+    <% end %>
 
     <% if daily_log.meal_entries.any? %>
       <ul class="list-group list-group-flush mb-0">
@@ -46,7 +70,7 @@
                 </div>
               </div>
               <div class="d-flex flex-column flex-sm-row gap-1">
-                <%= link_to entry.meal_template&.recipe ? "Adjust portions" : "Edit",
+                <%= link_to entry.items.any? || entry.meal_template&.recipe ? "Edit ingredients" : "Edit",
                       edit_daily_log_meal_entry_path(daily_log, entry),
                       class: "btn btn-sm btn-outline-primary" %>
                 <%= button_to "Remove", daily_log_meal_entry_path(daily_log, entry), method: :delete,
