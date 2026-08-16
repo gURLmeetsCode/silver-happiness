@@ -1,0 +1,71 @@
+<% content_for :title, "Journal" %>
+
+<header class="mb-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+    <div>
+      <p class="small text-uppercase text-muted mb-1">Profile</p>
+      <h1 class="h3 mb-1">Journal</h1>
+      <p class="text-muted mb-0">Check-ins, period days, feelings, and notes — separate from food &amp; workouts.</p>
+    </div>
+    <%= link_to "Goals & settings", edit_goal_path, class: "btn btn-outline-secondary btn-sm" %>
+  </div>
+</header>
+
+<%= render "shared/profile_nav", active: :journal %>
+
+<section class="mb-4" id="today-check-in">
+  <h2 class="h6 text-uppercase text-muted mb-2">Today’s check-in</h2>
+  <%= render "daily_logs/wellness", daily_log: @today, goal: @goal, return_to: journal_path %>
+</section>
+
+<section>
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h2 class="h6 text-uppercase text-muted mb-0">Past entries</h2>
+    <% if @months_with_entries.any? %>
+      <div class="d-flex flex-wrap gap-1">
+        <% @months_with_entries.first(8).each do |month| %>
+          <%= link_to month.strftime("%b %Y"),
+                journal_path(month: month.strftime("%Y-%m")),
+                class: "btn btn-sm #{month == @focus_month ? "btn-dark" : "btn-outline-secondary"}" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @entries.empty? %>
+    <p class="text-muted mb-0">No journal notes in <%= @focus_month.strftime("%B %Y") %> yet.</p>
+  <% else %>
+    <div class="list-group mb-3">
+      <% @entries.each do |log| %>
+        <%= link_to daily_log_path(log, anchor: "body"), class: "list-group-item list-group-item-action" do %>
+          <div class="d-flex justify-content-between align-items-start gap-2">
+            <div>
+              <div class="fw-semibold"><%= log.logged_on.strftime("%a, %b %-d") %></div>
+              <div class="small text-muted"><%= log.wellness_summary.presence || "Open check-in" %></div>
+              <% if log.notes.present? %>
+                <div class="small mt-1"><%= truncate(log.notes, length: 120) %></div>
+              <% end %>
+            </div>
+            <div class="text-end small">
+              <% if log.on_period? %><span class="badge text-bg-light border">Period</span><% end %>
+              <% if log.compulsive_eating_day? %><span class="badge text-bg-secondary">Hard day</span><% end %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% prev_month = @focus_month - 1.month %>
+  <% next_month = @focus_month + 1.month %>
+  <div class="d-flex justify-content-between">
+    <% if @months_with_entries.include?(prev_month) %>
+      <%= link_to "← #{prev_month.strftime("%B %Y")}", journal_path(month: prev_month.strftime("%Y-%m")), class: "btn btn-outline-secondary btn-sm" %>
+    <% else %>
+      <span></span>
+    <% end %>
+    <% if @months_with_entries.include?(next_month) && next_month <= Date.current.beginning_of_month %>
+      <%= link_to "#{next_month.strftime("%B %Y")} →", journal_path(month: next_month.strftime("%Y-%m")), class: "btn btn-outline-secondary btn-sm" %>
+    <% end %>
+  </div>
+</section>

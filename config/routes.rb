@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   resource :metrics, only: :show, controller: "metrics"
 
   resource :goal, only: [ :edit, :update ]
+  resource :journal, only: :show
 
   resources :workout_plans, only: [ :index, :show ]
 

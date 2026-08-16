@@ -1,0 +1,13 @@
+<%# locals: log %>
+<%= link_to daily_log_path(log), class: "list-group-item list-group-item-action d-flex justify-content-between align-items-center" do %>
+  <div>
+    <div class="fw-semibold"><%= log.logged_on.strftime("%a, %b %-d") %></div>
+    <div class="small text-muted">
+      <%= log.total_protein.round(0) %> g protein · <%= log.total_calories %> kcal
+      <% if log.wellness_summary.present? %> · <%= log.wellness_summary %><% end %>
+    </div>
+  </div>
+  <div class="text-end">
+    <div><%= log.weight_kg ? "#{log.weight_kg} kg" : "—" %></div>
+  </div>
+<% end %>

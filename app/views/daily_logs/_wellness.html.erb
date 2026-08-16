@@ -1,10 +1,10 @@
-<div class="card day-card mb-3">
+<div class="card day-card mb-3" id="body">
   <div class="card-body">
     <h2 class="h5 mb-1">Wellness check-in</h2>
     <p class="text-muted small mb-3">Sleep, period, how you’re feeling, and daily notes.</p>
 
     <div class="d-grid mb-3">
-      <%= link_to new_daily_log_urge_check_in_path(daily_log, return_to: daily_log_path(daily_log, anchor: "body")),
+      <%= link_to new_daily_log_urge_check_in_path(daily_log, return_to: local_assigns[:return_to].presence || daily_log_path(daily_log, anchor: "body")),
             class: "btn btn-outline-dark" do %>
         <i class="bi bi-pause-circle me-1"></i> I’m about to spiral — pause first
       <% end %>
@@ -30,7 +30,10 @@
     <% end %>
 
     <%= form_with model: daily_log, class: "row g-3" do |f| %>
-      <%= render "sleep_fields", f: f %>
+      <% if local_assigns[:return_to].present? %>
+        <%= hidden_field_tag :return_to, return_to %>
+      <% end %>
+      <%= render "daily_logs/sleep_fields", f: f %>
 
       <div class="col-12">
         <div class="form-check">

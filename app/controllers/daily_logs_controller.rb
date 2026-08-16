@@ -4,7 +4,21 @@ class DailyLogsController < ApplicationController
   before_action :load_show_page, only: [ :show, :update ]
 
   def index
-    @daily_logs = DailyLog.recent.limit(60)
+    today = Date.current
+    @week_start = today.beginning_of_week
+    @week_end = today.end_of_week
+    @this_week_logs = DailyLog.where(logged_on: @week_start..@week_end).recent
+
+    @focus_month = parse_month(params[:month]) || today.beginning_of_month
+    month_scope = DailyLog.for_month(@focus_month).recent
+    if @focus_month == today.beginning_of_month
+      month_scope = month_scope.where.not(logged_on: @week_start..@week_end)
+    end
+    @month_logs = month_scope
+
+    earliest = DailyLog.minimum(:logged_on)&.beginning_of_month
+    @prev_month = (@focus_month - 1.month if earliest && @focus_month > earliest)
+    @next_month = (@focus_month + 1.month if @focus_month < today.beginning_of_month)
   end
 
   def show
@@ -86,5 +100,13 @@ class DailyLogsController < ApplicationController
       :on_period, :compulsive_eating_day, :water_ml, :bed_time, :wake_time, :sleep_quality, :feeling_check_in,
       :hard_day_trigger, :hard_day_what_was_available, :hard_day_next_time
     )
+  end
+
+  def parse_month(value)
+    return nil if value.blank?
+
+    Date.strptime(value, "%Y-%m").beginning_of_month
+  rescue ArgumentError, TypeError
+    nil
   end
 end

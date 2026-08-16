@@ -260,23 +260,29 @@ body {
   line-height: 1.25;
 }
 
-.home-inspo-link {
-  display: block;
+.home-inspo {
+  overflow: visible;
 }
 
-.home-inspo-stack {
+.home-inspo .card-body {
+  overflow: visible;
+}
+
+.home-inspo-stage {
   position: relative;
-  width: min(100%, 16rem);
-  margin: 0 auto;
+  width: min(100%, 17rem);
+  margin: 0.5rem auto 0;
+  padding: 0.35rem 0.85rem 0.85rem 0.35rem;
 }
 
-.home-inspo-stack--pair {
-  margin-bottom: 0.5rem;
+.home-inspo-stage--pair {
+  margin-top: 0.75rem;
 }
 
 .home-inspo-polaroid {
+  display: block;
   background: #fff;
-  padding: 0.55rem 0.55rem 1.4rem;
+  padding: 0.55rem 0.55rem 1.35rem;
   border-radius: 0.35rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
 }
@@ -284,33 +290,35 @@ body {
 .home-inspo-polaroid img {
   display: block;
   width: 100%;
+  height: auto;
   aspect-ratio: 3 / 4;
   object-fit: cover;
   border-radius: 0.2rem;
-  background: #f1f3f5;
+  background: #e9ecef;
 }
 
-.home-inspo-polaroid--front {
+.home-inspo-polaroid--feature {
   position: relative;
   z-index: 2;
-  transform: rotate(-1.5deg);
+  color: inherit;
+  transform: rotate(-1.25deg);
   transition: transform 0.15s ease;
 }
 
-.home-inspo-polaroid--back {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1;
-  transform: rotate(4deg) translate(0.7rem, -0.25rem);
-  opacity: 0.9;
-  pointer-events: none;
+.home-inspo-polaroid--feature:hover,
+.home-inspo-polaroid--feature:focus-visible {
+  transform: rotate(0deg) translateY(-2px);
 }
 
-.home-inspo-link:hover .home-inspo-polaroid--front,
-.home-inspo-link:focus-visible .home-inspo-polaroid--front {
-  transform: rotate(0deg) translateY(-2px);
+.home-inspo-polaroid--peek {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 72%;
+  z-index: 1;
+  transform: rotate(5deg);
+  opacity: 0.88;
+  pointer-events: none;
 }
 
 .home-inspo-meta {

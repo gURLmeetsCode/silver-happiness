@@ -1,5 +1,12 @@
-<h1 class="h3 mb-4">Your goals</h1>
-<p class="text-muted">Adjust targets anytime. Charts and weekly status use these numbers.</p>
+<% content_for :title, "Goals" %>
+
+<header class="mb-4">
+  <p class="small text-uppercase text-muted mb-1">Profile</p>
+  <h1 class="h3 mb-1">Goals &amp; settings</h1>
+  <p class="text-muted mb-0">Targets for charts and daily suggestions. Check-ins live in your journal.</p>
+</header>
+
+<%= render "shared/profile_nav", active: :goals %>
 
 <%= form_with model: @goal, url: goal_path, method: :patch, class: "row g-3" do |f| %>
   <% if @goal.errors.any? %>

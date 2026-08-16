@@ -77,8 +77,8 @@ module ApplicationHelper
       controller_name == "workout_plans" || controller_name == "strength_sessions"
     when :outfits
       controller_name == "outfit_photos" || controller_name == "progress_photos"
-    when :goals
-      controller_name == "goals"
+    when :goals, :profile
+      controller_name.in?(%w[goals journals])
     else
       false
     end

@@ -11,6 +11,22 @@ class DailyLog < ApplicationRecord
 
   scope :recent, -> { order(logged_on: :desc) }
   scope :for_week_of, ->(date) { where(logged_on: date.beginning_of_week..date.end_of_week).order(:logged_on) }
+  scope :for_month, ->(date) {
+    month = date.to_date.beginning_of_month
+    where(logged_on: month..month.end_of_month)
+  }
+  scope :with_journal_content, -> {
+    left_joins(:urge_check_ins).where(
+      "COALESCE(TRIM(daily_logs.notes), '') != '' OR " \
+      "COALESCE(TRIM(daily_logs.feeling_check_in), '') != '' OR " \
+      "daily_logs.on_period = ? OR daily_logs.compulsive_eating_day = ? OR " \
+      "COALESCE(TRIM(daily_logs.hard_day_trigger), '') != '' OR " \
+      "COALESCE(TRIM(daily_logs.hard_day_what_was_available), '') != '' OR " \
+      "COALESCE(TRIM(daily_logs.hard_day_next_time), '') != '' OR " \
+      "urge_check_ins.id IS NOT NULL",
+      true, true
+    ).distinct
+  }
 
   def self.for_date(date)
     find_or_create_by!(logged_on: date)

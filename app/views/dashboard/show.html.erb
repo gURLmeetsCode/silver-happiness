@@ -5,8 +5,8 @@
     <p class="home-hero-date mb-1"><%= Date.current.strftime("%A, %B %-d") %></p>
     <h1 class="home-hero-greeting mb-0"><%= home_greeting(@goal) %></h1>
   </div>
-  <%= link_to edit_goal_path, class: "btn btn-link text-secondary p-1", "aria-label": "Goals and settings" do %>
-    <i class="bi bi-gear fs-5"></i>
+  <%= link_to journal_path, class: "btn btn-link text-secondary p-1", "aria-label": "Profile and journal" do %>
+    <i class="bi bi-person fs-5"></i>
   <% end %>
 </header>
 
@@ -74,30 +74,30 @@
         <%= link_to "Closet", outfit_photos_path, class: "small text-decoration-none" %>
       </div>
 
-      <%= link_to outfit_photos_path, class: "home-inspo-link text-decoration-none text-body" do %>
-        <div class="home-inspo-stack<%= " home-inspo-stack--pair" if @daily_inspo_alt %>">
-          <% if @daily_inspo_alt %>
-            <div class="home-inspo-polaroid home-inspo-polaroid--back" aria-hidden="true">
-              <%= image_tag @daily_inspo_alt.image, alt: "", loading: "lazy" %>
-            </div>
-          <% end %>
-          <div class="home-inspo-polaroid home-inspo-polaroid--front">
-            <%= image_tag @daily_inspo.image,
-                  alt: @daily_inspo.caption.presence || @daily_inspo.category_label,
-                  loading: "lazy" %>
+      <div class="home-inspo-stage<%= " home-inspo-stage--pair" if @daily_inspo_alt %>">
+        <% if @daily_inspo_alt&.image&.attached? %>
+          <div class="home-inspo-polaroid home-inspo-polaroid--peek" aria-hidden="true">
+            <%= image_tag url_for(@daily_inspo_alt.image), alt: "", loading: "lazy" %>
           </div>
-        </div>
+        <% end %>
 
-        <div class="home-inspo-meta mt-3">
-          <span class="badge text-bg-light border"><%= @daily_inspo.category_label %></span>
-          <p class="small text-muted mb-0 mt-2">
-            Worn <%= @daily_inspo.logged_on.strftime("%b %-d, %Y") %>
-          </p>
-          <% if @daily_inspo.caption.present? %>
-            <p class="mb-0 mt-1"><%= @daily_inspo.caption %></p>
+        <% if @daily_inspo.image.attached? %>
+          <%= link_to outfit_photos_path, class: "home-inspo-polaroid home-inspo-polaroid--feature text-decoration-none" do %>
+            <%= image_tag url_for(@daily_inspo.image),
+                  alt: @daily_inspo.caption.presence || @daily_inspo.category_label %>
           <% end %>
-        </div>
-      <% end %>
+        <% end %>
+      </div>
+
+      <div class="home-inspo-meta mt-3 text-center">
+        <span class="badge text-bg-light border"><%= @daily_inspo.category_label %></span>
+        <p class="small text-muted mb-0 mt-2">
+          Worn <%= @daily_inspo.logged_on.strftime("%b %-d, %Y") %>
+        </p>
+        <% if @daily_inspo.caption.present? %>
+          <p class="mb-0 mt-1"><%= @daily_inspo.caption %></p>
+        <% end %>
+      </div>
     </div>
   </section>
 <% end %>
@@ -126,6 +126,12 @@
     <i class="bi bi-camera"></i>
     <span class="home-action-label">Outfit</span>
     <span class="home-action-hint">Snap how you look</span>
+  <% end %>
+
+  <%= link_to journal_path(anchor: "today-check-in"), class: "home-action" do %>
+    <i class="bi bi-journal-heart"></i>
+    <span class="home-action-label">Check-in</span>
+    <span class="home-action-hint">Period, mood, notes</span>
   <% end %>
 </div>
 

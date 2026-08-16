@@ -1,0 +1,12 @@
+<%# locals: active %>
+<ul class="nav nav-pills gap-1 mb-4">
+  <li class="nav-item">
+    <%= link_to "Journal", journal_path, class: "nav-link #{'active' if active == :journal}" %>
+  </li>
+  <li class="nav-item">
+    <%= link_to "Goals", edit_goal_path, class: "nav-link #{'active' if active == :goals}" %>
+  </li>
+  <li class="nav-item">
+    <%= link_to "All day logs", daily_logs_path, class: "nav-link #{'active' if active == :logs}" %>
+  </li>
+</ul>

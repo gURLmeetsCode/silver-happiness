@@ -6,12 +6,25 @@ RSpec.describe "Daily logs", type: :request do
   before { Goal.current }
 
   describe "GET /daily_logs" do
-    it "lists recent logs" do
-      create(:daily_log)
+    it "lists this week and the focus month" do
+      create(:daily_log, logged_on: Date.current)
+      create(:daily_log, logged_on: Date.current.beginning_of_month)
 
       get daily_logs_path
 
       expect(response).to have_http_status(:ok)
+      expect(response.body).to include("This week")
+      expect(response.body).to include(Date.current.strftime("%B %Y"))
+    end
+
+    it "paginates older months" do
+      older = Date.current.beginning_of_month - 1.month
+      create(:daily_log, logged_on: older + 2.days)
+
+      get daily_logs_path(month: older.strftime("%Y-%m"))
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(older.strftime("%B %Y"))
     end
   end
 
