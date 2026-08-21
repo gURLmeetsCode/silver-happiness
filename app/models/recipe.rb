@@ -27,7 +27,7 @@ class Recipe < ApplicationRecord
     "lunch" => "Lunch",
     "dinner" => "Dinner",
     "snack" => "Snack",
-    "prep" => "Batch prep"
+    "prep" => "Batch tray"
   }.freeze
 
   def meal_type_label

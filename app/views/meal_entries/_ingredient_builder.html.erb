@@ -1,0 +1,56 @@
+<%# locals: daily_log, entry, products, meal_templates, builder_rows, form_url, form_method, submit_label %>
+<%= form_with url: form_url, method: form_method,
+      data: {
+        controller: "meal-builder",
+        action: "change->meal-builder#recalculate input->meal-builder#recalculate"
+      } do %>
+
+  <template data-meal-builder-target="template">
+    <%= render "daily_logs/meal_item_row",
+          products: products,
+          meal_templates: meal_templates,
+          index: "__INDEX__" %>
+  </template>
+
+  <div data-meal-builder-target="rows" class="mb-2">
+    <% builder_rows.each_with_index do |row, index| %>
+      <%= render "daily_logs/meal_item_row",
+            products: products,
+            meal_templates: meal_templates,
+            index: index,
+            selected: row[:picker],
+            quantity: row[:quantity],
+            unit: row[:unit] %>
+    <% end %>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-action="meal-builder#addRow">
+      <i class="bi bi-plus-lg"></i> Add another item
+    </button>
+  </div>
+
+  <div class="alert alert-light border d-flex justify-content-between align-items-center py-2 mb-3">
+    <span class="small text-muted">Meal total</span>
+    <strong data-meal-builder-target="total">Nothing added yet</strong>
+  </div>
+
+  <div class="row g-2 mb-3">
+    <div class="col-md-7">
+      <%= label_tag "meal_entry[name]", "Name", class: "form-label" %>
+      <%= text_field_tag "meal_entry[name]", entry.name, class: "form-control", required: true,
+            data: { meal_builder_target: "name" } %>
+    </div>
+    <div class="col-md-5">
+      <%= label_tag "meal_entry[meal_type]", "Meal", class: "form-label" %>
+      <%= select_tag "meal_entry[meal_type]",
+            options_for_select(MealEntry.meal_types.keys.map { |k| [ meal_type_label(k), k ] }, entry.meal_type),
+            class: "form-select" %>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <%= submit_tag submit_label, class: "btn btn-primary" %>
+    <%= link_to "Cancel", daily_log, class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>

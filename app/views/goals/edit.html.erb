@@ -74,6 +74,27 @@
     <%= f.date_field :target_date, class: "form-control" %>
   </div>
 
+  <div class="col-12">
+    <div class="form-check">
+      <%= hidden_field_tag :recalculate_targets, "0" %>
+      <%= check_box_tag :recalculate_targets, "1", true, class: "form-check-input" %>
+      <%= label_tag :recalculate_targets,
+            "Recalculate protein & calorie targets from target weight and profile",
+            class: "form-check-label" %>
+      <div class="form-text">
+        Protein ≈ <%= Goal::PROTEIN_MIN_PER_KG %>–<%= Goal::PROTEIN_MAX_PER_KG %> g per kg of target weight
+        <% if @suggested_protein %>
+          (now → <%= @suggested_protein[:min_g] %>–<%= @suggested_protein[:max_g] %> g)
+        <% end %>.
+        Calories use maintenance − your deficit
+        <% if @suggested_calories %>
+          (now → <%= @suggested_calories[:rest_day] %> rest / <%= @suggested_calories[:training_day] %> training)
+        <% end %>.
+        Uncheck to keep the numbers you typed below.
+      </div>
+    </div>
+  </div>
+
   <div class="col-12 mt-2"><h2 class="h5">Protein</h2></div>
   <div class="col-md-6">
     <%= f.label :protein_min_g, "Daily minimum (g)", class: "form-label" %>

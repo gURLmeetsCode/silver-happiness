@@ -3,6 +3,23 @@ class MealEntriesController < ApplicationController
   before_action :set_entry, only: [ :edit, :update, :destroy, :log_water ]
   before_action :load_recipe_form_context, only: [ :edit, :update ]
 
+  def new
+    source = MealEntry.find_by(id: params[:source_meal_entry_id])
+    unless source
+      redirect_to meals_tab, alert: "That past meal could not be found."
+      return
+    end
+
+    @source_entry = source
+    @entry = @daily_log.meal_entries.build(
+      name: source.name,
+      meal_type: source.meal_type
+    )
+    load_builder_options
+    @builder_rows = source.builder_rows
+    @builder_rows = [ { picker: nil, quantity: nil, unit: "g" } ] if @builder_rows.empty?
+  end
+
   def create
     @entry = @daily_log.meal_entries.build
     @recipe = recipe_for_log
@@ -175,25 +192,26 @@ class MealEntriesController < ApplicationController
 
   def load_recipe_form_context
     @recipe = @entry.meal_template&.recipe
+    load_builder_options
+  end
+
+  def load_builder_options
     @products = Product.order(:name)
     @meal_templates = MealTemplate
       .includes(:recipe, :meal_template_items)
       .joins(:meal_template_items)
       .distinct
       .order(:name)
-      .reject { |template| template.recipe&.status_archived? }
+      .reject { |template|
+        recipe = template.recipe
+        recipe&.status_archived? || recipe&.status_tired_of?
+      }
   end
 
   def prepare_builder_rows!
     return if @recipe
 
-    @builder_rows = @entry.items.includes(:product).map do |item|
-      {
-        picker: "product_#{item.product_id}",
-        quantity: item.grams.to_f == item.grams.to_i ? item.grams.to_i.to_s : item.grams.to_s,
-        unit: "g"
-      }
-    end
+    @builder_rows = @entry.builder_rows
     @builder_rows = [ { picker: nil, quantity: nil, unit: "g" } ] if @builder_rows.empty?
   end
 

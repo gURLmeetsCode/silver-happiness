@@ -51,8 +51,8 @@
     <div class="col-lg-7">
       <div class="card stat-card">
         <div class="card-body">
-          <h2 class="h5 mb-3">From your regular recipes</h2>
-          <p class="small text-muted mb-3">Active regular recipes only.</p>
+          <h2 class="h5 mb-3">From meals on rotation</h2>
+          <p class="small text-muted mb-3">Active recipes marked for the grocery list.</p>
 
           <% if @grouped.any? %>
             <% @grouped.each do |_category, ingredients| %>
@@ -76,7 +76,7 @@
 
   <div class="card stat-card mt-4 border-success border-opacity-25">
     <div class="card-body">
-      <h2 class="h6 mb-3">Sunday batch prep</h2>
+      <h2 class="h6 mb-3">Batch trays</h2>
       <% @batch_prep_items.each do |item| %>
         <%= grocery_checkbox item[:key], item[:label],
               checked_keys: @checked_keys,

@@ -5,14 +5,12 @@
 <section id="meals-quick" class="card day-card mb-3">
   <div class="card-body">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-      <h2 class="h5 mb-0">Quick add · <%= slot_label %></h2>
+      <h2 class="h5 mb-0">Usual · <%= slot_label %></h2>
       <%= link_to "Recipes", recipes_path, class: "btn btn-sm btn-link" %>
     </div>
     <p class="small text-muted mb-3">
-      From meals you ate this week — only ones that fit now.
-      <% if shortcuts.any? && shortcuts.any?(&:recipe?) %>
-        Tap <strong>Adjust</strong> to change portions first.
-      <% end %>
+      Meals you eat often — tap to log last time’s amounts.
+      <strong>Tweak</strong> if today’s plate is a little different.
     </p>
 
     <% if shortcuts.any? %>
@@ -23,18 +21,16 @@
                   daily_log_meal_entries_path(daily_log, source_meal_entry_id: shortcut.source_entry.id),
                   method: :post,
                   class: "btn btn-primary text-start flex-grow-1 quick-meal-btn" %>
-            <% if shortcut.recipe? %>
-              <%= link_to "Adjust",
-                    recipe_path(shortcut.recipe),
-                    class: "btn btn-outline-primary btn-sm align-self-sm-center" %>
-            <% end %>
+            <%= link_to "Tweak",
+                  new_daily_log_meal_entry_path(daily_log, source_meal_entry_id: shortcut.source_entry.id),
+                  class: "btn btn-outline-primary btn-sm align-self-sm-center" %>
           </div>
         <% end %>
       </div>
     <% else %>
       <p class="text-muted mb-0">
-        No recent <%= slot_label.downcase %> meals this week.
-        <%= link_to "Browse recipes", recipes_path %> or build one below.
+        No usual <%= slot_label.downcase %> meals yet.
+        <%= link_to "Browse recipes", recipes_path %> or build one below — repeats show up here.
       </p>
     <% end %>
   </div>

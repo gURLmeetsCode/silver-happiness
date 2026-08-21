@@ -19,7 +19,7 @@ Rails.application.routes.draw do
       post :add_water
       post :set_water
     end
-    resources :meal_entries, only: [ :create, :edit, :update, :destroy ] do
+    resources :meal_entries, only: [ :new, :create, :edit, :update, :destroy ] do
       member do
         post :log_water
       end

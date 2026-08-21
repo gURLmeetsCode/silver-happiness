@@ -99,6 +99,32 @@ RSpec.describe "Meal entries", type: :request do
     end
   end
 
+  describe "GET /daily_logs/:daily_log_id/meal_entries/new" do
+    it "prefills ingredients from a usual meal so you can tweak them" do
+      tofu = create(:product, name: "Tofu", calories_per_100g: 145, protein_per_100g: 16)
+      source_log = create(:daily_log, logged_on: Date.current - 1.day)
+      source = source_log.meal_entries.create!(
+        name: "Zucchini bowl", meal_type: :dinner,
+        calories: 350, protein_g: 28, carbs_g: 20, fat_g: 12
+      )
+      source.record_items!([ { product_id: tofu.id, grams: 150 } ])
+      source.save!
+
+      get new_daily_log_meal_entry_path(log, source_meal_entry_id: source.id)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Tweak from last time")
+      expect(response.body).to include("Zucchini bowl")
+      expect(response.body).to include("product_#{tofu.id}")
+    end
+
+    it "redirects when the source meal is missing" do
+      get new_daily_log_meal_entry_path(log, source_meal_entry_id: 999_999)
+
+      expect(response).to redirect_to(daily_log_path(log, anchor: "meals"))
+    end
+  end
+
   describe "GET /daily_logs/:daily_log_id/meal_entries/:id/edit" do
     it "renders the plain edit form" do
       entry = create(:meal_entry, daily_log: log)

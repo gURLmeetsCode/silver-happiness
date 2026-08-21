@@ -106,7 +106,10 @@ class DailyLogsController < ApplicationController
       .joins(:meal_template_items)
       .distinct
       .order(:name)
-      .reject { |template| template.recipe&.status_archived? }
+      .reject { |template|
+        recipe = template.recipe
+        recipe&.status_archived? || recipe&.status_tired_of?
+      }
   end
 
   def daily_log_params

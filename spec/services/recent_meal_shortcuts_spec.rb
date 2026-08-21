@@ -77,7 +77,7 @@ RSpec.describe RecentMealShortcuts do
       at: Time.zone.parse("#{today} 12:00")
     )
 
-    expect(result.slot_label).to eq("This week")
+    expect(result.slot_label).to eq("Usual meals")
     expect(result.shortcuts.map(&:name)).to include("Oats", "Dinner")
   end
 
@@ -121,5 +121,18 @@ RSpec.describe RecentMealShortcuts do
 
     expect(result.shortcuts.size).to eq(1)
     expect(result.shortcuts.first.source_entry).to eq(latest)
+    expect(result.shortcuts.first.times_eaten).to eq(2)
+  end
+
+  it "ranks meals you eat often above a one-off" do
+    3.times do |n|
+      log_meal(date: today - (n + 2).days, name: "Oats", meal_type: :breakfast)
+    end
+    log_meal(date: today - 1.day, name: "Hotel buffet", meal_type: :breakfast)
+
+    result = described_class.call(as_of: today, at: Time.zone.parse("#{today} 08:00"))
+
+    expect(result.shortcuts.map(&:name)).to eq([ "Oats", "Hotel buffet" ])
+    expect(result.shortcuts.first.times_eaten).to eq(3)
   end
 end

@@ -104,10 +104,10 @@
 
 <h2 class="h6 text-uppercase text-muted mb-2">Log something</h2>
 <div class="home-actions mb-3">
-  <%= link_to daily_log_path(@today, anchor: "meals"), class: "home-action" do %>
+  <%= link_to daily_log_path(@today, anchor: "meals-quick"), class: "home-action" do %>
     <i class="bi bi-egg-fried"></i>
     <span class="home-action-label">Meal</span>
-    <span class="home-action-hint">Breakfast, lunch, dinner</span>
+    <span class="home-action-hint">Quick add or build</span>
   <% end %>
 
   <%= link_to daily_log_path(@today, anchor: "beverages"), class: "home-action" do %>

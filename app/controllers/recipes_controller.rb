@@ -18,12 +18,13 @@ class RecipesController < ApplicationController
     end
 
     @active_regular = filtered.status_active.regular
+    @regular_meals = @active_regular.reject(&:meal_type_prep?)
+    @batch_trays = @active_regular.select(&:meal_type_prep?)
     @tired_recipes = filtered.status_tired_of
     @suggested_recipes = filtered.status_active.suggested
     @archived_count = Recipe.status_archived.count
     @archived_recipes = base.status_archived if @show_archived
     @recipes = filtered
-    @recently_eaten = recently_eaten_recipes
   end
 
   def show
@@ -128,14 +129,6 @@ class RecipesController < ApplicationController
 
   def load_products
     @products = Product.order(:name)
-  end
-
-  def recently_eaten_recipes
-    # Only active recipes — archived ones must not reappear here.
-    RecentMealShortcuts.call.shortcuts
-      .filter_map(&:recipe)
-      .select(&:status_active?)
-      .uniq
   end
 
   def personal_params

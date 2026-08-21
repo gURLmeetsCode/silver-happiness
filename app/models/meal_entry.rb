@@ -38,6 +38,18 @@ class MealEntry < ApplicationRecord
     end
   end
 
+  # Prefill Build a meal / Tweak from the last time you ate this.
+  def builder_rows
+    items.map do |item|
+      grams = item.grams
+      {
+        picker: "product_#{item.product_id}",
+        quantity: grams.to_f == grams.to_i ? grams.to_i.to_s : grams.to_s,
+        unit: "g"
+      }
+    end
+  end
+
   # Grams chosen for this ingredient, or nil when it was never adjusted.
   def override_for(recipe_ingredient)
     return nil if ingredient_overrides.blank?

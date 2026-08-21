@@ -71,7 +71,7 @@ RSpec.describe "Data capture coverage", type: :request do
       get daily_log_path(today)
 
       expect(response.body).to include("Quick add beverage")
-      expect(response.body).to include("Quick add ·")
+      expect(response.body).to include("Usual ·")
       expect(response.body).not_to include("Quick add snack")
       expect(response.body).not_to include("Quick templates")
     end

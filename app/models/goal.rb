@@ -37,6 +37,12 @@ class Goal < ApplicationRecord
     }
   end
 
+  # Protein band used when recalculating from target weight (~1.6–1.8 g/kg).
+  # Matches the original defaults: 56 kg → 90–100 g.
+  PROTEIN_MIN_PER_KG = 1.6
+  PROTEIN_MAX_PER_KG = 1.8
+  TRAINING_DAY_CALORIE_BUFFER = 100
+
   def greeting_name
     display_name.presence
   end
@@ -47,6 +53,47 @@ class Goal < ApplicationRecord
 
   def energy_estimate(weight_kg: nil)
     EnergyEstimate.new(self, weight_kg: weight_kg)
+  end
+
+  # Protein range from target weight (goal body size), not current weight.
+  def suggested_protein_range
+    weight = target_weight_kg.to_f
+    return nil unless weight.positive?
+
+    min = (weight * PROTEIN_MIN_PER_KG).round
+    max = (weight * PROTEIN_MAX_PER_KG).round
+    max = min if max < min
+    { min_g: min, max_g: max }
+  end
+
+  # Rest/training calorie targets from maintenance − deficit (+ small training buffer).
+  def suggested_calorie_targets(weight_kg: nil)
+    energy = energy_estimate(weight_kg: weight_kg)
+    return nil unless energy.ready?
+
+    rest = energy.recommended_intake
+    {
+      rest_day: rest,
+      training_day: rest + TRAINING_DAY_CALORIE_BUFFER,
+      recommended_intake: rest,
+      maintenance: energy.tdee,
+      deficit: energy.recommended_deficit
+    }
+  end
+
+  # Writes suggested protein (+ calories when the body profile is complete).
+  def apply_suggested_targets!(weight_kg: nil)
+    if (protein = suggested_protein_range)
+      self.protein_min_g = protein[:min_g]
+      self.protein_max_g = protein[:max_g]
+    end
+
+    if (calories = suggested_calorie_targets(weight_kg: weight_kg))
+      self.calories_rest_day = calories[:rest_day]
+      self.calories_training_day = calories[:training_day]
+    end
+
+    self
   end
 
   def weight_delta(current_weight)

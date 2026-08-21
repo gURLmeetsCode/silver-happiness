@@ -1,0 +1,22 @@
+<% content_for :title, "Tweak meal" %>
+
+<div class="mb-4">
+  <%= link_to "← #{@daily_log.logged_on.strftime('%b %-d')}", @daily_log, class: "text-decoration-none small" %>
+</div>
+
+<h1 class="h3 mb-1">Tweak from last time</h1>
+<p class="text-muted mb-3">
+  Starting from <strong><%= @source_entry.name %></strong>
+  (<%= @source_entry.daily_log.logged_on.strftime("%b %-d") %>).
+  Change amounts, drop a part, or add something — you don’t rebuild the plate.
+</p>
+
+<%= render "ingredient_builder",
+      daily_log: @daily_log,
+      entry: @entry,
+      products: @products,
+      meal_templates: @meal_templates,
+      builder_rows: @builder_rows,
+      form_url: daily_log_meal_entries_path(@daily_log),
+      form_method: :post,
+      submit_label: "Log this version" %>

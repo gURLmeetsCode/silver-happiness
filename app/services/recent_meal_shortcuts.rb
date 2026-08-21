@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-# Compact quick-add from what you actually ate in the last week — filtered to
-# the meal types you're most likely logging *right now* (Paris local time).
-# Prefers recipe-linked meals; skips lone ingredients already inside a build.
+# Compact quick-add from what you actually eat often — filtered to the meal
+# types you're most likely logging *right now* (Paris local time).
+# Uses the latest version of each usual meal so a small tweak becomes next time's default.
 class RecentMealShortcuts
-  DAYS = 7
+  DAYS = 21
   LIMIT = 5
 
   # Local hour (Europe/Paris) → meal types worth offering.
@@ -19,7 +19,7 @@ class RecentMealShortcuts
   ].freeze
 
   Shortcut = Struct.new(
-    :name, :meal_type, :calories, :protein_g, :source_entry, :recipe, :meal_template,
+    :name, :meal_type, :calories, :protein_g, :source_entry, :recipe, :meal_template, :times_eaten,
     keyword_init: true
   ) do
     def recipe?
@@ -27,7 +27,9 @@ class RecentMealShortcuts
     end
 
     def label
-      parts = [ name, "#{calories} kcal" ]
+      parts = [ name ]
+      parts << "#{times_eaten}× lately" if times_eaten.to_i > 1
+      parts << "#{calories} kcal"
       parts << "#{protein_g} g protein" if protein_g.to_f.positive?
       parts.join(" · ")
     end
@@ -59,35 +61,27 @@ class RecentMealShortcuts
       entries
     end
 
-    seen = {}
-    shortcuts = []
-
-    ranked(candidates).each do |entry|
-      next if redundant_single_ingredient?(entry, covered_by_builds)
-
-      key = dedupe_key(entry)
-      next if seen[key]
-
-      seen[key] = true
+    shortcuts = grouped_usuals(candidates, covered_by_builds).first(@limit).map do |group|
+      entry = group[:latest]
       template = entry.meal_template
       recipe = template&.recipe
       recipe = nil if recipe&.status_archived?
 
-      shortcuts << Shortcut.new(
+      Shortcut.new(
         name: entry.name,
         meal_type: entry.meal_type,
         calories: entry.calories,
         protein_g: entry.protein_g,
         source_entry: entry,
         meal_template: template,
-        recipe: recipe
+        recipe: recipe,
+        times_eaten: group[:count]
       )
-      break if shortcuts.size >= @limit
     end
 
     Result.new(
       shortcuts: shortcuts,
-      slot_label: (@as_of == @at.to_date) ? slot[:label] : "This week",
+      slot_label: (@as_of == @at.to_date) ? slot[:label] : "Usual meals",
       meal_types: types
     )
   end
@@ -99,13 +93,37 @@ class RecentMealShortcuts
     SLOTS.find { |slot| slot[:hours].cover?(hour) } || SLOTS.first
   end
 
-  def ranked(entries)
-    # Active recipe-backed first (editable portions), then newest.
-    entries.sort_by do |entry|
+  def grouped_usuals(entries, covered_product_ids)
+    groups = {}
+
+    entries.each do |entry|
+      next if redundant_single_ingredient?(entry, covered_product_ids)
+
+      key = dedupe_key(entry)
+      if (group = groups[key])
+        group[:count] += 1
+        group[:latest] = entry if newer?(entry, group[:latest])
+      else
+        group = groups[key] = { latest: entry, count: 1, recipe_rank: 1 }
+      end
+
       recipe = entry.meal_template&.recipe
-      recipe_rank = (recipe.present? && !recipe.status_archived?) ? 0 : 1
-      [ recipe_rank, -entry.daily_log.logged_on.to_time.to_i, -entry.created_at.to_i ]
+      if recipe.present? && !recipe.status_archived?
+        group[:recipe_rank] = 0
+      end
     end
+
+    groups.values.sort_by do |group|
+      logged_on = group[:latest].daily_log.logged_on
+      [ -group[:count], group[:recipe_rank], -logged_on.to_time.to_i, -group[:latest].created_at.to_i ]
+    end
+  end
+
+  def newer?(entry, other)
+    return true if entry.daily_log.logged_on > other.daily_log.logged_on
+    return false if entry.daily_log.logged_on < other.daily_log.logged_on
+
+    entry.created_at > other.created_at
   end
 
   def recent_entries

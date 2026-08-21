@@ -7,10 +7,12 @@
     <div class="d-flex flex-wrap gap-1 mb-2">
       <% if recipe.user_created? %>
         <span class="badge text-bg-primary">Yours</span>
+      <% elsif recipe.meal_type_prep? %>
+        <span class="badge text-bg-dark">Batch tray</span>
       <% elsif recipe.regular_meal? %>
-        <span class="badge text-bg-success">Regular meal</span>
+        <span class="badge text-bg-success">On rotation</span>
       <% else %>
-        <span class="badge text-bg-light text-dark border">Suggested</span>
+        <span class="badge text-bg-light text-dark border">Extra</span>
       <% end %>
       <% if recipe.status_tired_of? %>
         <span class="badge text-bg-warning text-dark">Tired of this</span>

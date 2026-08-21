@@ -27,13 +27,13 @@
           <% end %>
         </optgroup>
       <% end %>
-      <% if grouped[:saved]&.any? %>
-        <optgroup label="Other saved meals">
-          <% grouped[:saved].sort_by(&:name).each do |template| %>
-            <%= render "daily_logs/meal_picker_option", template: template, selected: selected %>
-          <% end %>
-        </optgroup>
-      <% end %>
+    <% if grouped[:saved]&.any? %>
+      <optgroup label="Other plates">
+        <% grouped[:saved].sort_by(&:name).each do |template| %>
+          <%= render "daily_logs/meal_picker_option", template: template, selected: selected %>
+        <% end %>
+      </optgroup>
+    <% end %>
       <optgroup label="Products">
         <% products.each do |product| %>
           <option value="product_<%= product.id %>"

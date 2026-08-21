@@ -28,10 +28,12 @@
   <div class="d-flex flex-wrap gap-1">
     <% if @recipe.user_created? %>
       <span class="badge text-bg-primary">Your recipe</span>
+    <% elsif @recipe.meal_type_prep? %>
+      <span class="badge text-bg-dark">Batch tray</span>
     <% elsif @recipe.regular_meal? %>
-      <span class="badge text-bg-success">Regular meal</span>
+      <span class="badge text-bg-success">On rotation</span>
     <% else %>
-      <span class="badge text-bg-light text-dark border">Suggested</span>
+      <span class="badge text-bg-light text-dark border">Extra</span>
     <% end %>
     <% if @recipe.status_tired_of? %>
       <span class="badge text-bg-warning text-dark">Tired of this</span>
@@ -127,7 +129,9 @@
 
 <div class="d-flex flex-wrap gap-2 mt-4">
   <%= link_to "Grocery list", grocery_recipes_path, class: "btn btn-success" %>
-  <%= link_to "Log a meal today", today_path, class: "btn btn-outline-primary" %>
+  <% unless @recipe.meal_template.present? %>
+    <%= link_to "Log on Today", today_path(anchor: "meals-quick"), class: "btn btn-outline-primary" %>
+  <% end %>
   <% if @recipe.editable? %>
     <%= link_to "Edit recipe", edit_recipe_path(@recipe), class: "btn btn-outline-dark" %>
   <% end %>

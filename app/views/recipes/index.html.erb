@@ -3,7 +3,10 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <div>
     <h1 class="h3 mb-1">Recipes</h1>
-    <p class="text-muted mb-0">What’s in your meals — rate them, note your tweaks, add your own.</p>
+    <p class="text-muted mb-0">
+      Browse and manage what’s on rotation. To eat something again, use
+      <%= link_to "Usual meals on Today", today_path(anchor: "meals-quick") %>.
+    </p>
   </div>
   <div class="d-flex flex-wrap gap-2">
     <%= link_to "Add recipe", new_recipe_path, class: "btn btn-primary" %>
@@ -48,11 +51,11 @@
       <% end %>
     </div>
   <% else %>
-    <% if @recently_eaten.any? %>
-      <h2 class="h5 mb-3">Recently eaten</h2>
-      <p class="small text-muted mb-3">From the last week — open one to log again or adjust portions.</p>
+    <% if @regular_meals.any? %>
+      <h2 class="h5 mb-2">Meals on rotation</h2>
+      <p class="small text-muted mb-3">Plated meals that also drive your grocery list.</p>
       <div class="row g-3 mb-4">
-        <% @recently_eaten.each do |recipe| %>
+        <% @regular_meals.each do |recipe| %>
           <div class="col-md-6 col-lg-4" data-list-filter-target="card"
                data-search-text="<%= [ recipe.name, recipe.description, recipe.meal_type_label, recipe.macros_label ].compact.join(' ') %>">
             <%= render "recipe_card", recipe: recipe %>
@@ -61,13 +64,24 @@
       </div>
     <% end %>
 
-    <% recently_ids = @recently_eaten.map(&:id).to_set %>
-
-    <% regulars = @active_regular.reject { |r| recently_ids.include?(r.id) } %>
-    <% if regulars.any? %>
-      <h2 class="h5 mb-3">Your regular meals</h2>
+    <% if @batch_trays.any? %>
+      <h2 class="h5 mb-2">Batch trays</h2>
+      <p class="small text-muted mb-3">Prep once, then log a share in Build a meal (¼, ½, …).</p>
       <div class="row g-3 mb-4">
-        <% regulars.each do |recipe| %>
+        <% @batch_trays.each do |recipe| %>
+          <div class="col-md-6 col-lg-4" data-list-filter-target="card"
+               data-search-text="<%= [ recipe.name, recipe.description, recipe.meal_type_label, recipe.macros_label ].compact.join(' ') %>">
+            <%= render "recipe_card", recipe: recipe %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% if @suggested_recipes.any? %>
+      <h2 class="h5 mb-2">Extras &amp; swaps</h2>
+      <p class="small text-muted mb-3">Saved, but not on the grocery list.</p>
+      <div class="row g-3 mb-4">
+        <% @suggested_recipes.each do |recipe| %>
           <div class="col-md-6 col-lg-4" data-list-filter-target="card"
                data-search-text="<%= [ recipe.name, recipe.description, recipe.meal_type_label, recipe.macros_label ].compact.join(' ') %>">
             <%= render "recipe_card", recipe: recipe %>
@@ -77,8 +91,8 @@
     <% end %>
 
     <% if @tired_recipes.any? %>
-      <h2 class="h5 mb-3 text-muted">Tired of these</h2>
-      <p class="small text-muted">Still saved — just off your regular rotation and grocery list.</p>
+      <h2 class="h5 mb-2 text-muted">Tired of these</h2>
+      <p class="small text-muted mb-3">Off rotation and grocery — still here if you want them back.</p>
       <div class="row g-3 mb-4">
         <% @tired_recipes.each do |recipe| %>
           <div class="col-md-6 col-lg-4" data-list-filter-target="card"
@@ -89,21 +103,8 @@
       </div>
     <% end %>
 
-    <% suggested = @suggested_recipes.reject { |r| recently_ids.include?(r.id) } %>
-    <% if suggested.any? %>
-      <h2 class="h5 mb-3">Suggested & swaps</h2>
-      <div class="row g-3 mb-4">
-        <% suggested.each do |recipe| %>
-          <div class="col-md-6 col-lg-4" data-list-filter-target="card"
-               data-search-text="<%= [ recipe.name, recipe.description, recipe.meal_type_label, recipe.macros_label ].compact.join(' ') %>">
-            <%= render "recipe_card", recipe: recipe %>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
-
     <% if @archived_recipes&.any? %>
-      <h2 class="h5 mb-3 text-muted">Archived</h2>
+      <h2 class="h5 mb-2 text-muted">Archived</h2>
       <div class="row g-3">
         <% @archived_recipes.each do |recipe| %>
           <div class="col-md-6 col-lg-4" data-list-filter-target="card"
