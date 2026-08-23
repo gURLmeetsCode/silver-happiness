@@ -13,7 +13,7 @@ rescue StandardError => e
   errors << "#{label}: #{e.class} — #{e.message}"
 end
 
-record_error(errors, "Product.quick_log") { Product.quick_log.load }
+record_error(errors, "Product.order") { Product.order(:name).limit(5).load }
 
 record_error(errors, "DailyLog#calories_burned") do
   log = DailyLog.includes(:workouts, :strength_sessions).new(logged_on: Date.current)

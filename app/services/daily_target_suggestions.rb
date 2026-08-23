@@ -107,15 +107,8 @@ class DailyTargetSuggestions
     end.first(3)
   end
 
-  # Prefer products already flagged for one-tap logging; fall back to anything
-  # with a meaningful protein density so the tip list isn't empty on a fresh DB.
+  # Prefer denser protein products so tips stay useful on a fresh DB.
   def protein_sources
-    preferred = Product.where(quick_log: true)
-      .where("protein_per_100g >= ?", 10)
-      .order(protein_per_100g: :desc)
-      .limit(5)
-    return preferred.to_a if preferred.any?
-
     Product.where("protein_per_100g >= ?", 10).order(protein_per_100g: :desc).limit(5).to_a
   end
 

@@ -36,12 +36,12 @@ RSpec.describe "Home", type: :request do
       expect(response.body).to include("daily_log[sleep_quality]")
     end
 
-    it "links to meal, beverage and metrics instead of showing them inline" do
+    it "links to meal, water and metrics instead of showing them inline" do
       get root_path
       today = DailyLog.today
 
-      expect(response.body).to include("#{daily_log_path(today)}#meals")
-      expect(response.body).to include("#{daily_log_path(today)}#beverages")
+      expect(response.body).to include("#{daily_log_path(today)}#meals-quick")
+      expect(response.body).to include("#{daily_log_path(today)}#water")
       expect(response.body).to include(metrics_path)
     end
 

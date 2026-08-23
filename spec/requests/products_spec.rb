@@ -4,11 +4,13 @@ require "rails_helper"
 
 RSpec.describe "Products", type: :request do
   describe "GET /products/new" do
-    it "renders the manual barcode form without a camera scanner" do
+    it "renders name search and barcode lookup without a camera scanner" do
       get new_product_path
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("barcode-lookup")
+      expect(response.body).to include("Search by name")
+      expect(response.body).to include("/products/search")
       expect(response.body).not_to match(/startScan|Open scanner|barcode-scanner/)
     end
   end
@@ -75,14 +77,6 @@ RSpec.describe "Products", type: :request do
       expect(response).to have_http_status(422)
     end
 
-    it "re-renders with 422 when a quick-log product has no serving size" do
-      post products_path, params: {
-        product: { name: "Snack", calories_per_100g: 100, protein_per_100g: 5, quick_log: "1" }
-      }
-
-      expect(response).to have_http_status(422)
-    end
-
     it "rejects a water volume on a non-beverage" do
       post products_path, params: {
         product: {
@@ -131,6 +125,30 @@ RSpec.describe "Products", type: :request do
       get lookup_barcode_products_path, params: { barcode: "123" }, as: :json
 
       expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "POST /products/search" do
+    it "returns matching products as JSON" do
+      allow(OpenFoodFacts).to receive(:search).with("sojasun").and_return([
+        { name: "Yaourt nature", brand: "Sojasun", calories_per_100g: 43 }
+      ])
+
+      post search_products_path, params: { q: "sojasun" }, as: :json
+
+      expect(response).to have_http_status(:ok)
+      json = response.parsed_body
+      expect(json["products"].length).to eq(1)
+      expect(json["products"].first["name"]).to eq("Yaourt nature")
+    end
+
+    it "returns 404 when nothing matches" do
+      allow(OpenFoodFacts).to receive(:search).and_raise(OpenFoodFacts::NotFound, "No products found")
+
+      post search_products_path, params: { q: "zzzznotaproduct" }, as: :json
+
+      expect(response).to have_http_status(:not_found)
+      expect(response.parsed_body["products"]).to eq([])
     end
   end
 end

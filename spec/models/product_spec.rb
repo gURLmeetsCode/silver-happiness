@@ -10,13 +10,6 @@ RSpec.describe Product do
     expect(product.errors[:name]).to be_present
   end
 
-  it "requires a default serving for quick-log products" do
-    product = build(:product, quick_log: true, default_serving_g: nil)
-
-    expect(product).not_to be_valid
-    expect(product.errors[:default_serving_g]).to be_present
-  end
-
   it "scales nutrition by grams" do
     product = build(:product, calories_per_100g: 100, protein_per_100g: 10)
 
@@ -24,14 +17,10 @@ RSpec.describe Product do
     expect(product.nutrition_for(250)[:protein]).to eq(25)
   end
 
-  describe "scopes" do
-    it "separates quick-log beverages from snacks" do
-      beverage = create(:beverage_product)
-      snack = create(:quick_product)
-      create(:product)
+  it "rejects water volume on a non-beverage" do
+    product = build(:product, beverage: false, water_volume_ml: 500)
 
-      expect(described_class.quick_log_beverages).to contain_exactly(beverage)
-      expect(described_class.quick_log_snacks).to contain_exactly(snack)
-    end
+    expect(product).not_to be_valid
+    expect(product.errors[:water_volume_ml]).to be_present
   end
 end

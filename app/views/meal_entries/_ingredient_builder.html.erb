@@ -28,6 +28,11 @@
     <button type="button" class="btn btn-sm btn-outline-secondary" data-action="meal-builder#addRow">
       <i class="bi bi-plus-lg"></i> Add another item
     </button>
+    <%= add_product_link(
+          return_to: request.fullpath,
+          label: "Add product",
+          css_class: "btn btn-sm btn-outline-secondary"
+        ) %>
   </div>
 
   <div class="alert alert-light border d-flex justify-content-between align-items-center py-2 mb-3">

@@ -1,23 +1,46 @@
 <div data-controller="barcode-lookup"
-     data-barcode-lookup-lookup-url-value="<%= lookup_barcode_products_path %>">
+     data-barcode-lookup-lookup-url-value="<%= lookup_barcode_products_path %>"
+     data-barcode-lookup-search-url-value="<%= search_products_path %>">
   <h1 class="h3 mb-2">Add a product</h1>
   <p class="text-muted mb-1">Enter nutrition from the label (French packages work well via Open Food Facts).</p>
   <p class="small text-muted mb-4"><span class="text-danger">*</span> Required fields</p>
 
   <div class="card stat-card mb-4">
     <div class="card-body">
-      <h2 class="h6 mb-3">Look up by barcode</h2>
-      <p class="small text-muted mb-3">Type the EAN from the package — values fill the form below.</p>
+      <h2 class="h6 mb-3">Look up on Open Food Facts</h2>
+      <p class="small text-muted mb-3">Search by name or barcode — values fill the form below.</p>
 
-      <div class="row g-2 align-items-end">
-        <div class="col-sm-8">
-          <label class="form-label small mb-1">Barcode (EAN) <span class="text-danger">*</span></label>
-          <input type="text" inputmode="numeric" pattern="[0-9]*" class="form-control" placeholder="e.g. 3259011034000" data-barcode-lookup-target="manualBarcode" required>
-        </div>
-        <div class="col-sm-4">
-          <button type="button" class="btn btn-outline-primary w-100" data-action="barcode-lookup#lookupManual">Look up</button>
+      <div class="mb-3">
+        <label class="form-label small mb-1" for="off-search">Search by name</label>
+        <div class="row g-2 align-items-end">
+          <div class="col-sm-8">
+            <input id="off-search" type="search" class="form-control"
+                   placeholder="e.g. Sojasun yaourt, Old El Paso wrap"
+                   data-barcode-lookup-target="searchQuery"
+                   autocomplete="off">
+          </div>
+          <div class="col-sm-4">
+            <button type="button" class="btn btn-outline-primary w-100" data-action="barcode-lookup#searchByName">Search</button>
+          </div>
         </div>
       </div>
+
+      <div class="mb-2">
+        <label class="form-label small mb-1" for="off-barcode">Or barcode (EAN)</label>
+        <div class="row g-2 align-items-end">
+          <div class="col-sm-8">
+            <input id="off-barcode" type="text" inputmode="numeric" pattern="[0-9]*" class="form-control"
+                   placeholder="e.g. 3259011034000"
+                   data-barcode-lookup-target="manualBarcode"
+                   autocomplete="off">
+          </div>
+          <div class="col-sm-4">
+            <button type="button" class="btn btn-outline-secondary w-100" data-action="barcode-lookup#lookupManual">Look up</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="list-group list-group-flush border rounded d-none mt-3" data-barcode-lookup-target="results"></div>
       <p class="small text-primary mb-0 mt-2" data-barcode-lookup-target="status"></p>
     </div>
   </div>
@@ -85,14 +108,7 @@
       <div class="<%= @product.beverage? ? '' : 'd-none' %>" data-barcode-lookup-beverage-field>
         <%= f.label :water_volume_ml, "Water added when logged (ml)", class: "form-label" %>
         <%= f.number_field :water_volume_ml, min: 1, step: 50, class: "form-control", placeholder: "e.g. 500 for a water bottle", data: { barcode_lookup_target: "waterVolumeMl" } %>
-        <div class="form-text">For water bottles — adds this amount to your daily water total when you quick-log it.</div>
-      </div>
-    </div>
-
-    <div class="col-12">
-      <div class="form-check">
-        <%= f.check_box :quick_log, class: "form-check-input" %>
-        <%= f.label :quick_log, "Show on Quick add beverage (one tap from the day log)", class: "form-check-label" %>
+        <div class="form-text">For water bottles — adds this amount to your daily water total when you log it.</div>
       </div>
     </div>
 

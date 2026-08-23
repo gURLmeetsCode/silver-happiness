@@ -21,7 +21,7 @@ RSpec.describe MealEntry do
 
       entry = log.meal_entries.create!(
         name: product.log_name,
-        meal_type: product.quick_log_meal_type,
+        meal_type: :beverage,
         calories: 0,
         protein_g: 0
       )

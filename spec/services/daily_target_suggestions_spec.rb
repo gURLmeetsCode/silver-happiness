@@ -21,7 +21,7 @@ RSpec.describe DailyTargetSuggestions do
   let!(:tofu) do
     create(:product, name: "Tofu",
       calories_per_100g: 145, protein_per_100g: 16, carbs_per_100g: 2, fat_per_100g: 8,
-      default_serving_g: 125, serving_label: "1 pavé (125 g)", quick_log: true)
+      default_serving_g: 125, serving_label: "1 pavé (125 g)")
   end
 
   def add_meal(name:, calories:, protein:, items: [])

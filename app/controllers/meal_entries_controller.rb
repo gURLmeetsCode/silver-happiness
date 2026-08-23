@@ -161,7 +161,7 @@ class MealEntriesController < ApplicationController
     nutrition = @product.nutrition_for(quantity)
 
     @entry.assign_attributes(
-      meal_type: @product.quick_log_meal_type,
+      meal_type: @product.beverage? ? :beverage : :snack,
       name: params[:name].presence || @product.log_name(quantity),
       calories: nutrition[:calories],
       protein_g: nutrition[:protein],

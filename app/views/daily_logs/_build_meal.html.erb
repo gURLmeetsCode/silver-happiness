@@ -30,13 +30,12 @@
                 data-action="meal-builder#addRow">
           <i class="bi bi-plus-lg"></i> Add another item
         </button>
-        <%= link_to new_product_path(return_to: daily_log_path(daily_log, anchor: "meals")),
-              class: "btn btn-sm btn-link" do %>
-          Missing a product?
-        <% end %>
-        <%= link_to new_recipe_path, class: "btn btn-sm btn-link" do %>
-          New recipe
-        <% end %>
+        <%= add_product_link(
+              return_to: daily_log_path(daily_log, anchor: "meals"),
+              label: "Add product",
+              css_class: "btn btn-sm btn-outline-secondary"
+            ) %>
+        <%= link_to "New recipe", new_recipe_path, class: "btn btn-sm btn-outline-secondary" %>
       </div>
 
       <div class="alert alert-light border d-flex justify-content-between align-items-center py-2 mb-3">

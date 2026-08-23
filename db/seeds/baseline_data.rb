@@ -70,7 +70,6 @@ Product.find_or_create_by!(name: "Coca-Cola Zero Zero mini") do |p|
   p.default_serving_g = 150
   p.serving_label = "mini can (150 ml)"
   p.notes = "Zero Zero mini can — 0 kcal"
-  p.quick_log = true
   p.beverage = true
 end
 
@@ -595,9 +594,9 @@ seed_untouched_day(Date.new(2026, 8, 7)) do |aug7|
   end
 end
 
-# One-tap quick log on dashboard / daily log
+# Soft drinks / soda bottles stay marked as beverages for meal typing.
 Product.find_or_create_by!(name: "Coca-Cola Zero Zero mini").update!(
-  quick_log: true,
+  beverage: true,
   default_serving_g: 150,
   serving_label: "mini can (150 ml)",
   calories_per_100g: 0,
@@ -605,6 +604,5 @@ Product.find_or_create_by!(name: "Coca-Cola Zero Zero mini").update!(
   carbs_per_100g: 0,
   fat_per_100g: 0
 )
-Product.find_by(name: "Banana")&.update!(quick_log: true)
 
 puts "Baseline loaded — #{Product.count} products, #{MealTemplate.count} meal templates, #{DailyLog.count} daily logs."

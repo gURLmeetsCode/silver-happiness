@@ -34,6 +34,8 @@ Rails.application.routes.draw do
     collection do
       get :lookup_barcode
       post :lookup_barcode
+      get :search
+      post :search
     end
   end
 

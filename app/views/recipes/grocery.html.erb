@@ -22,7 +22,7 @@
       <span class="small text-muted" data-grocery-list-target="progress">
         <%= @checked_count %> / <%= @total_items %> in cart
       </span>
-      <%= link_to "Scan product", new_product_path(return_to: grocery_recipes_path), class: "btn btn-outline-primary btn-sm" %>
+      <%= add_product_link(return_to: grocery_recipes_path, label: "Add product", css_class: "btn btn-outline-primary btn-sm") %>
       <%= button_to "Clear checks", reset_grocery_checks_path, method: :delete,
             class: "btn btn-outline-secondary btn-sm",
             data: { turbo_confirm: "Uncheck everything for this shopping trip?" } %>

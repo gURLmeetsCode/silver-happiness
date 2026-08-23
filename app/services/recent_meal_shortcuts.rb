@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Compact quick-add from what you actually eat often — filtered to the meal
+# Compact list of meals you eat often — filtered to the meal
 # types you're most likely logging *right now* (Paris local time).
 # Uses the latest version of each usual meal so a small tweak becomes next time's default.
 class RecentMealShortcuts

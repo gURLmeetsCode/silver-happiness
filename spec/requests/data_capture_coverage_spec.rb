@@ -8,7 +8,7 @@ require "rails_helper"
 RSpec.describe "Data capture coverage", type: :request do
   before do
     Goal.current
-    create(:quick_product)
+    create(:product)
     create(:beverage_product)
     create(:meal_template, :with_items)
     create(:workout_plan, :with_exercises)
@@ -67,11 +67,12 @@ RSpec.describe "Data capture coverage", type: :request do
       expect(response.body).to include("items[0][unit]")
     end
 
-    it "has quick beverages and time-aware meal shortcuts" do
+    it "has usual meal shortcuts (no one-tap quick-add beverages)" do
       get daily_log_path(today)
 
-      expect(response.body).to include("Quick add beverage")
       expect(response.body).to include("Usual ·")
+      expect(response.body).to include("Copy from yesterday").or include("No meals yet today")
+      expect(response.body).not_to include("Quick add beverage")
       expect(response.body).not_to include("Quick add snack")
       expect(response.body).not_to include("Quick templates")
     end
@@ -133,11 +134,11 @@ RSpec.describe "Data capture coverage", type: :request do
       expect(response.body).to include('id="meals"')
     end
 
-    it "resolves the beverages anchor" do
-      get daily_log_path(today, anchor: "beverages")
+    it "resolves the water anchor" do
+      get daily_log_path(today, anchor: "water")
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('id="beverages"')
+      expect(response.body).to include('id="water"')
     end
   end
 

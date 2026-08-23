@@ -16,6 +16,12 @@ module ApplicationHelper
     { "beverage" => "Beverage" }.fetch(meal_type.to_s, meal_type.to_s.humanize)
   end
 
+  # Shared entry point for Open Food Facts search / barcode add.
+  def add_product_link(return_to: nil, label: "Add product", css_class: "btn btn-sm btn-outline-secondary")
+    path = new_product_path(return_to: return_to.presence || request.fullpath)
+    link_to label, path, class: css_class
+  end
+
   def outfit_category_options
     OutfitPhoto.categories.keys.map do |key|
       [ OutfitPhoto::CATEGORY_LABELS[key], key ]

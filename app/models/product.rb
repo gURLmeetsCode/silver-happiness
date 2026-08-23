@@ -4,20 +4,11 @@ class Product < ApplicationRecord
 
   validates :name, presence: true
   validates :calories_per_100g, :protein_per_100g, presence: true
-  validates :default_serving_g, presence: true, numericality: { greater_than: 0 }, if: :quick_log?
   validates :water_volume_ml, numericality: { greater_than: 0 }, allow_nil: true
   validate :water_volume_only_for_beverages
 
-  scope :quick_log, -> { where(quick_log: true).order(:name) }
-  scope :quick_log_beverages, -> { quick_log.where(beverage: true) }
-  scope :quick_log_snacks, -> { quick_log.where(beverage: false) }
-
   def beverage?
     beverage
-  end
-
-  def quick_log_meal_type
-    beverage? ? :beverage : :snack
   end
 
   def default_quantity_g
@@ -44,15 +35,6 @@ class Product < ApplicationRecord
     when /tomato|zucchini|lettuce|spinach|pepper|onion|garlic|fruit|berry/i then "produce"
     else "other"
     end
-  end
-
-  def quick_log_label
-    nutrition = nutrition_for(default_quantity_g)
-    parts = [ name ]
-    parts << serving_label if serving_label.present?
-    label = "#{parts.join(' · ')} (#{nutrition[:calories]} kcal)"
-    label += " · +#{water_volume_ml} ml water" if water_volume_ml.to_i.positive?
-    label
   end
 
   ML_PER_UNIT = { "tsp" => 5.0, "tbsp" => 15.0, "cup" => 240.0, "ml" => 1.0 }.freeze

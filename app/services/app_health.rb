@@ -61,7 +61,7 @@ class AppHealth
   end
 
   def check_app_smoke(checks, issues)
-    Product.quick_log.load
+    Product.order(:name).limit(5).load
     log = DailyLog.includes(:workouts, :strength_sessions).new(logged_on: Date.current)
     log.calories_burned
     Goal.current

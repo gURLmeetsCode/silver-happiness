@@ -33,7 +33,7 @@ RSpec.describe "Daily logs", type: :request do
       log = create(:daily_log)
       create(:meal_entry, daily_log: log)
       create(:strength_session, daily_log: log)
-      create(:quick_product)
+      create(:product)
       create(:beverage_product)
 
       get daily_log_path(log)

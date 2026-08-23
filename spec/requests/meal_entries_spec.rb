@@ -47,8 +47,8 @@ RSpec.describe "Meal entries", type: :request do
       expect(entry.calories).to eq(template.total_calories)
     end
 
-    it "creates an entry from a quick-log product" do
-      product = create(:quick_product, calories_per_100g: 100, default_serving_g: 150)
+    it "creates an entry from a product id" do
+      product = create(:product, calories_per_100g: 100, default_serving_g: 150)
 
       post daily_log_meal_entries_path(log), params: { product_id: product.id }
 
