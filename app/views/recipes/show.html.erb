@@ -28,8 +28,6 @@
   <div class="d-flex flex-wrap gap-1">
     <% if @recipe.user_created? %>
       <span class="badge text-bg-primary">Your recipe</span>
-    <% elsif @recipe.meal_type_prep? %>
-      <span class="badge text-bg-dark">Batch tray</span>
     <% elsif @recipe.regular_meal? %>
       <span class="badge text-bg-success">On rotation</span>
     <% else %>
