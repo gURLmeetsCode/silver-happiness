@@ -128,7 +128,7 @@
 <div class="d-flex flex-wrap gap-2 mt-4">
   <%= link_to "Grocery list", grocery_recipes_path, class: "btn btn-success" %>
   <% unless @recipe.meal_template.present? %>
-    <%= link_to "Log on Today", today_path(anchor: "meals-quick"), class: "btn btn-outline-primary" %>
+    <%= link_to "Log on Today", today_path(anchor: "meals"), class: "btn btn-outline-primary" %>
   <% end %>
   <% if @recipe.editable? %>
     <%= link_to "Edit recipe", edit_recipe_path(@recipe), class: "btn btn-outline-dark" %>

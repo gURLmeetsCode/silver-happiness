@@ -87,7 +87,6 @@ class DailyLogsController < ApplicationController
     @goal = Goal.current
     @meal_templates = meal_templates_for_builder
     @products = Product.order(:name)
-    @recent_meals = RecentMealShortcuts.call(as_of: @daily_log.logged_on)
     @custom_meal = MealEntry.new
     @workout = Workout.new
     @target_suggestions = DailyTargetSuggestions.new(@daily_log)

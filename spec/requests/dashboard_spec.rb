@@ -40,7 +40,7 @@ RSpec.describe "Home", type: :request do
       get root_path
       today = DailyLog.today
 
-      expect(response.body).to include("#{daily_log_path(today)}#meals-quick")
+      expect(response.body).to include("#{daily_log_path(today)}#meals")
       expect(response.body).to include("#{daily_log_path(today)}#water")
       expect(response.body).to include(metrics_path)
     end

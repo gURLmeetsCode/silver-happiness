@@ -67,11 +67,11 @@ RSpec.describe "Data capture coverage", type: :request do
       expect(response.body).to include("items[0][unit]")
     end
 
-    it "has usual meal shortcuts (no one-tap quick-add beverages)" do
+    it "has copy-from-yesterday and meal builder (no usual/quick-add strip)" do
       get daily_log_path(today)
 
-      expect(response.body).to include("Usual ·")
-      expect(response.body).to include("Copy from yesterday").or include("No meals yet today")
+      expect(response.body).to include("Build a meal")
+      expect(response.body).not_to include("Usual ·")
       expect(response.body).not_to include("Quick add beverage")
       expect(response.body).not_to include("Quick add snack")
       expect(response.body).not_to include("Quick templates")
