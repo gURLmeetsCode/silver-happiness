@@ -17,9 +17,11 @@ module ApplicationHelper
   end
 
   # Shared entry point for Open Food Facts search / barcode add.
-  def add_product_link(return_to: nil, label: "Add product", css_class: "btn btn-sm btn-outline-secondary")
+  def add_product_link(return_to: nil, label: "Add product", css_class: "btn btn-primary")
     path = new_product_path(return_to: return_to.presence || request.fullpath)
-    link_to label, path, class: css_class
+    link_to path, class: css_class do
+      safe_join([ tag.i(class: "bi bi-plus-lg me-1", aria: { hidden: true }), label ])
+    end
   end
 
   def outfit_category_options
