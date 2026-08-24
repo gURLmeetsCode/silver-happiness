@@ -27,6 +27,14 @@ class WeeklySummary
     (weight_entries.sum(&:weight_kg) / weight_entries.size.to_f).round(1)
   end
 
+  def period_days_this_week
+    logs.count(&:on_period?)
+  end
+
+  def period_weigh_ins_this_week
+    weight_entries.count(&:on_period?)
+  end
+
   def total_eaten
     logs.sum(&:total_calories)
   end

@@ -15,8 +15,13 @@
       <div class="card-body">
         <div class="text-muted small">Weight</div>
         <div class="fs-4 fw-semibold"><%= @today.weight_kg.present? ? "#{@today.weight_kg} kg" : "—" %></div>
-        <div class="small mt-1"><%= target_status_badge(@goal.weight_status(@today.weight_kg)) %></div>
-        <div class="small text-muted"><%= weight_vs_goal_label(@goal, @today.weight_kg) %></div>
+        <% if @today.on_period? %>
+          <div class="small mt-1"><span class="badge text-bg-light text-dark border">Period day</span></div>
+          <div class="small text-muted">Scale may be up from water — normal this week of your cycle.</div>
+        <% else %>
+          <div class="small mt-1"><%= target_status_badge(@goal.weight_status(@today.weight_kg)) %></div>
+          <div class="small text-muted"><%= weight_vs_goal_label(@goal, @today.weight_kg) %></div>
+        <% end %>
       </div>
     </div>
   </div>
@@ -86,7 +91,12 @@
       <div class="card-body">
         <div class="text-muted small">Period</div>
         <div class="fs-4 fw-semibold"><%= @today.on_period? ? "Yes" : "No" %></div>
-        <div class="small text-muted"><%= link_to "Update →", edit_daily_log_path(@today) %></div>
+        <% if @cycle.period_days_in_window.positive? %>
+          <div class="small text-muted"><%= @cycle.period_days_in_window %> day<%= @cycle.period_days_in_window == 1 ? "" : "s" %> marked in last <%= WeightCycleInsight::DAYS %></div>
+        <% else %>
+          <div class="small text-muted">Not marked lately</div>
+        <% end %>
+        <div class="small mt-1"><%= link_to "Update →", edit_daily_log_path(@today) %></div>
       </div>
     </div>
   </div>
@@ -108,6 +118,11 @@
           <div class="small text-muted">Avg weight</div>
           <div class="fw-semibold"><%= @week.avg_weight ? "#{@week.avg_weight} kg" : "—" %></div>
           <%= target_status_badge(@goal.weight_status(@week.latest_weight)) %>
+          <% if @week.period_weigh_ins_this_week.positive? %>
+            <div class="small text-muted mt-1">
+              Includes <%= @week.period_weigh_ins_this_week %> period weigh-in<%= @week.period_weigh_ins_this_week == 1 ? "" : "s" %>
+            </div>
+          <% end %>
         </div>
       </div>
       <div class="col-6 col-md-3">
@@ -207,12 +222,64 @@
 
 <div class="card stat-card">
   <div class="card-body">
-    <h2 class="h5">Weight vs target (<%= @goal.target_weight_kg %> kg)</h2>
+    <h2 class="h5 mb-1">Weight vs target (<%= @goal.target_weight_kg %> kg)</h2>
+    <p class="small text-muted mb-3">
+      Last <%= WeightCycleInsight::DAYS %> days. Dots mark weigh-ins on period days — those bumps are often water.
+    </p>
     <% if @weight_data.any? %>
       <%= line_chart [
-            { name: "Weight", data: @weight_data },
-            { name: "Target", data: @weight_target_line }
+            {
+              name: "Weight",
+              data: @weight_data,
+              dataset: { borderColor: "#345c67", backgroundColor: "transparent", pointRadius: 3 }
+            },
+            {
+              name: "On period",
+              data: @weight_period_data,
+              dataset: {
+                borderColor: "transparent",
+                backgroundColor: "#b85c38",
+                pointBackgroundColor: "#b85c38",
+                pointBorderColor: "#b85c38",
+                pointRadius: 7,
+                pointHoverRadius: 8,
+                showLine: false,
+                spanGaps: false
+              }
+            },
+            {
+              name: "Target",
+              data: @weight_target_line,
+              dataset: { borderColor: "#8a9a9e", borderDash: [ 6, 4 ], pointRadius: 0, backgroundColor: "transparent" }
+            }
           ], suffix: " kg", library: { scales: { y: { beginAtZero: false } } } %>
+
+      <div class="border rounded p-3 bg-white mt-3">
+        <h3 class="h6 mb-2">Cycle &amp; the scale</h3>
+        <% if @cycle.enough_to_compare? %>
+          <div class="row g-3 mb-2">
+            <div class="col-6 col-md-4">
+              <div class="small text-muted">Avg on period</div>
+              <div class="fw-semibold"><%= @cycle.on_period_avg %> kg</div>
+              <div class="small text-muted"><%= @cycle.period_days_with_weight %> weigh-ins</div>
+            </div>
+            <div class="col-6 col-md-4">
+              <div class="small text-muted">Avg off period</div>
+              <div class="fw-semibold"><%= @cycle.off_period_avg %> kg</div>
+              <div class="small text-muted"><%= @cycle.off_days_with_weight %> weigh-ins</div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="small text-muted">Typical swing</div>
+              <div class="fw-semibold">
+                <% delta = @cycle.cycle_delta %>
+                <% if delta.positive? %>+<%= delta %> kg<% elsif delta.negative? %><%= delta %> kg<% else %>~0 kg<% end %>
+              </div>
+              <div class="small text-muted">on vs off period</div>
+            </div>
+          </div>
+        <% end %>
+        <p class="small text-muted mb-0"><%= @cycle.summary %></p>
+      </div>
       <p class="small text-muted mb-0 mt-2"><%= weight_vs_goal_label(@goal, @week.latest_weight || @today.weight_kg) %></p>
     <% else %>
       <p class="text-muted mb-0">Log weight on your daily page to see a chart.</p>

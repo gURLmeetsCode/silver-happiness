@@ -21,8 +21,20 @@ RSpec.describe "Metrics", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("This week")
       expect(response.body).to include("Weight vs target")
+      expect(response.body).to include("Cycle &amp; the scale")
       expect(response.body).to include("Calorie deficit this week")
       expect(response.body).to include("Cumulative deficit vs plan")
+    end
+
+    it "marks period context on weight when today is a period day" do
+      Goal.current
+      create(:daily_log, logged_on: Date.current, weight_kg: 58.2, on_period: true)
+
+      get metrics_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Period day")
+      expect(response.body).to include("Scale may be up from water")
     end
   end
 end

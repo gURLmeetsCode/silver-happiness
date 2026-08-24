@@ -29,7 +29,15 @@
   <div class="summary-cell">
     <span class="summary-label">Weight</span>
     <span class="summary-value"><%= daily_log.weight_kg || "—" %></span>
-    <span class="summary-hint"><%= daily_log.weight_kg.present? ? "kg" : "not logged" %></span>
+    <span class="summary-hint">
+      <% if daily_log.weight_kg.blank? %>
+        not logged
+      <% elsif daily_log.on_period? %>
+        kg · period
+      <% else %>
+        kg
+      <% end %>
+    </span>
   </div>
 </div>
 

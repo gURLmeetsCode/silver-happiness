@@ -7,7 +7,13 @@
         <% if daily_log.weight_pre_run? %>
           <span class="badge text-bg-light text-dark border ms-1">Pre-run</span>
         <% end %>
+        <% if daily_log.on_period? %>
+          <span class="badge text-bg-light text-dark border ms-1">Period</span>
+        <% end %>
       </p>
+      <% if daily_log.on_period? %>
+        <p class="small text-muted mb-2">Period day — a bump on the scale is often water, not fat.</p>
+      <% end %>
     <% else %>
       <p class="text-muted small mb-2">Log today's weigh-in (any decimals — e.g. 58.60).</p>
     <% end %>
