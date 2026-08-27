@@ -37,19 +37,19 @@ class DailyLog < ApplicationRecord
   end
 
   def total_calories
-    meal_entries.sum(:calories)
+    loaded_meal_sum(:calories) { meal_entries.sum(:calories) }
   end
 
   def total_protein
-    meal_entries.sum(:protein_g)
+    loaded_meal_sum(:protein_g) { meal_entries.sum(:protein_g) }
   end
 
   def total_carbs
-    meal_entries.sum(:carbs_g)
+    loaded_meal_sum(:carbs_g) { meal_entries.sum(:carbs_g) }
   end
 
   def total_fat
-    meal_entries.sum(:fat_g)
+    loaded_meal_sum(:fat_g) { meal_entries.sum(:fat_g) }
   end
 
   def calories_burned
@@ -76,20 +76,20 @@ class DailyLog < ApplicationRecord
   end
 
   def legacy_run_calories
-    return 0 if workouts.activity_type_run.exists?
+    return 0 if workouts_include_type?(:run)
 
     run_calories.to_i
   end
 
   def legacy_walk_calories
-    return 0 if workouts.activity_type_walk.exists?
+    return 0 if workouts_include_type?(:walk)
 
     walk_calories.to_i
   end
 
   def training_day?
     run_km.present? || run_calories.to_i.positive? ||
-      strength_sessions.exists? ||
+      strength_logged? ||
       training_notes.to_s.match?(/strength|gym|lift/i)
   end
 
@@ -272,6 +272,30 @@ class DailyLog < ApplicationRecord
   end
 
   private
+
+  def loaded_meal_sum(attribute)
+    if meal_entries.loaded?
+      meal_entries.sum { |entry| entry.public_send(attribute).to_f }
+    else
+      yield
+    end
+  end
+
+  def workouts_include_type?(type)
+    if workouts.loaded?
+      workouts.any? { |workout| workout.public_send("activity_type_#{type}?") }
+    else
+      workouts.public_send("activity_type_#{type}").exists?
+    end
+  end
+
+  def strength_logged?
+    if strength_sessions.loaded?
+      strength_sessions.any?
+    else
+      strength_sessions.exists?
+    end
+  end
 
   def sync_activity_workout!(type, km, kcal)
     existing = workouts.where(activity_type: type).order(:id).to_a

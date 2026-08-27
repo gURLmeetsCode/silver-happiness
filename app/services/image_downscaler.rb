@@ -5,10 +5,11 @@
 # require the image_processing gem, which drags in ruby-vips, and Rails 8 will
 # not boot against the libvips 8.10 on Raspbian Bullseye.
 #
-# Resizing in place also means a 4 MB phone photo is only sent over the wire
-# once, rather than being re-read on every page view.
+# Keep edges modest and JPEG quality capped — the Pi serves every byte over
+# Tailscale, and phone photos otherwise stay hundreds of KB after resize alone.
 class ImageDownscaler
-  MAX_EDGE = 1600
+  MAX_EDGE = 1200
+  JPEG_QUALITY = 82
 
   def self.call(uploaded)
     new(uploaded).call
@@ -24,10 +25,12 @@ class ImageDownscaler
     return @uploaded unless resizable?
 
     image = MiniMagick::Image.new(@uploaded.tempfile.path)
-    return @uploaded unless [ image.width, image.height ].max > MAX_EDGE
+    oversized = [ image.width, image.height ].max > MAX_EDGE
 
     image.auto_orient
-    image.resize "#{MAX_EDGE}x#{MAX_EDGE}>"
+    image.resize "#{MAX_EDGE}x#{MAX_EDGE}>" if oversized
+    image.strip
+    image.quality JPEG_QUALITY if jpeg?(image)
     @uploaded
   rescue StandardError => e
     Rails.logger.warn("ImageDownscaler skipped: #{e.class}: #{e.message}")
@@ -40,5 +43,10 @@ class ImageDownscaler
     @uploaded.respond_to?(:tempfile) &&
       @uploaded.content_type.to_s.start_with?("image/") &&
       File.exist?(@uploaded.tempfile.path)
+  end
+
+  def jpeg?(image)
+    format = image.type.to_s.downcase
+    format.in?(%w[jpeg jpg]) || @uploaded.content_type.to_s.match?(%r{\Aimage/jpe?g\z}i)
   end
 end

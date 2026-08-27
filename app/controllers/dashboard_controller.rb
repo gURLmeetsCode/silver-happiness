@@ -5,7 +5,6 @@ class DashboardController < ApplicationController
     @goal = Goal.current
     @today = DailyLog.today
     @suggested_strength = WorkoutPlan.suggested_for
-    @daily_inspo = OutfitPhoto.daily_inspo_for
-    @daily_inspo_alt = OutfitPhoto.daily_inspo_alternate(@daily_inspo)
+    @daily_inspo, @daily_inspo_alt = OutfitPhoto.daily_inspo_pair
   end
 end

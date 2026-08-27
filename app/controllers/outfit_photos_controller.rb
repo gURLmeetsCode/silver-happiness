@@ -1,7 +1,13 @@
 class OutfitPhotosController < ApplicationController
+  GALLERY_LIMIT = 60
+
   def index
     @category = params[:category]
-    @outfit_photos = OutfitPhoto.recent.by_category(@category)
+    @outfit_photos = OutfitPhoto
+      .with_attached_image
+      .recent
+      .by_category(@category)
+      .limit(GALLERY_LIMIT)
   end
 
   def new

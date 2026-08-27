@@ -25,7 +25,7 @@ RSpec.describe ImageDownscaler do
 
     resized = MiniMagick::Image.new(upload.tempfile.path)
     expect(resized.width).to eq(described_class::MAX_EDGE)
-    expect(resized.height).to eq(1067)
+    expect(resized.height).to eq(800)
   end
 
   it "leaves a photo that is already small alone" do

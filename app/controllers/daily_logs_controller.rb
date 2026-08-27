@@ -1,7 +1,7 @@
 class DailyLogsController < ApplicationController
   before_action :set_daily_log, only: [ :show, :edit, :update, :copy_meals, :add_water, :set_water ]
   before_action :load_strength_context, only: [ :show, :edit, :update ]
-  before_action :load_show_page, only: [ :show, :update ]
+  before_action :load_show_page, only: [ :show ]
 
   def index
     today = Date.current
@@ -84,6 +84,7 @@ class DailyLogsController < ApplicationController
   end
 
   def load_show_page
+    preload_day_associations!(@daily_log)
     @goal = Goal.current
     @meal_templates = meal_templates_for_builder
     @products = Product.order(:name)
@@ -95,12 +96,27 @@ class DailyLogsController < ApplicationController
     @workout_plans = WorkoutPlan.ordered
     @supplemental_plans = @workout_plans.supplemental
     @runna_plans = @workout_plans.kind_runna_reference
-    @yesterday_log = DailyLog.find_by(logged_on: @daily_log.logged_on - 1.day)
+    @yesterday_log = DailyLog
+      .includes(meal_entries: :items)
+      .find_by(logged_on: @daily_log.logged_on - 1.day)
+  end
+
+  def preload_day_associations!(log)
+    ActiveRecord::Associations::Preloader.new(
+      records: [ log ],
+      associations: [
+        :workouts,
+        :strength_sessions,
+        :urge_check_ins,
+        { progress_photos: { image_attachment: :blob } },
+        { meal_entries: [ :items, { meal_template: :recipe } ] }
+      ]
+    ).call
   end
 
   def meal_templates_for_builder
     MealTemplate
-      .includes(:recipe, :meal_template_items)
+      .includes(:recipe, meal_template_items: :product)
       .joins(:meal_template_items)
       .distinct
       .order(:name)

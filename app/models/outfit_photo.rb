@@ -17,20 +17,27 @@ class OutfitPhoto < ApplicationRecord
 
   # Same look all day; rotates when the calendar day changes (and when you add photos).
   def self.daily_inspo_for(date = Date.current)
-    ids = with_image.order(:id).pluck(:id)
-    return nil if ids.empty?
-
-    find(ids[date.yday % ids.size])
+    daily_inspo_pair(date).first
   end
 
   # Second polaroid peek — the next photo in the same daily rotation.
   def self.daily_inspo_alternate(featured, date = Date.current)
     return nil if featured.nil?
 
-    ids = with_image.order(:id).pluck(:id)
-    return nil if ids.size < 2
+    _primary, alternate = daily_inspo_pair(date)
+    alternate
+  end
 
-    find(ids[(date.yday + 1) % ids.size])
+  # One id list + one attachment-aware load for the home polaroids.
+  def self.daily_inspo_pair(date = Date.current)
+    ids = with_image.order(:id).pluck(:id)
+    return [ nil, nil ] if ids.empty?
+
+    featured_id = ids[date.yday % ids.size]
+    alternate_id = ids.size < 2 ? nil : ids[(date.yday + 1) % ids.size]
+    by_id = with_attached_image.where(id: [ featured_id, alternate_id ].compact).index_by(&:id)
+
+    [ by_id[featured_id], alternate_id && by_id[alternate_id] ]
   end
 
   CATEGORY_LABELS = {
