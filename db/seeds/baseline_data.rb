@@ -352,6 +352,37 @@ croissant.update!(
     calories_per_100g: 370, protein_per_100g: 5.0, carbs_per_100g: 42.0, fat_per_100g: 20.0,
     default_serving_g: 100, serving_label: "1 portion (~100 g)",
     notes: "Vegan chocolate fondant estimate."
+  },
+  "Old El Paso Tortillas Maïs et Blé" => {
+    brand: "Old El Paso",
+    calories_per_100g: 289, protein_per_100g: 8.5, carbs_per_100g: 51.8, fat_per_100g: 4.8,
+    default_serving_g: 42, serving_label: "1 tortilla (~42 g)",
+    notes: "Extra Moelleuses Maïs et Blé — pack of 8 / 335 g. ~121 kcal · 3.6 g protein per tortilla."
+  },
+  "U Lentilles Blondes (dry)" => {
+    brand: "U",
+    barcode: "3256220659123",
+    calories_per_100g: 347, protein_per_100g: 24.6, carbs_per_100g: 48.5, fat_per_100g: 1.4,
+    default_serving_g: 200, serving_label: "1 cup dry (~200 g)",
+    notes: "Dry blond lentils. Log dry weight for recipes."
+  },
+  "Panzani Tomacouli Nature" => {
+    brand: "Panzani",
+    barcode: "3038359006456",
+    calories_per_100g: 37, protein_per_100g: 1.7, carbs_per_100g: 6.1, fat_per_100g: 0.2,
+    default_serving_g: 100, serving_label: "100 g (~⅓ cup)",
+    notes: "Purée de tomates sans sel ajouté. 37 kcal / 100 g."
+  },
+  "Tortilla Nachips Original" => {
+    brand: "Tortilla Nachips",
+    calories_per_100g: 492, protein_per_100g: 6.5, carbs_per_100g: 60.0, fat_per_100g: 24.0,
+    default_serving_g: 30, serving_label: "1 small handful (~30 g)",
+    notes: "Corn chips ~492 kcal / 100 g. Crush into smash-taco filling."
+  },
+  "Onion" => {
+    calories_per_100g: 39, protein_per_100g: 1.1, carbs_per_100g: 7.0, fat_per_100g: 0.1,
+    default_serving_g: 150, serving_label: "1 medium (~150 g)",
+    notes: "CIQUAL oignon cru."
   }
 }.each do |name, attrs|
   product = Product.find_or_initialize_by(name: name)
@@ -488,6 +519,22 @@ seed_template("zucchini-tofu-batch", "Zucchini + tofu (batch)", :dinner, [
   [ tofu, 300, "tofu cubes (~300 g / ~2½ pavés)" ],
   [ puget_oil, 10, "1 tbsp olive oil" ]
 ])
+
+tortilla_mais = Product.find_by(name: "Old El Paso Tortillas Maïs et Blé")
+lentils_blondes = Product.find_by(name: "U Lentilles Blondes (dry)")
+tomacouli = Product.find_by(name: "Panzani Tomacouli Nature")
+nachips = Product.find_by(name: "Tortilla Nachips Original")
+onion = Product.find_by(name: "Onion")
+if tortilla_mais && lentils_blondes && tomacouli && nachips && onion
+  seed_template("lentil-smash-tacos", "Lentil smash tacos", :dinner, [
+    [ tortilla_mais, 42, "1 tortilla (~42 g)" ],
+    [ lentils_blondes, 25, "25 g dry lentils (1/8 batch)" ],
+    [ tomacouli, 50, "50 g Tomacouli (1/8 batch)" ],
+    [ onion, 25, "25 g onion + shallot (1/8 batch)" ],
+    [ puget_oil, 9, "9 g oil (sauté + fry)" ],
+    [ nachips, 5, "5 g crushed Nachips (1/8 batch)" ]
+  ])
+end
 
 bowl_ethiquete = Product.find_by(name: "L'Éthiquête bowl du moment (pasta)")
 houmous_ethiquete = Product.find_by(name: "L'Éthiquête houmous (side)")

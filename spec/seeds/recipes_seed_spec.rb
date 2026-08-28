@@ -89,4 +89,59 @@ RSpec.describe "db/seeds/recipes.rb" do
       expect(names).to include("Skyr vegan", "Strawberries")
     end
   end
+
+  describe "the lentil smash tacos recipe" do
+    before do
+      {
+        "Old El Paso Tortillas Maïs et Blé" => { calories_per_100g: 289, protein_per_100g: 8.5, carbs_per_100g: 51.8, fat_per_100g: 4.8 },
+        "U Lentilles Blondes (dry)" => { calories_per_100g: 347, protein_per_100g: 24.6, carbs_per_100g: 48.5, fat_per_100g: 1.4 },
+        "Panzani Tomacouli Nature" => { calories_per_100g: 37, protein_per_100g: 1.7, carbs_per_100g: 6.1, fat_per_100g: 0.2 },
+        "Onion" => { calories_per_100g: 39, protein_per_100g: 1.1, carbs_per_100g: 7.0, fat_per_100g: 0.1 },
+        "Puget Huile d'olive vierge extra" => { calories_per_100g: 900, protein_per_100g: 0, carbs_per_100g: 0, fat_per_100g: 100 },
+        "Tortilla Nachips Original" => { calories_per_100g: 492, protein_per_100g: 6.5, carbs_per_100g: 60.0, fat_per_100g: 24.0 }
+      }.each do |name, macros|
+        create(:product, { name: name }.merge(macros))
+      end
+
+      template = create(:meal_template, name: "Lentil smash tacos", slug: "lentil-smash-tacos", meal_type: :dinner)
+      [
+        [ "Old El Paso Tortillas Maïs et Blé", 42 ],
+        [ "U Lentilles Blondes (dry)", 25 ],
+        [ "Panzani Tomacouli Nature", 50 ],
+        [ "Onion", 25 ],
+        [ "Puget Huile d'olive vierge extra", 9 ],
+        [ "Tortilla Nachips Original", 5 ]
+      ].each do |name, grams|
+        template.meal_template_items.create!(product: Product.find_by!(name: name), quantity_g: grams, label: name)
+      end
+    end
+
+    it "seeds as a no-cheese smash taco with tracked pantry products" do
+      load_seed_helper!
+
+      seed_recipe "lentil-smash-tacos", {
+        name: "Lentil smash tacos",
+        meal_type: :dinner,
+        regular_meal: true,
+        meal_template_slug: "lentil-smash-tacos",
+        serves: 1,
+        description: "No cheese smash tacos."
+      }, [
+        [ :carbs, "1", "tortilla", "Old El Paso Tortillas Maïs et Blé", 42 ],
+        [ :protein, "25 g", "lentils", "U Lentilles Blondes (dry)", 25 ],
+        [ :produce, "50 g", "Tomacouli", "Panzani Tomacouli Nature", 50 ],
+        [ :produce, "25 g", "onion", "Onion", 25 ],
+        [ :pantry, "spices", "chili cumin", nil, nil ],
+        [ :fats, "9 g", "oil", "Puget Huile d'olive vierge extra", 9 ],
+        [ :carbs, "5 g", "Nachips", "Tortilla Nachips Original", 5 ],
+        [ :produce, "toppings", "lettuce pico", nil, nil ]
+      ], "Cook, smash, fry. No cheese."
+
+      recipe = Recipe.find_by!(slug: "lentil-smash-tacos")
+      expect(recipe.recipe_ingredients.reject(&:valid?)).to be_empty
+      expect(recipe.nutrition_per_serving[:calories]).to be_between(300, 400)
+      expect(recipe.steps).to match(/no cheese/i)
+      expect(recipe.recipe_ingredients.map(&:name).join(" ")).not_to match(/cheese/i)
+    end
+  end
 end

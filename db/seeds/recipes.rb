@@ -568,6 +568,46 @@ seed_recipe "zucchini-tofu-batch", {
   3. Store. Log a tray share in Build a meal (alone or with roasted potatoes).
 STEPS
 
+seed_recipe "lentil-smash-tacos", {
+  name: "Lentil smash tacos",
+  meal_type: :dinner,
+  regular_meal: true,
+  meal_template_slug: "lentil-smash-tacos",
+  prep_time: "40 min",
+  serves: 1,
+  position: 22,
+  water_suggestion_ml: 300,
+  description: "Derek Sarno smash lentil tacos (no cheese) with U blond lentils, Panzani Tomacouli, " \
+               "Tortilla Nachips, and Old El Paso Maïs et Blé tortillas. Batch = 8. " \
+               "Log servings = tacos you ate. Source: youtube.com/watch?v=gmLQB_nL1aE",
+  personal_notes: "As made: no cheese. Tomacouli instead of plum tomatoes; Nachips crushed into filling; " \
+                  "Maïs et Blé Extra Moelleuses (335 g / 8)."
+}, [
+  [ :carbs, "1", "Old El Paso Maïs et Blé tortilla", "Old El Paso Tortillas Maïs et Blé", 42 ],
+  [ :protein, "25 g", "U blond lentils, dry (1/8 of 200 g)", "U Lentilles Blondes (dry)", 25 ],
+  [ :produce, "50 g", "Panzani Tomacouli Nature", "Panzani Tomacouli Nature", 50 ],
+  [ :produce, "25 g", "onion + shallot", "Onion", 25 ],
+  [ :pantry, "4 cloves / batch", "garlic, minced (batch)", nil, nil ],
+  [ :pantry, "to taste", "chili powder, cumin, salt, pepper (batch)", nil, nil ],
+  [ :pantry, "2½ cups / batch", "water for simmering (batch)", nil, nil ],
+  [ :fats, "9 g", "olive oil (sauté + fry)", "Puget Huile d'olive vierge extra", 9 ],
+  [ :carbs, "5 g", "crushed Tortilla Nachips", "Tortilla Nachips Original", 5 ],
+  [ :produce, "to serve", "shredded lettuce + pico (tomato, red onion, lime, coriander)", nil, nil ]
+], <<~STEPS
+  Adapted from Derek Sarno — The Best Lentils Dish Ever (smash tacos). No cheese.
+
+  Batch (8 tacos):
+  1. Rinse 200 g (≈1 cup) U blond lentils. Dice 1 onion + 2 shallots; mince 4 garlic cloves.
+  2. Warm a light coat of olive oil (~3 tbsp); toast chili powder, cumin, salt, pepper.
+  3. Sauté aromatics. Add lentils + ~400 g Tomacouli + ~2½ cups water. Simmer until soft (~20 min). Cool.
+  4. Optional: blend half the mix and stir back for a thicker mash (helps if you use less oil).
+  5. Crush ~40 g Tortilla Nachips into the cooled filling.
+  6. Spread on half of each Maïs et Blé tortilla, fold, pan-fry until crisp. No cheese.
+  7. Top with lettuce + pico.
+
+  To log: Servings = smash tacos you ate (e.g. 2 or 3).
+STEPS
+
 seed_recipe "ethiquete-bowl", {
   name: "L'Éthiquête bowl du moment",
   meal_type: :lunch,
