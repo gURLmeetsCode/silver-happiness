@@ -19,11 +19,68 @@
     <%= f.text_field :display_name, class: "form-control", placeholder: "e.g. Natasha" %>
   </div>
 
+  <div class="col-12 mt-2"><h2 class="h5">Mode</h2></div>
+  <p class="col-12 text-muted small mb-0">
+    Stay on <strong>Weight</strong> until pregnancy is confirmed. Switch to <strong>Pregnancy</strong>
+    only then — charts use IOM/NAM lower-bound gain (not a fat-loss target). Not medical advice;
+    your OB/midwife decides with fetal growth in mind.
+  </p>
+  <div class="col-md-6">
+    <%= f.label :life_stage, "Tracking mode", class: "form-label" %>
+    <%= f.select :life_stage,
+          Goal::LIFE_STAGES.map { |key| [ Goal::LIFE_STAGE_LABELS[key], key ] },
+          {}, class: "form-select" %>
+  </div>
+
+  <div class="col-12 mt-1"><h3 class="h6 text-muted">Pregnancy details</h3></div>
+  <p class="col-12 text-muted small mb-0">Fill these when you switch to Pregnancy mode (after confirmation).</p>
+  <div class="col-md-4">
+    <%= f.label :pre_pregnancy_weight_kg, "Pre-pregnancy weight (kg)", class: "form-label" %>
+    <%= f.number_field :pre_pregnancy_weight_kg, step: :any, inputmode: "decimal", class: "form-control",
+          placeholder: @goal.starting_weight_kg %>
+    <div class="form-text">Baseline for IOM gain. Defaults to starting weight if blank.</div>
+  </div>
+  <div class="col-md-4">
+    <%= f.label :pregnancy_confirmed_on, "Confirmed on", class: "form-label" %>
+    <%= f.date_field :pregnancy_confirmed_on, class: "form-control" %>
+  </div>
+  <div class="col-md-4">
+    <%= f.label :pregnancy_lmp_on, "LMP (first day)", class: "form-label" %>
+    <%= f.date_field :pregnancy_lmp_on, class: "form-control" %>
+  </div>
+  <div class="col-md-4">
+    <%= f.label :pregnancy_due_on, "Due date", class: "form-label" %>
+    <%= f.date_field :pregnancy_due_on, class: "form-control" %>
+    <div class="form-text">Need LMP or due date for week + weight path.</div>
+  </div>
+  <div class="col-12">
+    <div class="form-check">
+      <%= f.check_box :exercise_cleared_by_clinician, class: "form-check-input" %>
+      <%= f.label :exercise_cleared_by_clinician,
+            "Cleared for exercise by my clinician (ACOG: most people without complications can stay active)",
+            class: "form-check-label" %>
+    </div>
+  </div>
+  <% if @pregnancy_guide&.ready? %>
+    <div class="col-12">
+      <div class="alert alert-light border small mb-0">
+        <% @pregnancy_guide.summary_lines.each do |line| %>
+          <div><%= line %></div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
   <div class="col-12 mt-2"><h2 class="h5">Body profile</h2></div>
   <p class="col-12 text-muted small mb-0">
-    Used to estimate maintenance calories (Mifflin–St Jeor). For a petite woman around your size,
-    guidelines point to a <strong>250–500 kcal/day</strong> deficit — roughly 0.25–0.5 kg per week —
-    and not eating below 1,200 kcal without medical advice.
+    <% if @goal.life_stage_pregnancy? %>
+      Used for maintenance calories (Mifflin–St Jeor). In pregnancy the app suggests
+      <strong>no calorie deficit</strong> — focus is IOM gestational gain, not cutting.
+    <% else %>
+      Used to estimate maintenance calories (Mifflin–St Jeor). For a petite woman around your size,
+      guidelines point to a <strong>250–500 kcal/day</strong> deficit — roughly 0.25–0.5 kg per week —
+      and not eating below 1,200 kcal without medical advice.
+    <% end %>
   </p>
   <div class="col-md-3">
     <%= f.label :height_cm, "Height (cm)", class: "form-label" %>
@@ -43,17 +100,19 @@
           EnergyEstimate::ACTIVITY_LABELS.map { |value, label| [ label, value ] },
           {}, class: "form-select" %>
   </div>
-  <div class="col-md-4">
-    <%= f.label :target_deficit_kcal, "Daily deficit goal (kcal)", class: "form-label" %>
-    <%= f.number_field :target_deficit_kcal, class: "form-control", min: 100, max: 1000, step: 50,
-          placeholder: "400" %>
-    <div class="form-text">Leave blank to use the size-based default (~400).</div>
-  </div>
+  <% unless @goal.life_stage_pregnancy? %>
+    <div class="col-md-4">
+      <%= f.label :target_deficit_kcal, "Daily deficit goal (kcal)", class: "form-label" %>
+      <%= f.number_field :target_deficit_kcal, class: "form-control", min: 100, max: 1000, step: 50,
+            placeholder: "400" %>
+      <div class="form-text">Leave blank to use the size-based default (~400).</div>
+    </div>
+  <% end %>
   <% if @energy&.ready? %>
     <div class="col-12">
       <div class="alert alert-light border small mb-0">
         <%= @energy.summary_line %>
-        Suggested intake ~<%= @energy.recommended_intake %> kcal/day.
+        Suggested intake ~<%= @suggested_calories&.dig(:recommended_intake) || @energy.recommended_intake %> kcal/day.
         Your current targets are <%= @goal.calories_rest_day %> rest /
         <%= @goal.calories_training_day %> training.
       </div>
@@ -61,35 +120,48 @@
   <% end %>
 
   <div class="col-12 mt-2"><h2 class="h5">Weight</h2></div>
-  <div class="col-md-4">
-    <%= f.label :target_weight_kg, "Target weight (kg)", class: "form-label" %>
-    <%= f.number_field :target_weight_kg, step: :any, inputmode: "decimal", class: "form-control" %>
-  </div>
+  <% unless @goal.life_stage_pregnancy? %>
+    <div class="col-md-4">
+      <%= f.label :target_weight_kg, "Target weight (kg)", class: "form-label" %>
+      <%= f.number_field :target_weight_kg, step: :any, inputmode: "decimal", class: "form-control" %>
+    </div>
+  <% else %>
+    <%= f.hidden_field :target_weight_kg %>
+    <div class="col-12">
+      <p class="small text-muted mb-0">
+        Fat-loss target is paused in pregnancy. Charts use pre-pregnancy weight + IOM lower-bound gain.
+      </p>
+    </div>
+  <% end %>
   <div class="col-md-4">
     <%= f.label :starting_weight_kg, "Starting weight (kg)", class: "form-label" %>
     <%= f.number_field :starting_weight_kg, step: :any, inputmode: "decimal", class: "form-control" %>
   </div>
-  <div class="col-md-4">
-    <%= f.label :target_date, "Target date", class: "form-label" %>
-    <%= f.date_field :target_date, class: "form-control" %>
-  </div>
+  <% unless @goal.life_stage_pregnancy? %>
+    <div class="col-md-4">
+      <%= f.label :target_date, "Target date", class: "form-label" %>
+      <%= f.date_field :target_date, class: "form-control" %>
+    </div>
+  <% end %>
 
   <div class="col-12">
     <div class="form-check">
       <%= hidden_field_tag :recalculate_targets, "0" %>
       <%= check_box_tag :recalculate_targets, "1", true, class: "form-check-input" %>
       <%= label_tag :recalculate_targets,
-            "Recalculate protein & calorie targets from target weight and profile",
+            (@goal.life_stage_pregnancy? ?
+              "Recalculate protein & calories for pregnancy (maintenance, no deficit)" :
+              "Recalculate protein & calorie targets from target weight and profile"),
             class: "form-check-label" %>
       <div class="form-text">
-        Protein ≈ <%= Goal::PROTEIN_MIN_PER_KG %>–<%= Goal::PROTEIN_MAX_PER_KG %> g per kg of target weight
+        Protein ≈ <%= Goal::PROTEIN_MIN_PER_KG %>–<%= Goal::PROTEIN_MAX_PER_KG %> g per kg
         <% if @suggested_protein %>
           (now → <%= @suggested_protein[:min_g] %>–<%= @suggested_protein[:max_g] %> g)
         <% end %>.
-        Calories use maintenance − your deficit
         <% if @suggested_calories %>
-          (now → <%= @suggested_calories[:rest_day] %> rest / <%= @suggested_calories[:training_day] %> training)
-        <% end %>.
+          Calories → <%= @suggested_calories[:rest_day] %> rest / <%= @suggested_calories[:training_day] %> training
+          <%= " (maintenance)" if @goal.life_stage_pregnancy? %>.
+        <% end %>
         Uncheck to keep the numbers you typed below.
       </div>
     </div>

@@ -14,7 +14,11 @@
   <div class="card-body">
     <div class="d-flex justify-content-between align-items-baseline mb-3">
       <h2 class="h6 text-uppercase text-muted mb-0">Weight</h2>
-      <span class="small text-muted">target <%= @goal.target_weight_kg %> kg</span>
+      <% if @goal.life_stage_pregnancy? %>
+        <span class="small text-muted">pregnancy · IOM lower path</span>
+      <% else %>
+        <span class="small text-muted">target <%= @goal.target_weight_kg %> kg</span>
+      <% end %>
     </div>
 
     <%= form_with model: @today, url: daily_log_path(@today), method: :patch, class: "row g-2 align-items-end" do |f| %>

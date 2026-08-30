@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_28_190000) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_30_100000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -82,6 +82,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_28_190000) do
     t.string "sex", default: "female", null: false
     t.string "activity_level", default: "moderate", null: false
     t.integer "target_deficit_kcal"
+    t.string "life_stage", default: "standard", null: false
+    t.decimal "pre_pregnancy_weight_kg", precision: 8, scale: 2
+    t.date "pregnancy_confirmed_on"
+    t.date "pregnancy_lmp_on"
+    t.date "pregnancy_due_on"
+    t.boolean "exercise_cleared_by_clinician", default: false, null: false
   end
 
   create_table "grocery_checks", force: :cascade do |t|

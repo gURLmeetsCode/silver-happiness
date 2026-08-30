@@ -57,16 +57,38 @@ module ApplicationHelper
   end
 
   def weight_vs_goal_label(goal, weight)
-    delta = goal.weight_delta(weight)
-    return "No weight logged" if delta.nil?
+    if goal.life_stage_pregnancy?
+      guide = goal.gestational_weight_guidance
+      return "Add LMP/due date + pre-pregnancy weight in Goals" unless guide.ready?
+      return "No weight logged" if weight.blank?
 
-    if delta.zero?
-      "At target (#{goal.target_weight_kg} kg)"
-    elsif delta.positive?
-      "#{delta} kg above target"
+      gain = guide.current_gain_kg(weight)
+      expected = guide.expected_lower_gain_kg
+      "Gain #{gain} kg (lower-path ~#{expected} kg by week #{guide.gestational_week}) · IOM #{guide.band[:total_min_kg]}–#{guide.band[:total_max_kg]} kg total"
     else
-      "#{delta.abs} kg below target"
+      delta = goal.weight_delta(weight)
+      return "No weight logged" if delta.nil?
+
+      if delta.zero?
+        "At target (#{goal.target_weight_kg} kg)"
+      elsif delta.positive?
+        "#{delta} kg above target"
+      else
+        "#{delta.abs} kg below target"
+      end
     end
+  end
+
+  def pregnancy_gain_badge(status)
+    labels = {
+      on_lower_path: [ "On lower path", "success" ],
+      within_range: [ "In IOM range", "info" ],
+      above_range: [ "Above IOM pace", "warning" ],
+      below_lower_bound: [ "Below lower bound", "secondary" ],
+      unknown: [ "—", "light" ]
+    }
+    label, css = labels.fetch(status.to_sym, [ status.to_s.humanize, "light" ])
+    tag.span(label, class: "badge text-bg-#{css}")
   end
 
   def nav_active?(key)

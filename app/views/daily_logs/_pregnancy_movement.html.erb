@@ -1,0 +1,25 @@
+<%# locals: goal %>
+<% return unless goal.life_stage_pregnancy? %>
+<section class="card day-card mb-3 border-info border-opacity-25">
+  <div class="card-body">
+    <h2 class="h5 mb-1">Pregnancy movement</h2>
+    <p class="small text-muted mb-2">
+      Based on <%= GestationalWeightGuidance::EXERCISE_SOURCE_LABEL %>.
+      Not medical advice — follow your clinician.
+    </p>
+    <% unless goal.exercise_cleared_by_clinician? %>
+      <div class="alert alert-warning small mb-2 py-2">
+        Mark “cleared for exercise” in <%= link_to "Goals", edit_goal_path %> after your clinician confirms.
+      </div>
+    <% end %>
+    <ul class="small mb-2">
+      <li>Aim for ~<strong>150 minutes/week</strong> of moderate-intensity aerobic activity when cleared.</li>
+      <li>Strength training is generally OK with modifications; avoid breath-holding / Valsalva strain.</li>
+      <li>After the first trimester, avoid prolonged <strong>supine</strong> (flat on your back) exercise.</li>
+      <li>Stop and seek care for: vaginal bleeding, regular painful contractions, amniotic fluid leakage,
+        dizziness, chest pain, calf pain/swelling, headache, muscle weakness affecting balance, or decreased fetal movement.</li>
+      <li>Don’t invent “safe 1RM %” from this app — reduce load when form or symptoms change, and ask your OB/physio for personal limits.</li>
+    </ul>
+    <p class="small text-muted mb-0">Keep logging runs, walks, and lifts as usual — the history helps postpartum recovery.</p>
+  </div>
+</section>

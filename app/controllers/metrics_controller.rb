@@ -8,5 +8,6 @@ class MetricsController < ApplicationController
     @weight_data = @cycle.weight_series
     @weight_period_data = @cycle.period_weight_series
     @weight_target_line = @cycle.target_series
+    @pregnancy_guide = @goal.gestational_weight_guidance if @goal.life_stage_pregnancy?
   end
 end

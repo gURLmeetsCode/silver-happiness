@@ -27,7 +27,11 @@ class DailyTargetSuggestions
   end
 
   def headline
-    if calorie_overshoot >= CALORIE_THRESHOLD
+    if @goal.life_stage_pregnancy?
+      if protein_shortfall >= PROTEIN_THRESHOLD
+        "You're #{protein_shortfall.round(1)} g below your #{@goal.protein_min_g} g protein minimum."
+      end
+    elsif calorie_overshoot >= CALORIE_THRESHOLD
       "You're #{calorie_overshoot.round} kcal over today's ~#{@log.calorie_target} kcal target."
     elsif protein_shortfall >= PROTEIN_THRESHOLD
       "You're #{protein_shortfall.round(1)} g below your #{@goal.protein_min_g} g protein minimum."
@@ -55,6 +59,7 @@ class DailyTargetSuggestions
   end
 
   def calorie_tips
+    return [] if @goal.life_stage_pregnancy?
     return [] unless calorie_overshoot >= CALORIE_THRESHOLD
 
     tips = reducible_items.filter_map { |item| tip_for(item) }

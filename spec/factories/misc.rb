@@ -14,6 +14,7 @@ FactoryBot.define do
     sex { "female" }
     activity_level { "moderate" }
     target_deficit_kcal { 400 }
+    life_stage { "standard" }
   end
 
   factory :grocery_check do

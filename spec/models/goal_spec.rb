@@ -20,6 +20,16 @@ RSpec.describe Goal, type: :model do
       expect(targets[:rest_day]).to eq(energy.recommended_intake)
       expect(targets[:training_day]).to eq(energy.recommended_intake + 100)
     end
+
+    it "uses maintenance with no deficit in pregnancy mode" do
+      goal = build(:goal, life_stage: "pregnancy", pregnancy_lmp_on: Date.current - 10.weeks)
+      energy = goal.energy_estimate
+      targets = goal.suggested_calorie_targets
+
+      expect(targets[:deficit]).to eq(0)
+      expect(targets[:rest_day]).to eq(energy.tdee)
+      expect(targets[:training_day]).to eq(energy.tdee + 100)
+    end
   end
 
   describe "#apply_suggested_targets!" do

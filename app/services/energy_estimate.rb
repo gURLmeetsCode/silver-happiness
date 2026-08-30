@@ -57,6 +57,8 @@ class EnergyEstimate
   # Prefer an explicit goal setting; otherwise pick ~400 kcal for her size,
   # clamped so recommended intake stays at or above 1,200.
   def recommended_deficit
+    return 0 if @goal.life_stage_pregnancy?
+
     explicit = @goal.target_deficit_kcal
     return explicit if explicit.to_i.positive?
 
@@ -68,6 +70,8 @@ class EnergyEstimate
 
   def recommended_intake
     return nil unless ready?
+
+    return tdee if @goal.life_stage_pregnancy?
 
     [ tdee - recommended_deficit, MIN_INTAKE_KCAL ].max
   end
@@ -91,10 +95,15 @@ class EnergyEstimate
   end
 
   def summary_line
-    return "Add height, age and weight in Goals to estimate your deficit." unless ready?
+    return "Add height, age and weight in Goals to estimate your energy needs." unless ready?
 
-    "Maintenance ~#{tdee} kcal (BMR #{bmr} × #{activity_label.split(' (').first.downcase}). " \
-      "A #{recommended_deficit} kcal/day deficit targets ~#{expected_weekly_loss_kg} kg/week."
+    if @goal.life_stage_pregnancy?
+      "Pregnancy mode: maintenance ~#{tdee} kcal (BMR #{bmr} × #{activity_label.split(' (').first.downcase}). " \
+        "No deficit — IOM/ACOG counseling focuses on healthy gestational gain, not cutting."
+    else
+      "Maintenance ~#{tdee} kcal (BMR #{bmr} × #{activity_label.split(' (').first.downcase}). " \
+        "A #{recommended_deficit} kcal/day deficit targets ~#{expected_weekly_loss_kg} kg/week."
+    end
   end
 
   private
