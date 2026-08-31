@@ -667,6 +667,41 @@ seed_recipe "oven-veggie-brochettes", {
   5. Log servings = skewers you ate (e.g. 2 or 3).
 STEPS
 
+seed_recipe "oven-brochettes-plate", {
+  name: "Oven brochettes plate (salad + quinoa)",
+  meal_type: :dinner,
+  regular_meal: true,
+  meal_template_slug: "oven-brochettes-plate",
+  prep_time: "45 min",
+  serves: 1,
+  position: 25,
+  water_suggestion_ml: 350,
+  description: "Complete light dinner: 2 BBQ-bean oven brochettes + a big green salad + " \
+               "½ cup cooked quinoa. Volume without calorie density. Log 1× = the plate.",
+  personal_notes: "Prefer this over plain skewers when you want a full meal. " \
+                  "Keep quinoa to ~90 g cooked; greens are free volume."
+}, [
+  [ :protein, "84 g", "tofu (2 skewers)", "Tofu", 84 ],
+  [ :produce, "80 g", "mushroom caps", "Mushrooms (button)", 80 ],
+  [ :produce, "70 g", "red pepper", "Red pepper", 70 ],
+  [ :produce, "50 g", "onion", "Onion", 50 ],
+  [ :produce, "80 g", "zucchini", "Zucchini", 80 ],
+  [ :pantry, "~3 tbsp", "BBQ bean brush", "Homemade BBQ bean brush", 40 ],
+  [ :fats, "6 g", "olive oil", "Puget Huile d'olive vierge extra", 6 ],
+  [ :produce, "2 big handfuls", "mâche / mesclun", nil, nil ],
+  [ :produce, "½", "cucumber, sliced", "Cucumber", 80 ],
+  [ :produce, "handful", "cherry tomatoes (optional)", nil, nil ],
+  [ :carbs, "90 g", "cooked quinoa (~½ cup)", "Quinoa cuit", 90 ],
+  [ :pantry, "1 tbsp", "homemade dressing", "Homemade salad dressing", 15 ]
+], <<~STEPS
+  1. Make / reheat 2 oven veggie brochettes (tofu, mushrooms, pepper, onion, zucchini;
+     BBQ bean brush; bake 200°C ~20–25 min).
+  2. Big salad: 2 big handfuls mâche/mesclun + cucumber, tomato, extra pepper if you want.
+  3. Scoop 90 g cooked quinoa (~½ cup) beside the skewers — not a heaping bowl.
+  4. Drizzle exactly 1 tbsp measured balsamic dressing on the salad.
+  5. Log 1× for the full plate.
+STEPS
+
 seed_recipe "ethiquete-bowl", {
   name: "L'Éthiquête bowl du moment",
   meal_type: :lunch,

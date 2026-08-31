@@ -597,6 +597,24 @@ if tofu && mushrooms && red_pepper && onion && zucchini && bbq_brush && puget_oi
   ])
 end
 
+cucumber_plate = Product.find_by(name: "Cucumber")
+homemade_dressing_plate = Product.find_by(name: "Homemade salad dressing")
+if tofu && mushrooms && red_pepper && onion && zucchini && bbq_brush && puget_oil &&
+   quinoa && homemade_dressing_plate && cucumber_plate
+  seed_template("oven-brochettes-plate", "Oven brochettes plate (salad + quinoa)", :dinner, [
+    [ tofu, 84, "84 g tofu (2 skewers)" ],
+    [ mushrooms, 80, "~4 caps (~80 g)" ],
+    [ red_pepper, 70, "70 g pepper" ],
+    [ onion, 50, "50 g onion" ],
+    [ zucchini, 80, "80 g zucchini" ],
+    [ bbq_brush, 40, "~3 tbsp brush" ],
+    [ puget_oil, 6, "light oil" ],
+    [ cucumber_plate, 80, "80 g cucumber" ],
+    [ quinoa, 90, "90 g cooked quinoa (~½ cup)" ],
+    [ homemade_dressing_plate, 15, "1 tbsp dressing" ]
+  ])
+end
+
 bowl_ethiquete = Product.find_by(name: "L'Éthiquête bowl du moment (pasta)")
 houmous_ethiquete = Product.find_by(name: "L'Éthiquête houmous (side)")
 fondant_ethiquete = Product.find_by(name: "L'Éthiquête fondant au chocolat")
