@@ -309,6 +309,8 @@ class DailyLog < ApplicationRecord
       workout.calories_burned = kcal.to_i if kcal.to_i.positive?
       workout.calories_burned = 0 if workout.calories_burned.nil?
       workout.distance_km = km if km.present?
+      # Clear stale distance when the field was emptied but calories remain.
+      workout.distance_km = nil if km.blank? && kcal.to_i.positive?
       workout.save!
     else
       existing.each(&:destroy)
