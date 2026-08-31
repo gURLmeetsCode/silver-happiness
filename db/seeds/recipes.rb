@@ -52,9 +52,9 @@ seed_recipe "baked-tofu", {
   prep_time: "35 min",
   serves: 4,
   position: 0,
-  description: "Make once, use in power salads and stir-fries all week. Weigh 150 g per salad serving."
+  description: "Make once, use in power salads and stir-fries. Batch = 2× 250 g packs (4 pavés). Weigh 1 pavé (125 g) per salad."
 }, [
-  [ :protein, "600 g", "firm tofu, pressed and cubed", "Tofu", 600 ],
+  [ :protein, "500 g", "firm tofu, 4 pavés (2 packs)", "Tofu", 500 ],
   [ :fats, "2 tbsp", "olive oil" ],
   [ :pantry, "2 tbsp", "soy sauce" ],
   [ :pantry, "1 tsp", "garlic powder" ],
@@ -62,9 +62,9 @@ seed_recipe "baked-tofu", {
   [ :pantry, nil, "black pepper" ]
 ], <<~STEPS
   1. Heat oven to 200°C. Line a baking tray.
-  2. Toss tofu with oil, soy sauce, and spices.
+  2. Toss 500 g tofu (4 pavés) with oil, soy sauce, and spices.
   3. Spread in a single layer. Bake 25–30 min, flip once, until golden.
-  4. Store in fridge up to 4 days. Weigh 150 g per salad.
+  4. Store fridge up to 4 days. Weigh 125 g (1 pavé) per salad.
 STEPS
 
 seed_recipe "quinoa-batch", {
@@ -535,11 +535,11 @@ seed_recipe "roasted-sweet-yellow-potatoes", {
   serves: 1,
   position: 20,
   water_suggestion_ml: 250,
-  description: "Full tray: 1 sweet potato + 4 yellow potatoes, roasted with oil. " \
+  description: "Full tray: 1 sweet potato (~200 g label size) + 4 yellow potatoes (~150 g each). " \
                "Log a plate share in Build a meal (¼, ½…) alone or with zucchini + tofu."
 }, [
   [ :carbs, "200 g", "1 whole sweet potato", "Sweet potato", 200 ],
-  [ :carbs, "600 g", "4 yellow potatoes", "Yellow potato", 600 ],
+  [ :carbs, "600 g", "4 yellow potatoes (~150 g each)", "Yellow potato", 600 ],
   [ :fats, "10 g", "1 tbsp olive oil", "Puget Huile d'olive vierge extra", 10 ]
 ], <<~STEPS
   1. Cut 1 medium sweet potato (~200 g) and 4 medium/small yellow potatoes (~600 g) into triangles.
@@ -557,13 +557,13 @@ seed_recipe "zucchini-tofu-batch", {
   serves: 1,
   position: 21,
   water_suggestion_ml: 250,
-  description: "Yellow + green zucchini with tofu. Mix leftovers with roasted potatoes in Build a meal."
+  description: "Yellow + green zucchini with 1 pack tofu (2 pavés / 250 g). Log a tray share in Build a meal."
 }, [
   [ :produce, "400 g", "yellow + green zucchini", "Zucchini", 400 ],
-  [ :protein, "300 g", "tofu cubes", "Tofu", 300 ],
+  [ :protein, "250 g", "tofu, 2 pavés / 1 pack", "Tofu", 250 ],
   [ :fats, "10 g", "1 tbsp olive oil", "Puget Huile d'olive vierge extra", 10 ]
 ], <<~STEPS
-  1. Slice ~400 g yellow + green zucchini; cube ~300 g tofu.
+  1. Slice ~400 g yellow + green zucchini; cube 250 g tofu (1× 250 g pack).
   2. Toss with oil and seasoning; roast or sauté until tender.
   3. Store. Log a tray share in Build a meal (alone or with roasted potatoes).
 STEPS
@@ -608,6 +608,65 @@ seed_recipe "lentil-smash-tacos", {
   To log: Servings = smash tacos you ate (e.g. 2 or 3).
 STEPS
 
+seed_recipe "thai-vegan-wraps", {
+  name: "Thai vegan rice-paper wraps",
+  meal_type: :lunch,
+  regular_meal: true,
+  meal_template_slug: "thai-vegan-wraps",
+  prep_time: "25 min",
+  serves: 1,
+  position: 23,
+  water_suggestion_ml: 250,
+  description: "Fresh bánh tráng rolls: tofu, cucumber, carrot, pepper. Soy-sauce dip (no peanut butter). " \
+               "Log servings = wraps. Batch of 4 uses 1 tofu pavé.",
+  personal_notes: "Dip is soy-based — not satay/peanut."
+}, [
+  [ :carbs, "1 sheet", "rice paper wrapper", "Rice paper wrappers", 10 ],
+  [ :protein, "31 g", "tofu (1/4 pavé)", "Tofu", 31 ],
+  [ :produce, "40 g", "cucumber", "Cucumber", 40 ],
+  [ :produce, "30 g", "carrot", "Carrot", 30 ],
+  [ :produce, "30 g", "red pepper", "Red pepper", 30 ],
+  [ :pantry, "~½ tbsp", "soy sauce dip", "Soy sauce", 8 ],
+  [ :pantry, "to taste", "lime/vinegar, chili, garlic in dip (batch)", nil, nil ]
+], <<~STEPS
+  Batch (4 wraps — 1 pavé tofu):
+  1. Cube or strip 125 g tofu; pan-sear lightly with a splash of soy if you like.
+  2. Julienne cucumber, carrot, and red pepper.
+  3. Dip each rice paper in warm water until pliable. Fill with tofu + veg; roll tight.
+  4. Dip: soy sauce + rice vinegar (or lime) + a little maple + chili / garlic — no peanut butter.
+  5. Log servings = wraps you ate (e.g. 2).
+STEPS
+
+seed_recipe "oven-veggie-brochettes", {
+  name: "Oven veggie brochettes (BBQ bean brush)",
+  meal_type: :dinner,
+  regular_meal: true,
+  meal_template_slug: "oven-veggie-brochettes",
+  prep_time: "40 min",
+  serves: 1,
+  position: 24,
+  water_suggestion_ml: 300,
+  description: "Baked skewers: tofu, mushroom caps, pepper, onion, zucchini with homemade BBQ bean brush. " \
+               "Log servings = skewers. Batch of 6 ≈ 1 tofu pack (250 g).",
+  personal_notes: "Oven-baked brochettes. Sauce is bean-based BBQ brush — not bottled BBQ only."
+}, [
+  [ :protein, "42 g", "tofu (1/6 pack)", "Tofu", 42 ],
+  [ :produce, "40 g", "mushroom caps", "Mushrooms (button)", 40 ],
+  [ :produce, "35 g", "red pepper", "Red pepper", 35 ],
+  [ :produce, "25 g", "onion", "Onion", 25 ],
+  [ :produce, "40 g", "zucchini", "Zucchini", 40 ],
+  [ :pantry, "~1½ tbsp", "BBQ bean brush", "Homemade BBQ bean brush", 20 ],
+  [ :fats, "3 g", "olive oil", "Puget Huile d'olive vierge extra", 3 ]
+], <<~STEPS
+  Batch (6 brochettes — 1× 250 g tofu pack):
+  1. Heat oven to 200°C. Soak wooden skewers if using.
+  2. Cube tofu, mushrooms, pepper, onion, zucchini. Light oil + seasoning.
+  3. Thread onto skewers. Brush with homemade BBQ bean sauce (blend cooked beans with tomato,
+     vinegar, smoked paprika, maple, garlic, soy; thin with water).
+  4. Bake 20–25 min, turn once, brush again halfway.
+  5. Log servings = skewers you ate (e.g. 2 or 3).
+STEPS
+
 seed_recipe "ethiquete-bowl", {
   name: "L'Éthiquête bowl du moment",
   meal_type: :lunch,
@@ -644,9 +703,10 @@ seed_recipe "ethiquete-fondant", {
   [ :pantry, "100 g", "1 portion", "L'Éthiquête fondant au chocolat", 100 ]
 ], "Log 1× full, 0.5× when shared."
 
-# Retire the legacy placeholder. Archive rather than destroy so existing links
-# and bookmarks keep resolving instead of 404ing.
-Recipe.find_by(slug: "lighter-pancakes")&.update!(status: :archived)
+# Retire unused / duplicate extras — keep history but hide from Extras & swaps.
+%w[tempeh-salad-option black-bean-tacos tofu-scramble lighter-pancakes].each do |slug|
+  Recipe.find_by(slug: slug)&.update!(status: :archived)
+end
 
 puts "Recipes loaded — #{Recipe.count} recipes, #{RecipeIngredient.count} ingredients."
 end # unless $RECIPES_SEED_HELPER_ONLY

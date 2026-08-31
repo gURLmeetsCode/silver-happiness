@@ -383,6 +383,36 @@ croissant.update!(
     calories_per_100g: 39, protein_per_100g: 1.1, carbs_per_100g: 7.0, fat_per_100g: 0.1,
     default_serving_g: 150, serving_label: "1 medium (~150 g)",
     notes: "CIQUAL oignon cru."
+  },
+  "Rice paper wrappers" => {
+    calories_per_100g: 333, protein_per_100g: 0.5, carbs_per_100g: 82.0, fat_per_100g: 0.5,
+    default_serving_g: 10, serving_label: "1 sheet (~10 g dry)",
+    notes: "Typical round bánh tráng sheet ~8–12 g dry."
+  },
+  "Cucumber" => {
+    calories_per_100g: 15, protein_per_100g: 0.7, carbs_per_100g: 2.5, fat_per_100g: 0.1,
+    default_serving_g: 100, serving_label: "100 g (~⅓ cucumber)",
+    notes: "CIQUAL concombre cru."
+  },
+  "Carrot" => {
+    calories_per_100g: 36, protein_per_100g: 0.8, carbs_per_100g: 6.5, fat_per_100g: 0.2,
+    default_serving_g: 80, serving_label: "1 medium (~80 g)",
+    notes: "CIQUAL carotte crue."
+  },
+  "Mushrooms (button)" => {
+    calories_per_100g: 22, protein_per_100g: 2.2, carbs_per_100g: 2.0, fat_per_100g: 0.3,
+    default_serving_g: 80, serving_label: "~4 medium caps (~80 g)",
+    notes: "CIQUAL champignon de Paris cru."
+  },
+  "Soy sauce" => {
+    calories_per_100g: 53, protein_per_100g: 8.0, carbs_per_100g: 4.9, fat_per_100g: 0.0,
+    default_serving_g: 15, serving_label: "1 tbsp (~15 g)",
+    notes: "Typical sauce soja."
+  },
+  "Homemade BBQ bean brush" => {
+    calories_per_100g: 95, protein_per_100g: 3.5, carbs_per_100g: 16.0, fat_per_100g: 1.5,
+    default_serving_g: 30, serving_label: "2 tbsp brush (~30 g)",
+    notes: "Blended beans + tomato + vinegar + smoked paprika + maple for oven brochettes."
   }
 }.each do |name, attrs|
   product = Product.find_or_initialize_by(name: name)
@@ -516,7 +546,7 @@ seed_template("pasta-salad-tofu-dinner", "Pasta salad + tofu", :dinner, [
 zucchini = Product.find_by!(name: "Zucchini")
 seed_template("zucchini-tofu-batch", "Zucchini + tofu (batch)", :dinner, [
   [ zucchini, 400, "yellow + green zucchini (~400 g)" ],
-  [ tofu, 300, "tofu cubes (~300 g / ~2½ pavés)" ],
+  [ tofu, 250, "2 pavés / 1 pack (~250 g)" ],
   [ puget_oil, 10, "1 tbsp olive oil" ]
 ])
 
@@ -533,6 +563,37 @@ if tortilla_mais && lentils_blondes && tomacouli && nachips && onion
     [ onion, 25, "25 g onion + shallot (1/8 batch)" ],
     [ puget_oil, 9, "9 g oil (sauté + fry)" ],
     [ nachips, 5, "5 g crushed Nachips (1/8 batch)" ]
+  ])
+end
+
+rice_paper = Product.find_by(name: "Rice paper wrappers")
+cucumber = Product.find_by(name: "Cucumber")
+carrot = Product.find_by(name: "Carrot")
+soy_sauce = Product.find_by(name: "Soy sauce")
+red_pepper = Product.find_by(name: "Red pepper")
+if rice_paper && cucumber && carrot && soy_sauce && red_pepper && tofu
+  seed_template("thai-vegan-wraps", "Thai vegan rice-paper wraps", :lunch, [
+    [ rice_paper, 10, "1 sheet (~10 g)" ],
+    [ tofu, 31, "31 g tofu (1/4 pavé)" ],
+    [ cucumber, 40, "40 g cucumber" ],
+    [ carrot, 30, "30 g carrot" ],
+    [ red_pepper, 30, "30 g red pepper" ],
+    [ soy_sauce, 8, "~½ tbsp soy dip" ]
+  ])
+end
+
+mushrooms = Product.find_by(name: "Mushrooms (button)")
+bbq_brush = Product.find_by(name: "Homemade BBQ bean brush")
+zucchini = Product.find_by(name: "Zucchini")
+if tofu && mushrooms && red_pepper && onion && zucchini && bbq_brush && puget_oil
+  seed_template("oven-veggie-brochettes", "Oven veggie brochettes (BBQ bean brush)", :dinner, [
+    [ tofu, 42, "42 g tofu (1/6 pack)" ],
+    [ mushrooms, 40, "~2 caps (~40 g)" ],
+    [ red_pepper, 35, "35 g pepper" ],
+    [ onion, 25, "25 g onion" ],
+    [ zucchini, 40, "40 g zucchini" ],
+    [ bbq_brush, 20, "~1½ tbsp brush" ],
+    [ puget_oil, 3, "light oil" ]
   ])
 end
 
