@@ -90,7 +90,6 @@ class DailyLogsController < ApplicationController
     @products = Product.order(:name)
     @custom_meal = MealEntry.new
     @workout = Workout.new
-    @target_suggestions = DailyTargetSuggestions.new(@daily_log)
     @suggested_strength = WorkoutPlan.suggested_for(@daily_log.logged_on)
     @suggestion_context = WorkoutPlan.suggestion_context(@daily_log.logged_on)
     @workout_plans = WorkoutPlan.ordered

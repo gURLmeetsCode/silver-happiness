@@ -19,8 +19,6 @@
 
 <%= render "summary_strip", daily_log: @daily_log, goal: goal %>
 
-<%= render "target_suggestions", suggestions: @target_suggestions %>
-
 <div data-controller="day-tabs"
      data-day-tabs-card-tabs-value="<%= { meals: "food", water: "food", body: "body" }.to_json %>">
   <ul class="nav nav-pills day-tabs mb-3" role="tablist">

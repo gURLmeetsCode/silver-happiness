@@ -3,7 +3,6 @@ class MetricsController < ApplicationController
     @goal = Goal.current
     @today = DailyLog.today
     @week = WeeklySummary.new
-    @target_suggestions = DailyTargetSuggestions.new(@today)
     @cycle = WeightCycleInsight.call(goal: @goal)
     @weight_data = @cycle.weight_series
     @weight_period_data = @cycle.period_weight_series

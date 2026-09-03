@@ -97,10 +97,6 @@ class DailyLog < ApplicationRecord
     Goal.current.calorie_target_for(self)
   end
 
-  def target_suggestions
-    DailyTargetSuggestions.new(self)
-  end
-
   def net_calories
     total_calories - calories_burned
   end
