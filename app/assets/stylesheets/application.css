@@ -210,6 +210,18 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+.cut-nudge + .cut-nudge {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.cut-nudge-dismissed {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
 .home-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

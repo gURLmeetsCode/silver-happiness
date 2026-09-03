@@ -59,6 +59,7 @@ Rails.application.routes.draw do
   end
 
   resources :outfit_photos, only: [ :index, :new, :create, :destroy ]
+  resources :habit_suggestion_feedbacks, only: [ :create ]
 
   get "today", to: "daily_logs#today"
 end

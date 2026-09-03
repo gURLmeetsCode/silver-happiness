@@ -1,0 +1,46 @@
+<%# locals: suggestions, dismissed, recipes %>
+<% if suggestions.any? || dismissed.any? %>
+  <section class="card home-card mb-4">
+    <div class="card-body">
+      <h2 class="h6 text-uppercase text-muted mb-1">For the cut</h2>
+      <p class="small text-muted mb-3">From your last few weeks. Dismiss hides it for a week; not helpful hides it for good.</p>
+
+      <% suggestions.each do |nudge| %>
+        <div class="cut-nudge">
+          <div class="fw-semibold"><%= nudge.title %></div>
+          <p class="small mb-2 mt-1"><%= nudge.body %></p>
+          <% recipe = recipes[nudge.recipe_slug] %>
+          <% if recipe %>
+            <p class="small mb-2">
+              <%= link_to recipe.name, recipe_path(recipe), class: "text-decoration-none" %>
+            </p>
+          <% end %>
+          <div class="d-flex flex-wrap gap-2">
+            <%= button_to "Dismiss", habit_suggestion_feedbacks_path,
+                  params: { suggestion_key: nudge.key, status: "dismissed" },
+                  form_class: "d-inline",
+                  class: "btn btn-sm btn-outline-secondary" %>
+            <%= button_to "Not helpful", habit_suggestion_feedbacks_path,
+                  params: { suggestion_key: nudge.key, status: "not_helpful" },
+                  form_class: "d-inline",
+                  class: "btn btn-sm btn-link text-muted text-decoration-none px-1" %>
+          </div>
+        </div>
+      <% end %>
+
+      <% if dismissed.any? %>
+        <div class="cut-nudge-dismissed">
+          <% dismissed.each do |nudge| %>
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+              <span class="small text-muted">Hidden: <%= nudge.title %></span>
+              <%= button_to "Not helpful", habit_suggestion_feedbacks_path,
+                    params: { suggestion_key: nudge.key, status: "not_helpful" },
+                    form_class: "d-inline",
+                    class: "btn btn-sm btn-link text-muted text-decoration-none px-0" %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </section>
+<% end %>

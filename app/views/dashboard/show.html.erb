@@ -70,6 +70,8 @@
   </div>
 </section>
 
+<%= render "cut_nudges", suggestions: @cut_suggestions, dismissed: @cut_dismissed, recipes: @nudge_recipes %>
+
 <% if @daily_inspo %>
   <section class="card home-card home-inspo mb-4">
     <div class="card-body">

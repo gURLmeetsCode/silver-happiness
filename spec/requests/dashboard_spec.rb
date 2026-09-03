@@ -73,6 +73,27 @@ RSpec.describe "Home", type: :request do
 
       expect(response.body).not_to include("Daily inspo")
     end
+
+    it "shows cut nudges from weekend eating habits" do
+      travel_to Time.zone.local(2026, 9, 5, 10, 0, 0) do
+        (Date.new(2026, 8, 31)..Date.new(2026, 9, 4)).each do |date|
+          log = DailyLog.find_or_create_by!(logged_on: date)
+          create(:meal_entry, daily_log: log, calories: 1700, name: "Weekday meals")
+        end
+        [ Date.new(2026, 8, 29), Date.new(2026, 8, 30) ].each do |date|
+          log = DailyLog.find_or_create_by!(logged_on: date)
+          create(:meal_entry, daily_log: log, calories: 2500, name: "Weekend meals")
+        end
+
+        get root_path
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("For the cut")
+        expect(response.body).to include("Weekends are the leak")
+        expect(response.body).to include("Dismiss")
+        expect(response.body).to include("Not helpful")
+      end
+    end
   end
 
   describe "GET /dashboard" do
