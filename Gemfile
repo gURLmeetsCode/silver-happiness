@@ -65,3 +65,5 @@ end
 
 gem "prawn", "~> 2.4"
 gem "prawn-table", "~> 0.2.2"
+# Prawn depends on matrix; Ruby 3.1+ no longer bundles it by default (Pi runs 3.3).
+gem "matrix"

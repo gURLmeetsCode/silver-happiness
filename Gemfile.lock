@@ -371,6 +371,7 @@ DEPENDENCIES
   factory_bot_rails
   groupdate
   importmap-rails
+  matrix
   mini_magick (~> 4.12)
   prawn (~> 2.4)
   prawn-table (~> 0.2.2)
