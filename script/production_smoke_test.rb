@@ -78,6 +78,22 @@ record_error(errors, "photo display") do
   Rails.application.routes.url_helpers.rails_blob_path(photo.image, only_path: true)
 end
 
+record_error(errors, "GET /metrics") do
+  session.get("/metrics", headers: https)
+  errors << "GET /metrics returned HTTP #{session.response.status}" unless session.response.successful?
+end
+
+record_error(errors, "GET /metrics/export PDF") do
+  session.get("/metrics/export", headers: https)
+  unless session.response.successful?
+    errors << "GET /metrics/export returned HTTP #{session.response.status}"
+    next
+  end
+  unless session.response.body.to_s.start_with?("%PDF")
+    errors << "GET /metrics/export did not return a PDF"
+  end
+end
+
 # Uploads are downscaled with MiniMagick, which needs the ImageMagick binary.
 record_error(errors, "ImageMagick available") do
   MiniMagick.cli_version

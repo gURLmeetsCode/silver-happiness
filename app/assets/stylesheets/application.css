@@ -186,6 +186,29 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+.metrics-insight {
+  height: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+.metrics-insight--warning {
+  border-color: rgba(184, 92, 56, 0.35);
+  background: rgba(184, 92, 56, 0.06);
+}
+
+.metrics-insight--success {
+  border-color: rgba(52, 120, 90, 0.35);
+  background: rgba(52, 120, 90, 0.06);
+}
+
+.metrics-insight--info {
+  border-color: rgba(52, 92, 103, 0.25);
+  background: rgba(52, 92, 103, 0.05);
+}
+
 /* --- Home screen --- */
 
 .home-hero {

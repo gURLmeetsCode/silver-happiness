@@ -62,3 +62,6 @@ group :test do
   gem "shoulda-matchers"
   gem "rspec_junit_formatter"
 end
+
+gem "prawn", "~> 2.4"
+gem "prawn-table", "~> 0.2.2"

@@ -6,7 +6,9 @@ Rails.application.routes.draw do
   root "dashboard#show"
 
   resource :dashboard, only: :show, controller: "dashboard"
-  resource :metrics, only: :show, controller: "metrics"
+  resource :metrics, only: :show, controller: "metrics" do
+    get :export
+  end
 
   resource :goal, only: [ :edit, :update ]
   resource :journal, only: :show

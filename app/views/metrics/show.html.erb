@@ -9,9 +9,155 @@
     <h1 class="h3 mb-1">Metrics</h1>
     <p class="text-muted mb-0"><%= Date.current.strftime("%A, %B %-d") %></p>
   </div>
-  <%= link_to "Today’s log", daily_log_path(@today), class: "btn btn-outline-secondary" %>
+  <div class="d-flex flex-wrap gap-2">
+    <%= link_to export_metrics_path, class: "btn btn-outline-dark" do %>
+      <i class="bi bi-filetype-pdf me-1"></i> Export PDF
+    <% end %>
+    <%= link_to "Today’s log", daily_log_path(@today), class: "btn btn-outline-secondary" %>
+  </div>
 </div>
 
+<%# --- Patterns (the analysis the weekly charts alone don't show) --- %>
+<section class="card stat-card mb-4">
+  <div class="card-body">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+      <div>
+        <h2 class="h5 mb-1">What the data says</h2>
+        <p class="text-muted small mb-0">
+          Last <%= MetricsTrends::LOOKBACK_DAYS %> days — rolling weight, weekday vs weekend, intake vs maintenance.
+        </p>
+      </div>
+    </div>
+
+    <p class="mb-3"><%= @trends.headline %></p>
+
+    <% if @trends.ready? %>
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="border rounded p-2 bg-white h-100">
+            <div class="small text-muted">7-day avg weight</div>
+            <div class="fs-5 fw-semibold"><%= @trends.rolling_latest ? "#{@trends.rolling_latest} kg" : "—" %></div>
+            <% if @trends.weight_delta %>
+              <div class="small text-muted"><%= @trends.weight_delta %> kg this window</div>
+            <% end %>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="border rounded p-2 bg-white h-100">
+            <div class="small text-muted">Avg eaten</div>
+            <div class="fs-5 fw-semibold"><%= @trends.avg_eaten ? "#{@trends.avg_eaten}" : "—" %></div>
+            <div class="small text-muted">
+              <% if @trends.tdee %>
+                vs ~<%= @trends.tdee %> TDEE
+                <% if @trends.gap_vs_tdee %>
+                  · <%= @trends.gap_vs_tdee >= 0 ? "−" : "+" %><%= @trends.gap_vs_tdee.abs %>/day
+                <% end %>
+              <% else %>
+                kcal/day
+              <% end %>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="border rounded p-2 bg-white h-100">
+            <div class="small text-muted">Weekday / weekend</div>
+            <div class="fs-5 fw-semibold">
+              <%= @trends.weekday_avg || "—" %><span class="text-muted fw-normal"> / </span><%= @trends.weekend_avg || "—" %>
+            </div>
+            <div class="small text-muted">avg kcal</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="border rounded p-2 bg-white h-100">
+            <div class="small text-muted">To <%= @trends.target_weight %> kg</div>
+            <div class="fs-5 fw-semibold">
+              <% if @trends.kg_to_goal %>
+                <%= @trends.kg_to_goal.positive? ? "#{@trends.kg_to_goal} kg" : "At/under" %>
+              <% else %>
+                —
+              <% end %>
+            </div>
+            <div class="small text-muted"><%= weight_vs_goal_label(@goal, @trends.last_weight || @today.weight_kg) %></div>
+          </div>
+        </div>
+      </div>
+
+      <% if @trends.insights.any? %>
+        <div class="row g-3 mb-4">
+          <% @trends.insights.each do |insight| %>
+            <div class="col-12 col-md-6">
+              <div class="metrics-insight metrics-insight--<%= insight.tone %>">
+                <div class="fw-semibold mb-1"><%= insight.title %></div>
+                <p class="small mb-0"><%= insight.body %></p>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <% if @trends.weight_series.any? %>
+        <h3 class="h6 text-muted">Weight + 7-day rolling average</h3>
+        <p class="small text-muted mb-2">Daily scale jumps; the rolling line is the cut signal.</p>
+        <%= line_chart [
+              {
+                name: "Morning weight",
+                data: @trends.weight_series,
+                dataset: { borderColor: "#345c67", backgroundColor: "transparent", pointRadius: 3 }
+              },
+              {
+                name: "7-day average",
+                data: @trends.rolling_weight_series,
+                dataset: { borderColor: "#b85c38", backgroundColor: "transparent", pointRadius: 0, borderWidth: 2.5 }
+              },
+              {
+                name: "Target",
+                data: @trends.weight_series.map { |label, _| [ label, @trends.target_weight ] },
+                dataset: { borderColor: "#8a9a9e", borderDash: [ 6, 4 ], pointRadius: 0, backgroundColor: "transparent" }
+              }
+            ], suffix: " kg", library: { scales: { y: { beginAtZero: false } } } %>
+      <% end %>
+
+      <% if @trends.weekly_avg_eaten.any? %>
+        <h3 class="h6 text-muted mt-4">Weekly average calories eaten</h3>
+        <p class="small text-muted mb-2">
+          One bar per week. Maintenance ~<%= @trends.tdee || "—" %> kcal —
+          weeks above that undo quieter ones.
+        </p>
+        <%= column_chart [
+              { name: "Avg eaten", data: @trends.weekly_avg_eaten }
+            ], suffix: " kcal", library: { scales: { y: { beginAtZero: false } } } %>
+      <% end %>
+
+      <% if @trends.spikes.any? %>
+        <h3 class="h6 text-muted mt-4">Highest days (≥ 2,100 kcal)</h3>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th class="text-end">Eaten</th>
+                <th>What stood out</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @trends.spikes.each do |spike| %>
+                <tr>
+                  <td><%= spike.date.strftime("%a %-d %b") %></td>
+                  <td class="text-end fw-semibold"><%= spike.calories %></td>
+                  <td class="small text-muted"><%= spike.label %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="text-muted small mb-0">Keep logging meals and weight — patterns show up after about a week.</p>
+    <% end %>
+  </div>
+</section>
+
+<%# --- Today (compact) --- %>
 <h2 class="h6 text-uppercase text-muted mb-2">Today</h2>
 <div class="row g-3 mb-4">
   <div class="col-6 col-md-3">
@@ -109,6 +255,7 @@
   </div>
 </div>
 
+<%# --- This week --- %>
 <div class="card stat-card mb-4">
   <div class="card-body">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
@@ -227,11 +374,12 @@
   </div>
 </div>
 
+<%# --- Cycle context (period water) --- %>
 <div class="card stat-card">
   <div class="card-body">
-    <h2 class="h5 mb-1">Weight vs target (<%= @goal.target_weight_kg %> kg)</h2>
+    <h2 class="h5 mb-1">Cycle &amp; the scale</h2>
     <p class="small text-muted mb-3">
-      Last <%= WeightCycleInsight::DAYS %> days. Dots mark weigh-ins on period days — those bumps are often water.
+      Last <%= WeightCycleInsight::DAYS %> days. Period weigh-ins often look like stalls — usually water.
     </p>
     <% if @weight_data.any? %>
       <%= line_chart [
@@ -262,7 +410,6 @@
           ], suffix: " kg", library: { scales: { y: { beginAtZero: false } } } %>
 
       <div class="border rounded p-3 bg-white mt-3">
-        <h3 class="h6 mb-2">Cycle &amp; the scale</h3>
         <% if @cycle.enough_to_compare? %>
           <div class="row g-3 mb-2">
             <div class="col-6 col-md-4">
@@ -287,7 +434,6 @@
         <% end %>
         <p class="small text-muted mb-0"><%= @cycle.summary %></p>
       </div>
-      <p class="small text-muted mb-0 mt-2"><%= weight_vs_goal_label(@goal, @week.latest_weight || @today.weight_kg) %></p>
     <% else %>
       <p class="text-muted mb-0">Log weight on your daily page to see a chart.</p>
     <% end %>
