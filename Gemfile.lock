@@ -141,7 +141,8 @@ GEM
       net-smtp
     marcel (1.2.1)
     matrix (0.4.3)
-    mini_magick (4.13.2)
+    mini_magick (5.4.0)
+      logger
     mini_mime (1.1.5)
     mini_portile2 (2.8.9)
     minitest (6.0.6)
@@ -372,7 +373,7 @@ DEPENDENCIES
   groupdate
   importmap-rails
   matrix
-  mini_magick (~> 4.12)
+  mini_magick (~> 5.4)
   prawn (~> 2.4)
   prawn-table (~> 0.2.2)
   propshaft
