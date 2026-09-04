@@ -233,6 +233,47 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+.cut-status-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.cut-status-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.cut-status-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6c757d;
+}
+
+.cut-status-value {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.cut-status-hint {
+  font-size: 0.72rem;
+  color: #6c757d;
+  line-height: 1.25;
+}
+
+.water-bottle-levels summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.water-bottle-levels summary::-webkit-details-marker {
+  display: none;
+}
+
 .cut-nudge + .cut-nudge {
   margin-top: 1rem;
   padding-top: 1rem;
@@ -551,7 +592,7 @@ body {
 
 @media (min-width: 768px) {
   .summary-strip {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
   }
 }
 

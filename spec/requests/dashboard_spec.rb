@@ -36,7 +36,23 @@ RSpec.describe "Home", type: :request do
       expect(response.body).to include("daily_log[sleep_quality]")
     end
 
-    it "links to meal, water and metrics instead of showing them inline" do
+    it "shows cut status and one-tap water on home" do
+      today = DailyLog.today
+      today.update!(water_ml: 500)
+      today.meal_entries.create!(name: "Toast", meal_type: :breakfast, calories: 200, protein_g: 8)
+
+      get root_path
+
+      expect(response.body).to include("Today’s cut")
+      expect(response.body).to include("500 ml")
+      expect(response.body).to include("ml to goal")
+      expect(response.body).to include("+ 250 ml")
+      expect(response.body).to include(add_water_daily_log_path(today))
+      expect(response.body).to include('name="amount_ml"')
+      expect(response.body).to include(metrics_path)
+    end
+
+    it "links to meals and metrics from home shortcuts" do
       get root_path
       today = DailyLog.today
 

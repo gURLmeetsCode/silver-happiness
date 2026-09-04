@@ -1,26 +1,78 @@
+<%# locals: daily_log, goal %>
+<% water_pct = goal.water_goal_ml.positive? ? [ (daily_log.water_ml.to_f / goal.water_goal_ml * 100).round, 100 ].min : 0 %>
+<% left = daily_log.water_remaining_ml(goal) %>
+<% return_to = daily_log_path(daily_log, anchor: "water") %>
+
 <div class="card day-card mb-3" id="water">
   <div class="card-body">
     <h2 class="h5 mb-1">Water today</h2>
     <p class="mb-2">
       <span class="fs-4 fw-semibold"><%= daily_log.water_ml %> ml</span>
-      <span class="text-muted small">(~<%= daily_log.water_glasses %> glasses · goal <%= goal.water_goal_ml %> ml)</span>
+      <span class="text-muted small">
+        (~<%= daily_log.water_glasses %> glasses · goal <%= goal.water_goal_ml %> ml
+        <% if left.positive? %>
+          · <strong><%= left %> ml left</strong>
+        <% else %>
+          · <strong>goal hit</strong>
+        <% end %>)
+      </span>
     </p>
-    <div class="progress mb-3" style="height: 8px;">
-      <% water_pct = goal.water_goal_ml.positive? ? [ (daily_log.water_ml.to_f / goal.water_goal_ml * 100).round, 100 ].min : 0 %>
-      <div class="progress-bar bg-info" role="progressbar" style="width: <%= water_pct %>%"></div>
+    <div class="progress mb-3" style="height: 8px;" role="progressbar"
+         aria-valuenow="<%= water_pct %>" aria-valuemin="0" aria-valuemax="100"
+         aria-label="Water progress">
+      <div class="progress-bar bg-info" style="width: <%= water_pct %>%"></div>
     </div>
 
-    <p class="small fw-semibold text-muted mb-2">Volvic 1.5 L bottle — tap how much you've drunk:</p>
-    <div class="d-flex flex-wrap gap-2 mb-2">
-      <% [ 250, 500, 750, 1000, 1250, 1500 ].each do |ml| %>
-        <%= button_to "#{ml} ml",
-              set_water_daily_log_path(daily_log, amount_ml: ml),
+    <p class="small fw-semibold text-muted mb-2">Add what you just drank</p>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <% [ 250, 500, 750, 1500 ].each do |ml| %>
+        <%= button_to "+ #{ml} ml",
+              add_water_daily_log_path(daily_log),
               method: :post,
-              class: "btn btn-sm #{daily_log.water_ml == ml ? 'btn-info' : 'btn-outline-info'}" %>
+              params: { amount_ml: ml, return_to: return_to },
+              class: "btn btn-sm btn-info",
+              form: { class: "d-inline" },
+              data: { disable_with: "…" } %>
+      <% end %>
+      <% if daily_log.water_ml.positive? %>
+        <%= button_to "− 250 ml",
+              add_water_daily_log_path(daily_log),
+              method: :post,
+              params: { amount_ml: -250, return_to: return_to },
+              class: "btn btn-sm btn-outline-secondary",
+              form: { class: "d-inline" },
+              data: { disable_with: "…" } %>
       <% end %>
     </div>
-    <p class="small text-muted mb-0">
-      Meal “+ 1 cup” buttons add water too. Bottle buttons set your total for the day.
+
+    <details class="water-bottle-levels">
+      <summary class="small text-muted mb-2">Set Volvic bottle level (overwrites total)</summary>
+      <p class="small text-muted mb-2">
+        Use when you’re marking how far down a 1.5 L bottle is — this replaces today’s total,
+        so meal “+ cup” adds already counted stay in sync only if you set after meals.
+      </p>
+      <div class="d-flex flex-wrap gap-2 mb-1">
+        <% [ 250, 500, 750, 1000, 1250, 1500 ].each do |ml| %>
+          <%= button_to "#{ml} ml",
+                set_water_daily_log_path(daily_log),
+                method: :post,
+                params: { amount_ml: ml, return_to: return_to },
+                class: "btn btn-sm #{daily_log.water_ml == ml ? 'btn-info' : 'btn-outline-info'}",
+                form: { class: "d-inline" } %>
+        <% end %>
+        <% if daily_log.water_ml.positive? %>
+          <%= button_to "Reset 0",
+                set_water_daily_log_path(daily_log),
+                method: :post,
+                params: { amount_ml: 0, return_to: return_to },
+                class: "btn btn-sm btn-outline-secondary",
+                form: { class: "d-inline", data: { turbo_confirm: "Clear today’s water total?" } } %>
+        <% end %>
+      </div>
+    </details>
+
+    <p class="small text-muted mb-0 mt-3">
+      Meal “+ cup” buttons still add water. Prefer <strong>Add</strong> for sips through the day.
     </p>
   </div>
 </div>

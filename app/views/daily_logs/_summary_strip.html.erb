@@ -27,6 +27,18 @@
     <span class="summary-hint">&nbsp;</span>
   </div>
   <div class="summary-cell">
+    <span class="summary-label">Water</span>
+    <span class="summary-value"><%= daily_log.water_ml %></span>
+    <span class="summary-hint">
+      <% left = daily_log.water_remaining_ml(goal) %>
+      <% if left.positive? %>
+        <%= left %> ml left
+      <% else %>
+        of <%= goal.water_goal_ml %> ml
+      <% end %>
+    </span>
+  </div>
+  <div class="summary-cell">
     <span class="summary-label">Weight</span>
     <span class="summary-value"><%= daily_log.weight_kg || "—" %></span>
     <span class="summary-hint">

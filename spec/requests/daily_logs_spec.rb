@@ -210,6 +210,24 @@ RSpec.describe "Daily logs", type: :request do
 
       expect(log.reload.water_ml).to eq(250)
     end
+
+    it "can undo a glass without going below zero" do
+      log = create(:daily_log, water_ml: 200)
+
+      post add_water_daily_log_path(log), params: { amount_ml: -250, return_to: root_path }
+
+      expect(response).to redirect_to(root_path)
+      expect(log.reload.water_ml).to eq(0)
+    end
+
+    it "honours return_to back to home" do
+      log = create(:daily_log, water_ml: 0)
+
+      post add_water_daily_log_path(log), params: { amount_ml: 250, return_to: root_path }
+
+      expect(response).to redirect_to(root_path)
+      expect(log.reload.water_ml).to eq(250)
+    end
   end
 
   describe "POST /daily_logs/:id/set_water" do
