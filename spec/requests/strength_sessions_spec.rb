@@ -47,6 +47,26 @@ RSpec.describe "Strength sessions", type: :request do
       expect(session.strength_exercise_logs.map(&:name)).to eq([ "Squat" ])
     end
 
+    it "redirects to the existing session when that plan is already logged today" do
+      plan = create(:workout_plan)
+      existing = create(:strength_session, daily_log: log, workout_plan: plan)
+
+      expect {
+        post daily_log_strength_sessions_path(log), params: {
+          strength_session: {
+            workout_plan_id: plan.id,
+            location: "gym",
+            perceived_difficulty: 5,
+            duration_min: 30,
+            calories_burned: 150
+          }
+        }
+      }.not_to change(log.strength_sessions, :count)
+
+      expect(response).to redirect_to(daily_log_strength_session_path(log, existing))
+      expect(flash[:notice]).to include("already logged")
+    end
+
     it "re-renders with 422 when the difficulty is out of range" do
       post daily_log_strength_sessions_path(log), params: {
         strength_session: { location: "gym", perceived_difficulty: 42 }

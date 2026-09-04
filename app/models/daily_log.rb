@@ -30,6 +30,8 @@ class DailyLog < ApplicationRecord
 
   def self.for_date(date)
     find_or_create_by!(logged_on: date)
+  rescue ActiveRecord::RecordNotUnique
+    find_by!(logged_on: date)
   end
 
   def self.today

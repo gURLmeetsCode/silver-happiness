@@ -10,6 +10,11 @@ class StrengthSession < ApplicationRecord
   validates :location, presence: true
   validates :perceived_difficulty, inclusion: { in: 1..10 }, allow_nil: true
   validates :calories_burned, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :workout_plan_id, uniqueness: {
+    scope: :daily_log_id,
+    allow_nil: true,
+    message: "is already logged for this day"
+  }
 
   before_validation :purge_exercise_logs_for_runna
 

@@ -10,6 +10,7 @@ class Recipe < ApplicationRecord
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
+  validates :name, uniqueness: { case_sensitive: false, message: "already exists — open that recipe instead of creating a twin" }
 
   before_validation :generate_slug, on: :create
 

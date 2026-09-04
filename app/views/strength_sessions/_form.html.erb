@@ -80,7 +80,7 @@
   <% end %>
 
   <div class="col-12 d-flex gap-2">
-    <%= f.submit "Save session", class: "btn btn-primary btn-lg" %>
+    <%= f.submit "Save session", class: "btn btn-primary btn-lg", data: { disable_with: "Saving…" } %>
     <%= link_to "Cancel", @daily_log, class: "btn btn-outline-secondary btn-lg" %>
   </div>
 <% end %>

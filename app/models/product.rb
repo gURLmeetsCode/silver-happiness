@@ -2,10 +2,32 @@ class Product < ApplicationRecord
   has_many :meal_template_items, dependent: :restrict_with_error
   has_many :recipe_ingredients, dependent: :nullify
 
-  validates :name, presence: true
+  validates :name, presence: true, uniqueness: { case_sensitive: false }
+  validates :barcode, uniqueness: { allow_nil: true }
   validates :calories_per_100g, :protein_per_100g, presence: true
   validates :water_volume_ml, numericality: { greater_than: 0 }, allow_nil: true
   validate :water_volume_only_for_beverages
+
+  before_validation :normalize_blank_barcode
+
+  # Create or update by barcode (when present) else by name — never insert a twin.
+  def self.upsert_from_attrs!(attrs)
+    attrs = attrs.to_h.with_indifferent_access
+    barcode = attrs[:barcode].to_s.strip.presence
+    name = attrs[:name].to_s.strip
+
+    product = if barcode.present?
+      find_by(barcode: barcode) || find_by("LOWER(name) = ?", name.downcase)
+    else
+      find_by("LOWER(name) = ?", name.downcase)
+    end
+    product ||= new
+
+    product.assign_attributes(attrs)
+    product.barcode = barcode
+    product.save!
+    product
+  end
 
   def beverage?
     beverage
@@ -85,6 +107,10 @@ class Product < ApplicationRecord
   end
 
   private
+
+  def normalize_blank_barcode
+    self.barcode = barcode.to_s.strip.presence
+  end
 
   def water_volume_only_for_beverages
     return if water_volume_ml.blank?

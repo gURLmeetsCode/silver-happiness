@@ -106,6 +106,26 @@ RSpec.describe "Recipes", type: :request do
       expect(Recipe.last).to be_user_created
     end
 
+    it "rejects a second recipe with the same name" do
+      create(:recipe, :user_created, :with_ingredients, name: "My dinner")
+
+      expect {
+        post recipes_path, params: {
+          recipe: {
+            name: "my dinner",
+            meal_type: "dinner",
+            serves: 1,
+            recipe_ingredients_attributes: {
+              "0" => { name: "Tofu", amount: "100 g", grocery_category: "protein", position: 0 }
+            }
+          }
+        }
+      }.not_to change(Recipe, :count)
+
+      expect(response).to have_http_status(422)
+      expect(response.body).to include("already exists")
+    end
+
     it "re-renders with 422 when the recipe has no ingredients" do
       post recipes_path, params: { recipe: { name: "Empty", meal_type: "dinner" } }
 

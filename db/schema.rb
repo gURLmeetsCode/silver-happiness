@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_03_080000) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_04_190000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -187,7 +187,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_03_080000) do
     t.boolean "quick_log", default: false, null: false
     t.boolean "beverage", default: false, null: false
     t.integer "water_volume_ml"
-    t.index ["barcode"], name: "index_products_on_barcode"
+    t.index "LOWER(name)", name: "index_products_on_lower_name", unique: true
+    t.index ["barcode"], name: "index_products_on_barcode_unique", unique: true, where: "barcode IS NOT NULL"
     t.index ["beverage"], name: "index_products_on_beverage"
     t.index ["quick_log"], name: "index_products_on_quick_log"
   end
@@ -235,6 +236,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_03_080000) do
     t.integer "status", default: 0, null: false
     t.boolean "user_created", default: false, null: false
     t.integer "water_suggestion_ml", default: 250, null: false
+    t.index "LOWER(name)", name: "index_recipes_on_lower_name", unique: true
     t.index ["meal_template_id"], name: "index_recipes_on_meal_template_id"
     t.index ["slug"], name: "index_recipes_on_slug", unique: true
   end
@@ -263,6 +265,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_03_080000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "calories_burned"
+    t.index ["daily_log_id", "workout_plan_id"], name: "index_strength_sessions_unique_plan_per_day", unique: true, where: "workout_plan_id IS NOT NULL"
     t.index ["daily_log_id"], name: "index_strength_sessions_on_daily_log_id"
     t.index ["workout_plan_id"], name: "index_strength_sessions_on_workout_plan_id"
   end

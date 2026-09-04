@@ -38,6 +38,11 @@ class MealEntriesController < ApplicationController
 
     finalize_recipe_nutrition! if @recipe
 
+    if (dup = recent_duplicate_meal)
+      redirect_to @daily_log, notice: "#{dup.name} is already logged — skipped duplicate."
+      return
+    end
+
     if @entry.save
       apply_product_water!(@entry) if params[:product_id].present?
       notice = build_create_notice(@entry)
@@ -249,5 +254,16 @@ class MealEntriesController < ApplicationController
     params.require(:meal_entry).permit(
       :meal_type, :name, :calories, :protein_g, :carbs_g, :fat_g, :notes
     )
+  end
+
+  # Double-submit / impatient re-click: same name, type, and calories within 2 minutes.
+  def recent_duplicate_meal
+    return nil if @entry.name.blank?
+
+    @daily_log.meal_entries
+      .where(meal_type: @entry.meal_type, name: @entry.name, calories: @entry.calories.to_i)
+      .where("created_at >= ?", 2.minutes.ago)
+      .order(created_at: :desc)
+      .first
   end
 end

@@ -54,7 +54,8 @@
                 class: "form-select" %>
         </div>
         <div class="col-12 mt-3">
-          <%= submit_tag "Add this meal", class: "btn btn-primary w-100 btn-lg" %>
+          <%= submit_tag "Add this meal", class: "btn btn-primary w-100 btn-lg",
+                data: { disable_with: "Adding…" } %>
         </div>
       </div>
     <% end %>

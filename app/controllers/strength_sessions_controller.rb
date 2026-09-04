@@ -13,6 +13,16 @@ class StrengthSessionsController < ApplicationController
   end
 
   def create
+    plan_id = strength_session_params[:workout_plan_id].presence
+    if plan_id.present?
+      existing = @daily_log.strength_sessions.find_by(workout_plan_id: plan_id)
+      if existing
+        redirect_to daily_log_strength_session_path(@daily_log, existing),
+          notice: "That strength plan is already logged today."
+        return
+      end
+    end
+
     @strength_session = @daily_log.strength_sessions.build(strength_session_params)
 
     if @strength_session.save

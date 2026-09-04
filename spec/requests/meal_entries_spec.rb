@@ -17,6 +17,21 @@ RSpec.describe "Meal entries", type: :request do
       expect(log.meal_entries.last.name).to eq("Toast")
     end
 
+    it "skips a double-submit of the same meal within two minutes" do
+      log.meal_entries.create!(
+        name: "Toast", meal_type: :breakfast, calories: 200, protein_g: 8
+      )
+
+      expect {
+        post daily_log_meal_entries_path(log), params: {
+          meal_entry: { name: "Toast", meal_type: "breakfast", calories: 200, protein_g: 8 }
+        }
+      }.not_to change(log.meal_entries, :count)
+
+      expect(response).to redirect_to(daily_log_path(log))
+      expect(flash[:notice]).to include("skipped duplicate")
+    end
+
     it "creates an entry by copying a past meal" do
       tofu = create(:product, name: "Tofu", calories_per_100g: 145, protein_per_100g: 16)
       source_log = create(:daily_log, logged_on: Date.current - 2.days)

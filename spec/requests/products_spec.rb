@@ -19,18 +19,50 @@ RSpec.describe "Products", type: :request do
     it "saves a product and returns home" do
       expect {
         post products_path, params: {
-          product: { name: "Tofu", calories_per_100g: 145, protein_per_100g: 14 }
+          product: { name: "Fresh Tofu Block", calories_per_100g: 145, protein_per_100g: 14 }
         }
       }.to change(Product, :count).by(1)
 
       expect(response).to redirect_to(root_path)
     end
 
+    it "updates an existing product instead of creating a duplicate name" do
+      existing = create(:product, name: "Tofu", calories_per_100g: 100, protein_per_100g: 10)
+
+      expect {
+        post products_path, params: {
+          product: { name: "tofu", calories_per_100g: 145, protein_per_100g: 14 }
+        }
+      }.not_to change(Product, :count)
+
+      expect(response).to redirect_to(root_path)
+      expect(existing.reload.calories_per_100g).to eq(145)
+      expect(flash[:notice]).to include("already in your products")
+    end
+
+    it "updates an existing product matched by barcode" do
+      existing = create(:product, name: "Old Name", barcode: "3168930173199", calories_per_100g: 100, protein_per_100g: 5)
+
+      expect {
+        post products_path, params: {
+          product: {
+            name: "Sweet Chilli Pepper Tortillas",
+            barcode: "3168930173199",
+            calories_per_100g: 280,
+            protein_per_100g: 8
+          }
+        }
+      }.not_to change(Product, :count)
+
+      expect(existing.reload.name).to eq("Sweet Chilli Pepper Tortillas")
+      expect(existing.calories_per_100g).to eq(280)
+    end
+
     it "honours return_to" do
       log = create(:daily_log)
 
       post products_path, params: {
-        product: { name: "Tofu", calories_per_100g: 145, protein_per_100g: 14 },
+        product: { name: "Return Tofu", calories_per_100g: 145, protein_per_100g: 14 },
         return_to: daily_log_path(log)
       }
 
@@ -39,7 +71,7 @@ RSpec.describe "Products", type: :request do
 
     it "ignores an off-site return_to" do
       post products_path, params: {
-        product: { name: "Tofu", calories_per_100g: 145, protein_per_100g: 14 },
+        product: { name: "Offsite Tofu", calories_per_100g: 145, protein_per_100g: 14 },
         return_to: "https://evil.example.com"
       }
 
@@ -48,7 +80,7 @@ RSpec.describe "Products", type: :request do
 
     it "ignores a protocol-relative return_to" do
       post products_path, params: {
-        product: { name: "Tofu", calories_per_100g: 145, protein_per_100g: 14 },
+        product: { name: "Protocol Tofu", calories_per_100g: 145, protein_per_100g: 14 },
         return_to: "//evil.example.com"
       }
 

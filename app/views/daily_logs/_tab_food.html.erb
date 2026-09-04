@@ -144,7 +144,8 @@
                   <span data-meal-calculator-target="previewProtein">—</span> ·
                   <span data-meal-calculator-target="previewRemainingProtein">—</span>
                 </div>
-                <%= submit_tag "Add custom meal", class: "btn btn-primary" %>
+                <%= submit_tag "Add custom meal", class: "btn btn-primary",
+                      data: { disable_with: "Adding…" } %>
               </div>
             <% end %>
           </div>

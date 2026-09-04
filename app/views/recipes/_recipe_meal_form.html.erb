@@ -171,7 +171,8 @@
       <% end %>
 
       <p class="small fw-semibold mb-3" data-recipe-log-target="preview"></p>
-      <%= submit_tag entry ? "Save adjusted meal" : "Log this meal today", class: "btn btn-primary" %>
+      <%= submit_tag entry ? "Save adjusted meal" : "Log this meal today", class: "btn btn-primary",
+            data: { disable_with: "Saving…" } %>
     <% end %>
   </div>
 </div>

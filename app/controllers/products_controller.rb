@@ -4,10 +4,18 @@ class ProductsController < ApplicationController
   end
 
   def create
-    @product = Product.new(product_params)
+    attrs = product_params.to_h
+    existing = find_existing_product(attrs)
+    @product = existing || Product.new
+    @product.assign_attributes(attrs)
 
     if @product.save
-      redirect_to safe_return_to(default: root_path), notice: "#{@product.name} saved to your products."
+      notice = if existing
+        "#{@product.name} was already in your products — updated instead of duplicating."
+      else
+        "#{@product.name} saved to your products."
+      end
+      redirect_to safe_return_to(default: root_path), notice: notice
     else
       render :new, status: :unprocessable_entity
     end
@@ -29,6 +37,16 @@ class ProductsController < ApplicationController
   end
 
   private
+
+  def find_existing_product(attrs)
+    barcode = attrs[:barcode].to_s.strip.presence || attrs["barcode"].to_s.strip.presence
+    name = attrs[:name].to_s.strip.presence || attrs["name"].to_s.strip.presence
+    if barcode.present?
+      Product.find_by(barcode: barcode) || (name.present? && Product.find_by("LOWER(name) = ?", name.downcase)) || nil
+    elsif name.present?
+      Product.find_by("LOWER(name) = ?", name.downcase)
+    end
+  end
 
   def product_params
     params.require(:product).permit(

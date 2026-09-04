@@ -156,7 +156,8 @@
   </div>
 
   <div class="col-12 d-flex gap-2">
-    <%= f.submit recipe.persisted? ? "Save recipe" : "Add recipe", class: "btn btn-primary" %>
+    <%= f.submit recipe.persisted? ? "Save recipe" : "Add recipe", class: "btn btn-primary",
+          data: { disable_with: "Saving…" } %>
     <%= link_to "Cancel", recipe.persisted? ? recipe_path(recipe) : recipes_path, class: "btn btn-outline-secondary" %>
   </div>
 <% end %>

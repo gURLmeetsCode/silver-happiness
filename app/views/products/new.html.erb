@@ -113,7 +113,7 @@
     </div>
 
     <div class="col-12 d-flex gap-2">
-      <%= f.submit "Save product", class: "btn btn-primary" %>
+      <%= f.submit "Save product", class: "btn btn-primary", data: { disable_with: "Saving…" } %>
       <%= link_to "Cancel", safe_return_to(default: root_path), class: "btn btn-outline-secondary" %>
     </div>
   <% end %>
