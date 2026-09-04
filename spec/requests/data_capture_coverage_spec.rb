@@ -97,7 +97,10 @@ RSpec.describe "Data capture coverage", type: :request do
     it "has water controls" do
       get daily_log_path(today)
 
-      expect(response.body).to include(set_water_daily_log_path(today, amount_ml: 500))
+      expect(response.body).to include(add_water_daily_log_path(today))
+      expect(response.body).to include(set_water_daily_log_path(today))
+      expect(response.body).to include("+ 250 ml")
+      expect(response.body).to include("Set Volvic bottle level")
     end
     it "links to the urge pause flow" do
       get daily_log_path(today)

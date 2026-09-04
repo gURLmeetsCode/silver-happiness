@@ -205,6 +205,18 @@ class Goal < ApplicationRecord
     end
   end
 
+  def days_to_target(as_of: Date.current)
+    return nil if target_date.blank?
+
+    (target_date - as_of).to_i
+  end
+
+  def kg_to_target(current_weight)
+    return nil if current_weight.blank? || life_stage_pregnancy?
+
+    (current_weight.to_d - target_weight_kg).round(1)
+  end
+
   def calorie_status(eaten, burned, target)
     return :unknown if eaten.zero? && burned.zero?
 

@@ -62,15 +62,18 @@ class DailyLogsController < ApplicationController
 
   def add_water
     amount = params[:amount_ml].to_i
-    amount = 250 if amount <= 0
-    @daily_log.add_water!(amount)
-    redirect_to @daily_log, notice: "Added #{amount} ml water (#{@daily_log.water_ml} ml total)."
+    amount = 250 if amount.zero?
+    @daily_log.adjust_water!(amount)
+    verb = amount.negative? ? "Removed" : "Added"
+    redirect_to safe_return_to(default: @daily_log),
+      notice: "#{verb} #{amount.abs} ml water (#{@daily_log.water_ml} ml total)."
   end
 
   def set_water
     amount = [ params[:amount_ml].to_i, 0 ].max
     @daily_log.update!(water_ml: amount)
-    redirect_to @daily_log, notice: "Water set to #{amount} ml (#{@daily_log.water_glasses} glasses)."
+    redirect_to safe_return_to(default: @daily_log),
+      notice: "Water set to #{amount} ml (#{@daily_log.water_glasses} glasses)."
   end
 
   private

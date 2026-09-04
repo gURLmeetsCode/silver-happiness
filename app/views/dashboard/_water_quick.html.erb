@@ -1,0 +1,52 @@
+<%# locals: daily_log, goal, return_to: root_path %>
+<% return_to ||= root_path %>
+<% water_pct = goal.water_goal_ml.positive? ? [ (daily_log.water_ml.to_f / goal.water_goal_ml * 100).round, 100 ].min : 0 %>
+<% left = daily_log.water_remaining_ml(goal) %>
+
+<section class="card home-card mb-3" id="home-water" aria-label="Water today">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-baseline mb-2">
+      <h2 class="h6 text-uppercase text-muted mb-0">Water</h2>
+      <%= link_to "Full day →", daily_log_path(daily_log, anchor: "water"), class: "small text-decoration-none" %>
+    </div>
+
+    <p class="mb-1">
+      <span class="fs-4 fw-semibold"><%= daily_log.water_ml %> ml</span>
+      <span class="text-muted small">
+        <% if left.positive? %>
+          · <%= left %> ml to goal
+        <% else %>
+          · goal hit (<%= goal.water_goal_ml %> ml)
+        <% end %>
+      </span>
+    </p>
+    <div class="progress mb-3" style="height: 8px;" role="progressbar"
+         aria-valuenow="<%= water_pct %>" aria-valuemin="0" aria-valuemax="100"
+         aria-label="Water progress">
+      <div class="progress-bar bg-info" style="width: <%= water_pct %>%"></div>
+    </div>
+
+    <p class="small fw-semibold text-muted mb-2">Quick add</p>
+    <div class="d-flex flex-wrap gap-2 mb-2">
+      <% [ 250, 500, 750 ].each do |ml| %>
+        <%= button_to "+ #{ml} ml",
+              add_water_daily_log_path(daily_log),
+              method: :post,
+              params: { amount_ml: ml, return_to: return_to },
+              class: "btn btn-info",
+              form: { class: "d-inline" },
+              data: { disable_with: "…" } %>
+      <% end %>
+      <% if daily_log.water_ml.positive? %>
+        <%= button_to "− 250 ml",
+              add_water_daily_log_path(daily_log),
+              method: :post,
+              params: { amount_ml: -250, return_to: return_to },
+              class: "btn btn-outline-secondary",
+              form: { class: "d-inline" },
+              data: { disable_with: "…" } %>
+      <% end %>
+    </div>
+    <p class="small text-muted mb-0">Glass ≈ 250 ml · half Volvic ≈ 750 ml</p>
+  </div>
+</section>

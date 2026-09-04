@@ -1,0 +1,70 @@
+<%# locals: daily_log, goal %>
+<% kcal_left = daily_log.calories_remaining %>
+<% protein_left = daily_log.protein_to_min_g(goal) %>
+<% water_left = daily_log.water_remaining_ml(goal) %>
+<% days_left = goal.days_to_target %>
+<% kg_left = goal.kg_to_target(daily_log.weight_kg) %>
+
+<section class="card home-card mb-3" aria-label="Today's cut status">
+  <div class="card-body pb-2">
+    <div class="d-flex justify-content-between align-items-baseline mb-3">
+      <h2 class="h6 text-uppercase text-muted mb-0">
+        <%= goal.life_stage_pregnancy? ? "Today" : "Today’s cut" %>
+      </h2>
+      <% if !goal.life_stage_pregnancy? && (days_left || kg_left) %>
+        <span class="small text-muted">
+          <% if days_left %>
+            <% if days_left.negative? %>
+              <%= days_left.abs %> days past <%= goal.target_date.strftime("%-d %b") %>
+            <% elsif days_left.zero? %>
+              Target day
+            <% else %>
+              <%= days_left %> days to <%= goal.target_date.strftime("%-d %b") %>
+            <% end %>
+          <% end %>
+          <% if kg_left %>
+            · <%= kg_left.positive? ? "#{kg_left} kg to go" : (kg_left.zero? ? "at goal" : "#{kg_left.abs} kg under") %>
+          <% end %>
+        </span>
+      <% end %>
+    </div>
+
+    <div class="cut-status-strip">
+      <div class="cut-status-cell">
+        <span class="cut-status-label">Calories</span>
+        <span class="cut-status-value">
+          <% if kcal_left.positive? %>
+            <%= kcal_left %> left
+          <% elsif kcal_left.zero? %>
+            At target
+          <% else %>
+            <%= kcal_left.abs %> over
+          <% end %>
+        </span>
+        <span class="cut-status-hint">of ~<%= daily_log.calorie_target %></span>
+      </div>
+      <div class="cut-status-cell">
+        <span class="cut-status-label">Protein</span>
+        <span class="cut-status-value">
+          <% if protein_left.positive? %>
+            <%= protein_left %> g left
+          <% else %>
+            Min hit
+          <% end %>
+        </span>
+        <span class="cut-status-hint"><%= daily_log.total_protein.round(0) %> / <%= goal.protein_min_g %>–<%= goal.protein_max_g %> g</span>
+      </div>
+      <div class="cut-status-cell">
+        <span class="cut-status-label">Water</span>
+        <span class="cut-status-value">
+          <% if water_left.positive? %>
+            <%= water_left %> ml left
+          <% else %>
+            Goal hit
+          <% end %>
+        </span>
+        <span class="cut-status-hint"><%= daily_log.water_ml %> / <%= goal.water_goal_ml %> ml</span>
+      </div>
+    </div>
+  </div>
+</section>

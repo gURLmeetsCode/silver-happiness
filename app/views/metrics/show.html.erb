@@ -225,8 +225,11 @@
       <div class="card-body">
         <div class="text-muted small">Water</div>
         <div class="fs-4 fw-semibold"><%= @today.water_ml %> ml</div>
-        <div class="small text-muted">~<%= @today.water_glasses %> glasses · goal <%= @goal.water_goal_ml %> ml</div>
-        <div class="small mt-1"><%= link_to "Update bottle →", daily_log_path(@today, anchor: "water") %></div>
+        <div class="small text-muted">~<%= @today.water_glasses %> glasses · goal <%= @goal.water_goal_ml %> ml
+          <% left = @today.water_remaining_ml(@goal) %>
+          <% if left.positive? %> · <%= left %> ml left<% else %> · goal hit<% end %>
+        </div>
+        <div class="small mt-1"><%= link_to "Add water on Home →", root_path(anchor: "home-water") %></div>
       </div>
     </div>
   </div>

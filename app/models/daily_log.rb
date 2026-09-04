@@ -210,6 +210,26 @@ class DailyLog < ApplicationRecord
     update!(water_ml: water_ml + amount_ml)
   end
 
+  def adjust_water!(delta_ml)
+    update!(water_ml: [ water_ml + delta_ml.to_i, 0 ].max)
+  end
+
+  def calories_remaining
+    calorie_target - total_calories
+  end
+
+  def protein_to_min_g(goal = Goal.current)
+    (goal.protein_min_g - total_protein).round(0)
+  end
+
+  def water_remaining_ml(goal = Goal.current)
+    goal.water_goal_ml - water_ml
+  end
+
+  def water_goal_met?(goal = Goal.current)
+    water_ml >= goal.water_goal_ml
+  end
+
   def sync_run_walk_workouts!
     sync_activity_workout!(:run, run_km, run_calories)
     sync_activity_workout!(:walk, walk_km, walk_calories)
