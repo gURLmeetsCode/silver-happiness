@@ -50,6 +50,8 @@ ITEMS = [
   { product: "Tofu", grams: 45, note: "cakes: 3–4 strips" },
   { product: "Carrot", grams: 25, note: "cakes: 3–4 strips" },
   { product: "Cucumber", grams: 30, note: "cakes: 3–4 strips" },
+  # 2 whole avocados (product: ½ = 75 g → 1 = 150 g); 2–4 pieces per roll/cake
+  { product: "Avocado", grams: 300, note: "2 whole (~150 g each)" },
   # Sauces
   { product: "Sauce sriracha", grams: 30, note: "2 tbsp U" },
   { product: "Moutarde au miel", grams: 30, note: "2 tbsp Maille" },
@@ -57,7 +59,7 @@ ITEMS = [
   { product: "Sauce soja sucrée", grams: 5, note: "1 tsp" }
 ].freeze
 
-MEAL_NAME = "Vegan sushi roll + 4 galettes de riz (sauces)"
+MEAL_NAME = "Vegan sushi roll + 4 galettes de riz (sauces + avocado)"
 
 puts "==> Ensuring new products"
 NEW_PRODUCTS.each do |attrs|
@@ -88,9 +90,9 @@ entry.meal_type = :dinner
 MealAssembler.new(rows).apply!(entry, replace_notes: true)
 entry.notes = [
   entry.notes,
-  "1 hand roll: tofu/carrot/cucumber strips + 3 tbsp sushi rice. " \
-  "4 Tien Shan rice cakes with same strips. Sauces: 2 tbsp U sriracha, " \
-  "2 tbsp miel mustard, 1 tbsp miso marinade, 1 tsp sweet soy (placeholder — update label)."
+  "1 hand roll: tofu/carrot/cucumber/avocado strips + 3 tbsp sushi rice. " \
+  "4 Tien Shan rice cakes with same strips. 2 whole avocados (~300 g). " \
+  "Sauces: 2 tbsp U sriracha, 2 tbsp miel mustard, 1 tbsp miso marinade, 1 tsp sweet soy (placeholder — update label)."
 ].compact_blank.join(" · ")
 entry.save!
 
