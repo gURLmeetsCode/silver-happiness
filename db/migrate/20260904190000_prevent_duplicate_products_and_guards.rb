@@ -4,7 +4,7 @@
 # plan per day. Merges any existing collisions before adding unique indexes.
 #
 # Important: while twins still exist, do NOT Product#save! (uniqueness
-# validations will reject the keeper). Use update_columns + delete instead.
+# validations will reject the keeper). Delete the twin first, then update_columns.
 class PreventDuplicateProductsAndGuards < ActiveRecord::Migration[8.0]
   def up
     say_with_time "normalize blank barcodes and trim names" do
@@ -46,17 +46,24 @@ class PreventDuplicateProductsAndGuards < ActiveRecord::Migration[8.0]
       end
     end
 
-    remove_index :products, name: "index_products_on_barcode" if index_exists?(:products, :barcode, name: "index_products_on_barcode")
+    if index_name_exists?(:products, "index_products_on_barcode")
+      remove_index :products, name: "index_products_on_barcode"
+    end
 
-    add_index :products, "LOWER(name)", unique: true, name: "index_products_on_lower_name" unless index_exists?(:products, name: "index_products_on_lower_name")
-    unless index_exists?(:products, name: "index_products_on_barcode_unique")
+    unless index_name_exists?(:products, "index_products_on_lower_name")
+      add_index :products, "LOWER(name)", unique: true, name: "index_products_on_lower_name"
+    end
+
+    unless index_name_exists?(:products, "index_products_on_barcode_unique")
       add_index :products, :barcode, unique: true, name: "index_products_on_barcode_unique",
                 where: "barcode IS NOT NULL"
     end
 
-    add_index :recipes, "LOWER(name)", unique: true, name: "index_recipes_on_lower_name" unless index_exists?(:recipes, name: "index_recipes_on_lower_name")
+    unless index_name_exists?(:recipes, "index_recipes_on_lower_name")
+      add_index :recipes, "LOWER(name)", unique: true, name: "index_recipes_on_lower_name"
+    end
 
-    unless index_exists?(:strength_sessions, name: "index_strength_sessions_unique_plan_per_day")
+    unless index_name_exists?(:strength_sessions, "index_strength_sessions_unique_plan_per_day")
       add_index :strength_sessions, [ :daily_log_id, :workout_plan_id ],
                 unique: true,
                 where: "workout_plan_id IS NOT NULL",
@@ -65,11 +72,11 @@ class PreventDuplicateProductsAndGuards < ActiveRecord::Migration[8.0]
   end
 
   def down
-    remove_index :strength_sessions, name: "index_strength_sessions_unique_plan_per_day" if index_exists?(:strength_sessions, name: "index_strength_sessions_unique_plan_per_day")
-    remove_index :recipes, name: "index_recipes_on_lower_name" if index_exists?(:recipes, name: "index_recipes_on_lower_name")
-    remove_index :products, name: "index_products_on_barcode_unique" if index_exists?(:products, name: "index_products_on_barcode_unique")
-    remove_index :products, name: "index_products_on_lower_name" if index_exists?(:products, name: "index_products_on_lower_name")
-    add_index :products, :barcode, name: "index_products_on_barcode" unless index_exists?(:products, :barcode, name: "index_products_on_barcode")
+    remove_index :strength_sessions, name: "index_strength_sessions_unique_plan_per_day" if index_name_exists?(:strength_sessions, "index_strength_sessions_unique_plan_per_day")
+    remove_index :recipes, name: "index_recipes_on_lower_name" if index_name_exists?(:recipes, "index_recipes_on_lower_name")
+    remove_index :products, name: "index_products_on_barcode_unique" if index_name_exists?(:products, "index_products_on_barcode_unique")
+    remove_index :products, name: "index_products_on_lower_name" if index_name_exists?(:products, "index_products_on_lower_name")
+    add_index :products, :barcode, name: "index_products_on_barcode" unless index_name_exists?(:products, "index_products_on_barcode")
   end
 
   private
