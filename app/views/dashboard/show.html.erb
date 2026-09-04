@@ -10,7 +10,7 @@
   <% end %>
 </header>
 
-<%= render "cut_status", daily_log: @today, goal: @goal %>
+<%= render "cut_status", daily_log: @today, goal: @goal, protein_suggestions: @protein_suggestions %>
 <%= render "water_quick", daily_log: @today, goal: @goal, return_to: root_path %>
 
 <section class="card home-card mb-3">

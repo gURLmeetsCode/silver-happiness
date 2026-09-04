@@ -1,9 +1,10 @@
-<%# locals: daily_log, goal %>
+<%# locals: daily_log, goal, protein_suggestions: nil %>
 <% kcal_left = daily_log.calories_remaining %>
 <% protein_left = daily_log.protein_to_min_g(goal) %>
 <% water_left = daily_log.water_remaining_ml(goal) %>
 <% days_left = goal.days_to_target %>
 <% kg_left = goal.kg_to_target(daily_log.weight_kg) %>
+<% protein_suggestions ||= nil %>
 
 <section class="card home-card mb-3" aria-label="Today's cut status">
   <div class="card-body pb-2">
@@ -66,5 +67,32 @@
         <span class="cut-status-hint"><%= daily_log.water_ml %> / <%= goal.water_goal_ml %> ml</span>
       </div>
     </div>
+
+    <% if protein_suggestions && !protein_suggestions.met_min && protein_suggestions.picks.any? %>
+      <div class="cut-protein-picks mt-3 pt-3 border-top">
+        <p class="small fw-semibold text-muted mb-2">Protein picks</p>
+        <div class="d-flex flex-column gap-2">
+          <% protein_suggestions.picks.each do |pick| %>
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+              <div class="small min-w-0">
+                <span class="fw-semibold"><%= pick.label %></span>
+                <span class="text-muted"> · ~<%= pick.protein_g %> g</span>
+              </div>
+              <% if pick.kind == :product %>
+                <%= button_to "Log",
+                      daily_log_meal_entries_path(daily_log),
+                      method: :post,
+                      params: { product_id: pick.record.id, return_to: root_path },
+                      class: "btn btn-sm btn-outline-primary",
+                      form: { class: "flex-shrink-0" },
+                      data: { disable_with: "…" } %>
+              <% else %>
+                <%= link_to "Open", pick.record, class: "btn btn-sm btn-outline-primary flex-shrink-0" %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
   </div>
 </section>

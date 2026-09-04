@@ -39,16 +39,16 @@ class MealEntriesController < ApplicationController
     finalize_recipe_nutrition! if @recipe
 
     if (dup = recent_duplicate_meal)
-      redirect_to @daily_log, notice: "#{dup.name} is already logged — skipped duplicate."
+      redirect_to safe_return_to(default: @daily_log), notice: "#{dup.name} is already logged — skipped duplicate."
       return
     end
 
     if @entry.save
       apply_product_water!(@entry) if params[:product_id].present?
       notice = build_create_notice(@entry)
-      redirect_to @daily_log, notice: notice
+      redirect_to safe_return_to(default: @daily_log), notice: notice
     else
-      redirect_to @daily_log, alert: @entry.errors.full_messages.to_sentence
+      redirect_to safe_return_to(default: @daily_log), alert: @entry.errors.full_messages.to_sentence
     end
   end
 

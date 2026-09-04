@@ -1,0 +1,52 @@
+<%# locals: daily_log, goal, suggestions %>
+<% return if suggestions.blank? %>
+<% left = suggestions.grams_left %>
+
+<section class="card day-card mb-3" id="protein-gap" aria-label="Protein left today">
+  <div class="card-body">
+    <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2 mb-2">
+      <h2 class="h5 mb-0">Protein</h2>
+      <span class="small text-muted">
+        <%= daily_log.total_protein.round(0) %> / <%= goal.protein_min_g %>–<%= goal.protein_max_g %> g
+      </span>
+    </div>
+
+    <% if suggestions.met_min %>
+      <p class="mb-0 text-success fw-semibold">Min hit — nice.</p>
+    <% else %>
+      <p class="mb-3">
+        <span class="fs-4 fw-semibold"><%= left %> g left</span>
+        <span class="text-muted small">to today’s <%= goal.protein_min_g %> g min</span>
+      </p>
+
+      <% if suggestions.picks.any? %>
+        <p class="small fw-semibold text-muted mb-2">Close the gap with</p>
+        <div class="d-flex flex-column gap-2">
+          <% suggestions.picks.each do |pick| %>
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 border rounded px-3 py-2">
+              <div class="min-w-0">
+                <div class="fw-semibold text-truncate"><%= pick.label %></div>
+                <div class="small text-muted">
+                  ~<%= pick.protein_g %> g · <%= pick.detail %>
+                </div>
+              </div>
+              <% if pick.kind == :product %>
+                <%= button_to "Log it",
+                      daily_log_meal_entries_path(daily_log),
+                      method: :post,
+                      params: { product_id: pick.record.id },
+                      class: "btn btn-sm btn-primary",
+                      form: { class: "flex-shrink-0" },
+                      data: { disable_with: "…" } %>
+              <% else %>
+                <%= link_to "Open", pick.record, class: "btn btn-sm btn-outline-primary flex-shrink-0" %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="small text-muted mb-0">Build a meal below — aim for tofu, skyr, or a batch tray share.</p>
+      <% end %>
+    <% end %>
+  </div>
+</section>

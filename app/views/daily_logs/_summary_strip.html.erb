@@ -14,7 +14,14 @@
   <div class="summary-cell">
     <span class="summary-label">Protein</span>
     <span class="summary-value"><%= daily_log.total_protein.round(0) %> g</span>
-    <span class="summary-hint">goal <%= goal.protein_min_g %>–<%= goal.protein_max_g %> g</span>
+    <span class="summary-hint">
+      <% protein_left = daily_log.protein_to_min_g(goal) %>
+      <% if protein_left.positive? %>
+        <%= protein_left %> g to min
+      <% else %>
+        goal <%= goal.protein_min_g %>–<%= goal.protein_max_g %> g
+      <% end %>
+    </span>
   </div>
   <div class="summary-cell">
     <span class="summary-label">Carbs</span>

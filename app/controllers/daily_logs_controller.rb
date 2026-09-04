@@ -101,6 +101,7 @@ class DailyLogsController < ApplicationController
     @yesterday_log = DailyLog
       .includes(meal_entries: :items)
       .find_by(logged_on: @daily_log.logged_on - 1.day)
+    @protein_suggestions = ProteinGapSuggestions.call(daily_log: @daily_log, goal: @goal)
   end
 
   def preload_day_associations!(log)

@@ -11,5 +11,6 @@ class DashboardController < ApplicationController
     @cut_dismissed = nudges.just_dismissed
     slugs = @cut_suggestions.map(&:recipe_slug).compact
     @nudge_recipes = Recipe.visible.where(slug: slugs).index_by(&:slug)
+    @protein_suggestions = ProteinGapSuggestions.call(daily_log: @today, goal: @goal, limit: 2)
   end
 end
