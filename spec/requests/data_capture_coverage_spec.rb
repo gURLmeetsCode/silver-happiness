@@ -24,6 +24,7 @@ RSpec.describe "Data capture coverage", type: :request do
       "weight_pre_run" => "daily_log[weight_pre_run]",
       "run_km" => "daily_log[run_km]",
       "run_calories" => "daily_log[run_calories]",
+      "run_duration_min" => "daily_log[run_duration_min]",
       "walk_km" => "daily_log[walk_km]",
       "walk_calories" => "daily_log[walk_calories]",
       "training_notes" => "daily_log[training_notes]",

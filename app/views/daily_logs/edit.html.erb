@@ -21,6 +21,10 @@
     <%= f.number_field :run_km, step: :any, inputmode: "decimal", class: "form-control", placeholder: "5.24" %>
   </div>
   <div class="col-md-3">
+    <%= f.label :run_duration_min, "Run time (min)", class: "form-label" %>
+    <%= f.number_field :run_duration_min, min: 1, class: "form-control", placeholder: "48" %>
+  </div>
+  <div class="col-md-3">
     <%= f.label :run_calories, "Run calories burned", class: "form-label" %>
     <%= f.number_field :run_calories, class: "form-control" %>
   </div>

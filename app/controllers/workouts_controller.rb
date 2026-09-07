@@ -27,7 +27,7 @@ class WorkoutsController < ApplicationController
     workout = @daily_log.workouts.find(params[:id])
 
     if workout.activity_type_run?
-      @daily_log.update!(run_km: nil, run_calories: nil)
+      @daily_log.update!(run_km: nil, run_calories: nil, run_duration_min: nil)
       redirect_to daily_log_path(@daily_log, anchor: "movement"), notice: "Run removed."
     elsif workout.activity_type_walk?
       @daily_log.update!(walk_km: nil, walk_calories: nil)

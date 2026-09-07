@@ -1,10 +1,31 @@
 <%# locals: daily_log %>
+<% week_km = DailyLog.run_km_for_week(daily_log.logged_on) %>
+<% usual_km = DailyLog.usual_week_run_km(as_of: daily_log.logged_on) %>
 <%= render "daily_logs/pregnancy_movement", goal: Goal.current %>
 
 <section class="card day-card mb-3">
   <div class="card-body">
     <h2 class="h5 mb-1">Run &amp; walk</h2>
-    <p class="text-muted small mb-3">Distance and calories straight off your watch.</p>
+    <p class="text-muted small mb-3">Distance, time, and calories off your watch. Pace is calculated.</p>
+
+    <% if daily_log.run_summary.present? %>
+      <p class="mb-2">
+        <span class="fw-semibold"><%= daily_log.run_summary.sub(/\ARun · /, "Run ") %></span>
+      </p>
+    <% end %>
+
+    <p class="small text-muted mb-3">
+      This week <strong><%= week_km %> km</strong>
+      <% if usual_km %>
+        · usual ~<%= usual_km %> km
+        <% if week_km.positive? %>
+          <% delta = (week_km - usual_km).round(1) %>
+          (<%= delta.positive? ? "+" : "" %><%= delta %> vs usual)
+        <% end %>
+      <% else %>
+        · no recent weeks to compare yet
+      <% end %>
+    </p>
 
     <%= form_with model: daily_log, class: "row g-2" do |f| %>
       <%= hidden_field_tag :return_to, daily_log_path(daily_log, anchor: "movement") %>
@@ -13,8 +34,21 @@
         <%= f.number_field :run_km, step: :any, inputmode: "decimal", class: "form-control", placeholder: "5.24" %>
       </div>
       <div class="col-6 col-md-3">
+        <%= f.label :run_duration_min, "Time (min)", class: "form-label small text-muted" %>
+        <%= f.number_field :run_duration_min, min: 1, class: "form-control", placeholder: "48" %>
+      </div>
+      <div class="col-6 col-md-3">
         <%= f.label :run_calories, "Run kcal", class: "form-label small text-muted" %>
         <%= f.number_field :run_calories, class: "form-control" %>
+      </div>
+      <div class="col-6 col-md-3 d-flex align-items-end">
+        <p class="small text-muted mb-2">
+          <% if daily_log.run_pace_label %>
+            Pace <strong><%= daily_log.run_pace_label %></strong>
+          <% else %>
+            Pace after km + time
+          <% end %>
+        </p>
       </div>
       <div class="col-6 col-md-3">
         <%= f.label :walk_km, "Walk (km)", class: "form-label small text-muted" %>

@@ -6,6 +6,7 @@ class DailyLog < ApplicationRecord
   has_many :urge_check_ins, dependent: :destroy
 
   validates :logged_on, presence: true, uniqueness: true
+  validates :run_duration_min, numericality: { greater_than: 0, only_integer: true }, allow_nil: true
 
   after_save :sync_run_walk_workouts!
 
@@ -90,7 +91,7 @@ class DailyLog < ApplicationRecord
   end
 
   def training_day?
-    run_km.present? || run_calories.to_i.positive? ||
+    run_km.present? || run_calories.to_i.positive? || run_duration_min.to_i.positive? ||
       strength_logged? ||
       training_notes.to_s.match?(/strength|gym|lift/i)
   end
@@ -111,7 +112,7 @@ class DailyLog < ApplicationRecord
       line += " · #{session.duration_min} min" if session.duration_min.present?
       parts << line
     end
-    parts << "Run #{run_km}km (#{run_calories} kcal)" if run_km.present? && workouts.none?
+    parts << run_summary if run_km.present? && workouts.none?
     parts << "Walk #{walk_km}km (#{walk_calories} kcal)" if walk_km.present? && workouts.none?
     parts << training_notes if training_notes.present?
     parts.compact_blank.join(" · ")
@@ -204,6 +205,51 @@ class DailyLog < ApplicationRecord
 
   def energy_estimate
     Goal.current.energy_estimate(weight_kg: weight_kg)
+  end
+
+  def run_pace_min_per_km
+    km = run_km.to_f
+    return nil unless km.positive? && run_duration_min.to_i.positive?
+
+    run_duration_min.to_f / km
+  end
+
+  def run_pace_label
+    pace = run_pace_min_per_km
+    return nil unless pace
+
+    minutes = pace.floor
+    seconds = ((pace - minutes) * 60).round
+    if seconds == 60
+      minutes += 1
+      seconds = 0
+    end
+    format("%d:%02d /km", minutes, seconds)
+  end
+
+  def run_summary
+    return nil unless run_km.present? || run_calories.to_i.positive? || run_duration_min.to_i.positive?
+
+    parts = [ "Run" ]
+    parts << "#{run_km} km" if run_km.present?
+    parts << "#{run_duration_min} min" if run_duration_min.to_i.positive?
+    parts << run_pace_label if run_pace_label
+    parts << "#{run_calories} kcal" if run_calories.to_i.positive?
+    parts.join(" · ")
+  end
+
+  def self.run_km_for_week(date)
+    for_week_of(date).sum(:run_km).to_f.round(1)
+  end
+
+  def self.usual_week_run_km(as_of: Date.current, weeks: 4)
+    totals = (1..weeks).filter_map do |i|
+      km = run_km_for_week(as_of.beginning_of_week - i.weeks)
+      km if km.positive?
+    end
+    return nil if totals.empty?
+
+    (totals.sum / totals.size).round(1)
   end
 
   def add_water!(amount_ml = 250)

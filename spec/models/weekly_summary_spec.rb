@@ -43,4 +43,15 @@ RSpec.describe WeeklySummary do
     expect(week.week_deficit_kcal).to be < 0
     expect(week.deficit_pace_status).to eq(:above_target)
   end
+
+  it "sums run kilometres for the week" do
+    start = Date.current.beginning_of_week
+    create(:daily_log, logged_on: start, run_km: 8)
+    create(:daily_log, logged_on: start + 2.days, run_km: 12)
+
+    week = described_class.new(start)
+
+    expect(week.total_run_km).to eq(20.0)
+    expect(week.run_days).to eq(2)
+  end
 end

@@ -48,6 +48,26 @@ RSpec.describe DailyLog do
     end
   end
 
+  describe "run pace and week volume" do
+    it "formats pace from km and duration" do
+      log = create(:daily_log, run_km: 8, run_duration_min: 48, run_calories: 400)
+
+      expect(log.run_pace_label).to eq("6:00 /km")
+      expect(log.run_summary).to include("48 min")
+    end
+
+    it "sums this week's run km and averages recent weeks with runs" do
+      monday = Date.current.beginning_of_week
+      create(:daily_log, logged_on: monday, run_km: 10)
+      create(:daily_log, logged_on: monday + 2.days, run_km: 8)
+      create(:daily_log, logged_on: monday - 7.days, run_km: 20)
+      create(:daily_log, logged_on: monday - 14.days, run_km: 16)
+
+      expect(DailyLog.run_km_for_week(monday)).to eq(18.0)
+      expect(DailyLog.usual_week_run_km(as_of: monday)).to eq(18.0)
+    end
+  end
+
   describe "sleep" do
     it "labels the window from the previous evening to the wake morning" do
       log = create(:daily_log, :with_sleep, logged_on: Date.new(2026, 8, 8))

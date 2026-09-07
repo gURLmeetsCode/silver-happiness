@@ -301,6 +301,17 @@
           <div class="small text-muted">avg <%= @week.avg_daily_protein %> g/day</div>
         </div>
       </div>
+      <div class="col-6 col-md-3">
+        <div class="border rounded p-2 bg-white">
+          <div class="small text-muted">Run volume</div>
+          <div class="fw-semibold"><%= @week.total_run_km %> km</div>
+          <div class="small text-muted">
+            <%= @week.run_days %> run day<%= @week.run_days == 1 ? "" : "s" %>
+            <% usual = DailyLog.usual_week_run_km(as_of: @week.week_start) %>
+            <% if usual %> · usual ~<%= usual %> km<% end %>
+          </div>
+        </div>
+      </div>
     </div>
 
     <% if @week.deficit_ready? %>
