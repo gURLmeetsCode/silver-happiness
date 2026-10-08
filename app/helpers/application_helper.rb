@@ -101,8 +101,6 @@ module ApplicationHelper
       controller_name == "metrics"
     when :log
       controller_name == "daily_logs" && action_name == "index"
-    when :recipes
-      controller_name == "recipes"
     when :strength
       controller_name == "workout_plans" || controller_name == "strength_sessions"
     when :outfits

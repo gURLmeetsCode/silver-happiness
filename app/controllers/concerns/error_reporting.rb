@@ -16,8 +16,8 @@ module ErrorReporting
     def install_error_handlers(rescue_everything:)
       rescue_from StandardError, with: :render_server_error if rescue_everything
 
-      # Missing records are an expected outcome (stale bookmarks, retired
-      # recipes) rather than a crash.
+      # Missing records are an expected outcome (stale bookmarks, deleted
+      # records) rather than a crash.
       rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
       rescue_from ActionController::ParameterMissing, with: :render_bad_request
     end

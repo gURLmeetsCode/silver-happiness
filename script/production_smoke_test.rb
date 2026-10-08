@@ -54,17 +54,10 @@ record_error(errors, "recipe meal form partial") do
   )
 end
 
-record_error(errors, "GET chipotle tofu wrap") do
-  recipe = Recipe.joins(:meal_template).find_by(slug: "chipotle-yogurt-salad") ||
-    Recipe.joins(:meal_template).first
-  if recipe.nil?
-    errors << "No recipe with meal template in database"
-    next
-  end
-
-  session.get("/recipes/#{recipe.id}", headers: https)
+record_error(errors, "GET /workout_plans") do
+  session.get("/workout_plans", headers: https)
   unless session.response.successful?
-    errors << "GET /recipes/#{recipe.id} (#{recipe.slug}) returned HTTP #{session.response.status}"
+    errors << "GET /workout_plans returned HTTP #{session.response.status}"
   end
 end
 

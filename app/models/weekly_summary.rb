@@ -97,6 +97,7 @@ class WeeklySummary
     logs.count { |log| log.run_km.to_f.positive? }
   end
 
+  def calorie_balance_status
     avg_eaten = logs.any? ? (total_eaten / logs.size.to_f).round(0) : 0
     avg_target = logs.any? ? (logs.sum(&:calorie_target) / logs.size.to_f).round(0) : goal.calories_rest_day
 

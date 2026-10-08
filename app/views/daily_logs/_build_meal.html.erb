@@ -4,8 +4,8 @@
   <div class="card-body">
     <h2 class="h5 mb-1">Build a meal</h2>
     <p class="small text-muted mb-3">
-      Compose a plate: a <strong>recipe</strong>, a share of a <strong>batch tray</strong>, and/or
-      individual <strong>products</strong>. Amount for recipes/trays is how much of the whole thing
+      Compose a plate: a <strong>saved meal</strong>, a share of a <strong>batch tray</strong>, and/or
+      individual <strong>products</strong>. Amount for meals/trays is how much of the whole thing
       (1 = all, ½ = half, ¼ = a plate share).
     </p>
 
@@ -32,7 +32,6 @@
               return_to: daily_log_path(daily_log, anchor: "meals"),
               css_class: "btn btn-sm btn-primary"
             ) %>
-        <%= link_to "New recipe", new_recipe_path, class: "btn btn-sm btn-outline-secondary" %>
       </div>
 
       <div class="alert alert-light border d-flex justify-content-between align-items-center py-2 mb-3">

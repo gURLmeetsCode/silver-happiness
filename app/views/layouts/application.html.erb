@@ -41,11 +41,6 @@
               <% end %>
             </li>
             <li class="nav-item">
-              <%= link_to recipes_path, class: nav_item_class(:recipes) do %>
-                <i class="bi bi-journal-text me-1"></i> Recipes
-              <% end %>
-            </li>
-            <li class="nav-item">
               <%= link_to workout_plans_path, class: nav_item_class(:strength) do %>
                 <i class="bi bi-lightning me-1"></i> Strength
               <% end %>
@@ -82,10 +77,6 @@
       <%= link_to metrics_path, class: mobile_tab_class(:metrics) do %>
         <i class="bi bi-graph-up"></i>
         <span>Metrics</span>
-      <% end %>
-      <%= link_to recipes_path, class: mobile_tab_class(:recipes) do %>
-        <i class="bi bi-journal-text"></i>
-        <span>Recipes</span>
       <% end %>
       <%= link_to workout_plans_path, class: mobile_tab_class(:strength) do %>
         <i class="bi bi-lightning"></i>

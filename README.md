@@ -6,8 +6,7 @@ A self-hosted fitness and wellness tracker built with Rails. Log meals, workouts
 
 - **Today dashboard** — weight, macros, water, sleep, and weekly charts
 - **Daily log** — meals (templates or custom), workouts, strength sessions, wellness check-ins, notes
-- **Recipes & grocery list** — meal ideas with ingredients grouped by shop section
-- **Strength plans** — structured workout templates with optional supplemental sessions
+- **Strength plans** — home dumbbell + band sessions for glutes, hamstrings and lower back, plus Runna log slots
 - **Goals** — target weight, protein, calories, and water
 - **Photo uploads** — progress and outfit galleries (mobile camera friendly)
 

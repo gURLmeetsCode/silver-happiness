@@ -3,6 +3,12 @@
 puts "Loading recipes..."
 
 def seed_recipe(slug, attrs, ingredients, steps)
+  # Some templates only exist once their products do (baseline_data skips them otherwise).
+  if attrs[:meal_template_slug] && !MealTemplate.exists?(slug: attrs[:meal_template_slug])
+    puts "  · #{slug} skipped — meal template #{attrs[:meal_template_slug]} not seeded"
+    return
+  end
+
   recipe = Recipe.find_or_create_by!(slug: slug) do |r|
     r.assign_attributes(attrs.except(:meal_template_slug))
   end

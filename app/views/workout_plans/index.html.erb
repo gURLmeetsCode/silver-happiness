@@ -2,8 +2,11 @@
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <div>
-    <h1 class="h3 mb-1">Toning & strength plans</h1>
-    <p class="text-muted mb-0">Runna handles Wed/Sat — these are extras to log or follow on other days.</p>
+    <h1 class="h3 mb-1">Home strength</h1>
+    <p class="text-muted mb-0">
+      2 × 7 kg dumbbells and resistance bands, aimed at glutes, hamstrings and lower back.
+      Runna still handles Wed/Sat.
+    </p>
   </div>
   <%= link_to "Today’s log", today_path, class: "btn btn-primary" %>
 </div>
@@ -19,7 +22,8 @@
 <% end %>
 
 <% if @supplemental_plans.any? %>
-  <h2 class="h5 mb-3">Supplemental (suggested on other days)</h2>
+  <h2 class="h5 mb-1">Back of body</h2>
+  <p class="small text-muted mb-3">Full sessions Mon/Thu; the short ones fit after a run. When a set feels easy, slow the lowering to 3–4 sec or add a band.</p>
   <div class="row g-3 mb-4">
     <% @supplemental_plans.each do |plan| %>
       <div class="col-md-6 col-lg-4">

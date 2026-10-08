@@ -16,10 +16,4 @@ FactoryBot.define do
     target_deficit_kcal { 400 }
     life_stage { "standard" }
   end
-
-  factory :grocery_check do
-    shopping_period { ShoppingPeriod.current }
-    sequence(:item_key) { |n| "item-#{n}" }
-    checked { true }
-  end
 end

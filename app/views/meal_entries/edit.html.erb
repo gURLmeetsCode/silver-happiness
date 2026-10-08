@@ -6,7 +6,7 @@
 
 <% if @recipe %>
   <p class="text-muted mb-3">
-    From recipe: <%= link_to @recipe.name, recipe_path(@recipe) %>.
+    From <strong><%= @recipe.name %></strong>.
     Set servings (e.g. 3 wraps), add extras like jalapeños or Cholula in tbsp, then save.
   </p>
   <%= render "recipes/recipe_meal_form",

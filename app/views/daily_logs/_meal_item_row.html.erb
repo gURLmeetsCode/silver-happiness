@@ -9,12 +9,12 @@
     <select name="items[<%= index %>][picker]" class="form-select form-select-sm"
             aria-label="Item"
             data-searchable-select-target="select"
-            data-search-placeholder="Search recipes, batches, products…"
+            data-search-placeholder="Search meals, batches, products…"
             data-meal-builder-target="product"
             data-action="change->meal-builder#productChanged">
-      <option value="">Choose a recipe, batch, or product…</option>
+      <option value="">Choose a meal, batch, or product…</option>
       <% if grouped[:recipes]&.any? %>
-        <optgroup label="Recipes">
+        <optgroup label="Saved meals">
           <% grouped[:recipes].sort_by(&:name).each do |template| %>
             <%= render "daily_logs/meal_picker_option", template: template, selected: selected %>
           <% end %>

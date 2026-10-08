@@ -67,15 +67,17 @@ RSpec.describe "Adjusting a recipe meal's ingredients", type: :request do
     expect(response.body).to include("Avocado")
   end
 
-  it "shows every product-linked ingredient as adjustable when logging" do
-    get recipe_path(recipe)
+  it "shows every product-linked ingredient as adjustable when editing" do
+    log_meal(ingredients: {})
+    get edit_daily_log_meal_entry_path(daily_log, daily_log.meal_entries.last)
 
     expect(response.body).to include("ingredients[#{tofu_ingredient.id}][grams]")
     expect(response.body).to include("ingredients[#{avocado_ingredient.id}][grams]")
   end
 
   it "lists ingredients with no product as untracked rather than adjustable" do
-    get recipe_path(recipe)
+    log_meal(ingredients: {})
+    get edit_daily_log_meal_entry_path(daily_log, daily_log.meal_entries.last)
 
     coriander = recipe.recipe_ingredients.find_by(name: "coriander")
 

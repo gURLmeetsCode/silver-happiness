@@ -10,7 +10,7 @@
   <% end %>
 </header>
 
-<%= render "cut_status", daily_log: @today, goal: @goal, protein_suggestions: @protein_suggestions %>
+<%= render "cut_status", daily_log: @today, goal: @goal %>
 <%= render "water_quick", daily_log: @today, goal: @goal, return_to: root_path %>
 
 <section class="card home-card mb-3">
@@ -72,8 +72,6 @@
     <% end %>
   </div>
 </section>
-
-<%= render "cut_nudges", suggestions: @cut_suggestions, dismissed: @cut_dismissed, recipes: @nudge_recipes %>
 
 <% if @daily_inspo %>
   <section class="card home-card home-inspo mb-4">

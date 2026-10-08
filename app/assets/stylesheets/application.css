@@ -96,7 +96,7 @@
   bottom: 0;
   z-index: 1030;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   align-items: stretch;
   background: #fff;
   border-top: 1px solid rgba(0, 0, 0, 0.08);

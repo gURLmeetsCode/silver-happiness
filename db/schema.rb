@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_04_190000) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_08_090100) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -62,6 +62,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_04_190000) do
     t.text "hard_day_trigger"
     t.text "hard_day_what_was_available"
     t.text "hard_day_next_time"
+    t.integer "run_duration_min"
     t.index ["logged_on"], name: "index_daily_logs_on_logged_on", unique: true
   end
 
@@ -88,24 +89,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_04_190000) do
     t.date "pregnancy_lmp_on"
     t.date "pregnancy_due_on"
     t.boolean "exercise_cleared_by_clinician", default: false, null: false
-  end
-
-  create_table "grocery_checks", force: :cascade do |t|
-    t.date "shopping_period", null: false
-    t.string "item_key", null: false
-    t.boolean "checked", default: false, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["shopping_period", "item_key"], name: "index_grocery_checks_on_shopping_period_and_item_key", unique: true
-  end
-
-  create_table "habit_suggestion_feedbacks", force: :cascade do |t|
-    t.string "suggestion_key", null: false
-    t.integer "status", default: 0, null: false
-    t.date "hidden_until"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["suggestion_key"], name: "index_habit_suggestion_feedbacks_on_suggestion_key", unique: true
   end
 
   create_table "meal_entries", force: :cascade do |t|

@@ -85,7 +85,7 @@ class WorkoutPlan < ApplicationRecord
 
   def self.suggestion_context(date = Date.current)
     if FULL_SUPPLEMENTAL_WDAYS.include?(date.wday)
-      "Extra toning day — Runna covers Wed/Sat strength."
+      "Back-of-body day at home — glutes, hamstrings, lower back."
     elsif RUNNA_STRENGTH_WDAYS.include?(date.wday)
       "Runna strength today — optional quick add-on after."
     elsif RUN_DAYS.include?(date.wday)

@@ -198,12 +198,7 @@ if ! wait_for_http "home page" "http://127.0.0.1:3000/"; then
   rollback
 fi
 
-RECIPE_PATH="$(bin/rails runner 'r = Recipe.joins(:meal_template).find_by(slug: "chipotle-yogurt-salad") || Recipe.joins(:meal_template).first; print r ? "/recipes/#{r.id}" : ""')"
-if [[ -z "${RECIPE_PATH}" ]]; then
-  echo "FAILED: no recipe with meal template found — cannot verify recipe pages"
-  rollback
-fi
-if ! wait_for_http "chipotle recipe" "http://127.0.0.1:3000${RECIPE_PATH}"; then
+if ! wait_for_http "strength plans" "http://127.0.0.1:3000/workout_plans"; then
   rollback
 fi
 

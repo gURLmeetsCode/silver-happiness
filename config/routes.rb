@@ -41,27 +41,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :grocery_checks, only: [] do
-    collection do
-      post :toggle
-      delete :reset
-    end
-  end
-
-  resources :recipes, except: [ :destroy ] do
-    collection do
-      get :grocery
-    end
-    member do
-      patch :react
-      patch :archive
-      patch :tired_of
-      patch :restore
-    end
-  end
-
   resources :outfit_photos, only: [ :index, :new, :create, :destroy ]
-  resources :habit_suggestion_feedbacks, only: [ :create ]
 
   get "today", to: "daily_logs#today"
 end
