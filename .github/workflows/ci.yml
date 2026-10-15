@@ -89,7 +89,7 @@ jobs:
       # request diff, so a reviewer sees exactly what broke without opening logs.
       - name: Annotate failing examples
         if: always()
-        uses: mikepenz/action-junit-report@v5
+        uses: mikepenz/action-junit-report@v6
         with:
           report_paths: tmp/rspec/results.xml
           check_name: RSpec results
